@@ -12,26 +12,21 @@ tasks.named('bootJar') {
 }
 
 dependencies {
-//    implementation project(':mainModules:common')
-//    implementation project(':mainModules:domain')
-//    implementation project(':mainModules:application')
-//    implementation project(':mainModules:infrastructure:persistence')
+    implementation project(':main-modules:common')
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation libs.spring.boot.starter.jpa
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.web.flux
+    implementation libs.mysql.connector
+    implementation libs.bundles.jwt
+    implementation libs.mapstruct
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test', {
-        exclude module: 'mockito-core'
+    testImplementation(libs.spring.boot.starter.test) {
+        exclude group: 'org.mockito', module: 'mockito-core'
     }
-    testImplementation 'org.mockito:mockito-core:5.3.1'
-    testImplementation 'org.mariadb.jdbc:mariadb-java-client'
+    testImplementation libs.database.h2
 
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'com.ninja-squad:springmockk:4.0.2'
 }
 
 repositories {
