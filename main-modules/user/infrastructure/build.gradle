@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+tasks.named('jar') {
+    enabled = false
+}
+
+tasks.named('bootJar') {
+    enabled = true
+}
+
+dependencies {
+    implementation project(':main-modules:common')
+
+    implementation libs.spring.boot.starter.jpa
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.web.flux
+    implementation libs.mysql.connector
+    implementation libs.bundles.jwt
+    implementation libs.mapstruct
+
+    testImplementation(libs.spring.boot.starter.test) {
+        exclude group: 'org.mockito', module: 'mockito-core'
+    }
+    testImplementation libs.database.h2
+
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}

@@ -1,1 +1,97 @@
+import java.nio.file.FileVisitOption
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
 rootProject.name = 'SideWork'
+
+enableFeaturePreview('TYPESAFE_PROJECT_ACCESSORS')
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+}
+
+void includeModulesFrom(String... entryPointNames) {
+    entryPointNames.each { entryPointName ->
+        Path entryPoint = rootDir.toPath().resolve(entryPointName)
+
+        // 디렉토리가 존재하지 않으면 스킵
+        if (!Files.exists(entryPoint)) {
+            println("Skipping non-existent directory: ${entryPointName}")
+            return
+        }
+
+        List<Path> foundBuildScriptPaths = []
+        Files.walkFileTree(
+                entryPoint,
+                EnumSet.of(FileVisitOption.FOLLOW_LINKS),
+                Integer.MAX_VALUE,
+                new FileVisitor('build.gradle', foundBuildScriptPaths)
+        )
+
+        List<String> modules = foundBuildScriptPaths
+                .collect { it.parent.toAbsolutePath().toString() }
+                .collect { it.replace("${rootDir.toPath()}${File.separator}", '') }
+                .collect { it.replace(File.separator, ':') }
+
+        println("Found modules in ${entryPointName}: ${modules}")
+
+        include(modules as String[])
+
+        List<String> moduleGroups = Files.list(entryPoint)
+                .collect { "${entryPointName}:${it.fileName.toString()}" }
+                .toList()
+
+        include(moduleGroups as String[])
+    }
+}
+
+class FileVisitor extends SimpleFileVisitor<Path> {
+    private final String fileNameToSearch
+    private final List<Path> foundBuildScriptPaths
+
+    FileVisitor(String fileNameToSearch, List<Path> foundBuildScriptPaths) {
+        this.fileNameToSearch = fileNameToSearch
+        this.foundBuildScriptPaths = foundBuildScriptPaths
+    }
+
+    @Override
+    FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+        if (file.fileName.toString() == fileNameToSearch) {
+            foundBuildScriptPaths.add(file.toAbsolutePath())
+        }
+        return FileVisitResult.CONTINUE
+    }
+
+    @Override
+    FileVisitResult visitFileFailed(Path file, IOException exc) {
+        println("Error accessing file: ${file} - ${exc.message}")
+        return FileVisitResult.CONTINUE
+    }
+
+    @Override
+    FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+        return FileVisitResult.CONTINUE
+    }
+
+    @Override
+    FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+        return FileVisitResult.CONTINUE
+    }
+}
+
+includeModulesFrom('main-modules')

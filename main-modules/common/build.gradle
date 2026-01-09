@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+tasks.named('jar') {
+    enabled = false
+}
+
+tasks.named('bootJar') {
+    enabled = true
+}
+
+dependencies {
+    implementation libs.bundles.jackson
+    implementation libs.spring.boot.starter.logging
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.validation
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
