@@ -1,0 +1,60 @@
+[versions]
+jackson = "2.16.1"
+mockk = "1.13.5"
+fixture = "1.2.0"
+jwt = "0.12.3"
+redisson = "3.52.0"
+
+[libraries]
+
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+
+jwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jwt" }
+jwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jwt" }
+jwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jwt" }
+
+
+org-redisson-starter = {module = "org.redisson:redisson-spring-boot-starter", version.ref = "redisson"}
+
+
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
+spring-boot-starter-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging" }
+spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-boot-starter-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+spring-boot-starter-kafka = { module = "org.springframework.kafka:spring-kafka" }
+
+
+
+spring-context = { module = "org.springframework:spring-context" }
+spring-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
+database-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client" }
+
+test-fixture = { module = "com.appmattus.fixture:fixture", version.ref = "fixture" }
+
+[bundles]
+jackson = [
+    "jackson-databind",
+    "jackson-datatype-jsr310",
+    "jackson-module-kotlin",
+]
+jwt = [
+    "jwt-api",
+    "jwt-impl",
+    "jwt-jackson"
+]
+bootstrap = [
+    "spring-boot-starter-web",
+    "spring-boot-starter-validation",
+    "jackson-module-kotlin",
+    "jackson-datatype-jsr310",
+]
+test = [
+    "test-fixture",
+]
