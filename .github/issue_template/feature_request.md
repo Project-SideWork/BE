@@ -1,3 +1,11 @@
+---
+name: Feature request
+about: Suggest an idea for this project
+title: "[feat]"
+labels: ''
+assignees: ''
+
+---
 ## ✨ Feature 개요
 <!-- 어떤 기능을 추가하는지 간단히 설명해주세요 -->
 

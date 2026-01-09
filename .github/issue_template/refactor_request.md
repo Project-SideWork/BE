@@ -1,3 +1,11 @@
+---
+name: Refactor template
+about: Describe this issue template's purpose here.
+title: "[refactor]"
+labels: ''
+assignees: ''
+
+---
 ## ♻️ Refactor 개요
 <!-- 어떤 영역을 리팩터링하는지 간단히 -->
 
