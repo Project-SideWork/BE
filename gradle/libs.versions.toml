@@ -7,18 +7,22 @@ redisson = "3.52.0"
 springdoc = "2.8.4"
 connector = "8.3.0"
 mapstruct = "1.6.2"
+lombok = "1.18.30"
+
 
 [libraries]
 
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 
 jwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jwt" }
 jwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jwt" }
 jwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jwt" }
 
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
 
 org-redisson-starter = {module = "org.redisson:redisson-spring-boot-starter", version.ref = "redisson"}
 
