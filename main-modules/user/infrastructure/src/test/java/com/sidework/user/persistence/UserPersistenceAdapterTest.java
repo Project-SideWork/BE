@@ -24,21 +24,22 @@ public class UserPersistenceAdapterTest {
     private final UserMapper mapper = mock(UserMapper.class);
     private final PasswordEncoder encoder = mock(PasswordEncoder.class);
 
-    private final UserPersistenceAdapter adapter =             new UserPersistenceAdapter(repo, mapper);
+    private final UserPersistenceAdapter adapter = new UserPersistenceAdapter(repo, mapper);
 
 
     @Test
     void 회원가입에_필요한_값을_모두_입력하면_성공한다() {
         // given
-        SignUpCommand validCommand = createCommand();
         User domain = createUser();
+        User savedDomain = createSavedUser();
+
         UserEntity entity = createUserEntity(null);
         UserEntity saved = createUserEntity(1L);
 
         when(mapper.toEntity(domain)).thenReturn(entity);
         when(repo.save(entity)).thenReturn(saved);
         when(repo.findById(1L)).thenReturn(Optional.of(saved));
-        when(mapper.toDomain(saved)).thenReturn(domain);
+        when(mapper.toDomain(saved)).thenReturn(savedDomain);
 
         // when
         adapter.save(domain);
@@ -48,9 +49,9 @@ public class UserPersistenceAdapterTest {
         assertNotNull(user);
         assertEquals(1L, user.getId());
 
-        verify(repo, times(1)).save(entity);
-        verify(mapper, times(1)).toEntity(domain);
-        verify(repo, times(1)).findById(1L);
+        verify(repo).save(entity);
+        verify(mapper).toEntity(domain);
+        verify(repo).findById(1L);
     }
 
     @Test
@@ -77,15 +78,25 @@ public class UserPersistenceAdapterTest {
     }
 
     private User createUser(){
-        return new User(
+        return User.create("test@test.com",
+                "테스트",
+                "테스트1",
+                "password123!",
+                20,
+                "010-1234-5678",
+                UserType.LOCAL);
+    }
+
+    private User createSavedUser(){
+        return new User(1L,
                 "test@test.com",
                 "테스트",
                 "테스트1",
                 "password123!",
                 20,
                 "010-1234-5678",
-                UserType.LOCAL
-        );
+                UserType.LOCAL,
+                true);
     }
 
     private UserEntity createUserEntity(Long id){
