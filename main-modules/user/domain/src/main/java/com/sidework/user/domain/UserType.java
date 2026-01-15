@@ -1,4 +1,4 @@
-package com.sidework.user.persistence;
+package com.sidework.user.domain;
 
 public enum UserType {
     LOCAL, KAKAO, GOOGLE
