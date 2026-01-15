@@ -1,5 +1,14 @@
 package com.sidework.user.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     private Long id;
 
@@ -19,7 +28,7 @@ public class User {
 
     private Boolean isActive = true;
 
-    public User(
+    public static User create(
             String email,
             String name,
             String nickname,
@@ -28,19 +37,8 @@ public class User {
             String tel,
             UserType type
     ) {
-        this.email = email;
-        this.name = name;
-        this.nickname = nickname;
-        this.password = password;
-        this.age = age;
-        this.tel = tel;
-        this.type = type;
+        return new User(null, email, name, nickname, password, age, tel, type, true);
     }
-
-    public Long getId() {
-        return id;
-    }
-
     // 탈퇴 처리
     public void deactivate() {
         this.isActive = false;
