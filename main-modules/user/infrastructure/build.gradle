@@ -13,6 +13,8 @@ tasks.named('bootJar') {
 
 dependencies {
     implementation project(':main-modules:common')
+    implementation project(':main-modules:user:domain')
+    implementation project(':main-modules:user:application')
 
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security
@@ -23,15 +25,16 @@ dependencies {
 
     implementation libs.mapstruct
     annotationProcessor libs.mapstruct.processor
+    testAnnotationProcessor libs.mapstruct.processor
 
     compileOnly libs.lombok
     annotationProcessor libs.lombok
 
-    testImplementation(libs.spring.boot.starter.test) {
-        exclude group: 'org.mockito', module: 'mockito-core'
-    }
+    testImplementation libs.spring.boot.starter.test
     testImplementation libs.database.h2
-
+    testImplementation project(':main-modules:user:application')
+    testImplementation project(':main-modules:common')
+    testImplementation project(':main-modules:user:domain')
 }
 
 repositories {
