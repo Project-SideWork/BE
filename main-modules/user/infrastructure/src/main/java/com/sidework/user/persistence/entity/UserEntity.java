@@ -1,6 +1,7 @@
-package com.sidework.user.persistence;
+package com.sidework.user.persistence.entity;
 
 import com.sidework.common.entity.BaseEntity;
+import com.sidework.user.domain.UserType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,15 +9,17 @@ import lombok.*;
 @Entity
 @Table(name = "user")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class UserEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "email", nullable = false, length = 15)
+    private String email;
 
     // 실명
     @Column(name = "name", nullable = false, length = 15)
@@ -46,10 +49,4 @@ public class UserEntity extends BaseEntity {
     // 활성 / 비활성 여부 (0 = 활성, 1 = 탈퇴)
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
-
-
-    // 탈퇴 처리
-    public void deactivate() {
-        this.isActive = false;
-    }
 }
