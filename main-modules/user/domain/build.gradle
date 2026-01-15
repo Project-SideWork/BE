@@ -1,1 +1,27 @@
-// 도메인 모듈은 특정 프레임워크나 인터페이스나 의존하지 않으므로 의존성 불필요.
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+tasks.named('jar') {
+    enabled = true
+}
+
+tasks.named('bootJar') {
+    enabled = false
+}
+
+dependencies {
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
