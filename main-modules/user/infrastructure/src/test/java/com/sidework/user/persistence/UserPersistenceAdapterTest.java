@@ -7,64 +7,68 @@ import com.sidework.user.persistence.adapter.UserPersistenceAdapter;
 import com.sidework.user.persistence.entity.UserEntity;
 import com.sidework.user.persistence.mapper.UserMapper;
 import com.sidework.user.persistence.repository.UserJpaRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserPersistenceAdapterTest {
-    private final UserJpaRepository repo = mock(UserJpaRepository.class);
-    private final UserMapper mapper = mock(UserMapper.class);
-    private final PasswordEncoder encoder = mock(PasswordEncoder.class);
+    @Mock
+    private UserJpaRepository repo;
 
-    private final UserPersistenceAdapter adapter = new UserPersistenceAdapter(repo, mapper);
+    UserMapper mapper = Mappers.getMapper(UserMapper.class);
+    private UserPersistenceAdapter adapter;
 
+    @BeforeEach
+    void setUp() {
+        adapter = new UserPersistenceAdapter(repo, mapper);
+    }
 
     @Test
-    void 회원가입에_필요한_값을_모두_입력하면_성공한다() {
-        // given
-        User domain = createUser();
-        User savedDomain = createSavedUser();
-
-        UserEntity entity = createUserEntity(null);
-        UserEntity saved = createUserEntity(1L);
-
-        when(mapper.toEntity(domain)).thenReturn(entity);
-        when(repo.save(entity)).thenReturn(saved);
-        when(repo.findById(1L)).thenReturn(Optional.of(saved));
-        when(mapper.toDomain(saved)).thenReturn(savedDomain);
-
-        // when
+    void save는_도메인_객체를_영속성_객체로_변환해_저장한다() {
+        User domain = createUser(createCommand());
         adapter.save(domain);
+        verify(repo).save(any(UserEntity.class));
+    }
+
+    @Test
+    void existByEmail은_이메일_중복_여부를_확인한다() {
+        String emailExists = "test1@naver.com";
+        String emailNotExists = "test2@naver.com";
+        when(repo.existsByEmail(emailExists)).thenReturn(true);
+        when(repo.existsByEmail(emailNotExists)).thenReturn(false);
+
+        boolean exists = adapter.existsByEmail(emailExists);
+        boolean notExists = adapter.existsByEmail(emailNotExists);
+
+        assertTrue(exists);
+        assertFalse(notExists);
+
+        verify(repo).existsByEmail(emailExists);
+        verify(repo).existsByEmail(emailNotExists);
+    }
+
+    @Test
+    void findById는_Id로_사용자를_조회해_도메인_객체로_변환한다() {
+        UserEntity entity = createUserEntity(1L);
+
+        when(repo.findById(1L)).thenReturn(Optional.of(entity));
+
         User user = adapter.findById(1L);
 
-        // then
         assertNotNull(user);
         assertEquals(1L, user.getId());
 
-        verify(repo).save(entity);
-        verify(mapper).toEntity(domain);
         verify(repo).findById(1L);
     }
-
-    @Test
-    void 회원가입에_필요한_값_하나라도_누락되면_실패한다() {
-
-    }
-
-    @Test
-    void DB에_존재하지_않는_이메일로_중복_확인시_false를_반환한다() {}
-
-
-    @Test
-    void DB에_존재하는_이메일로_중복_확인시_true를_반환한다() {}
 
     private SignUpCommand createCommand(){
         return new SignUpCommand(
@@ -77,26 +81,14 @@ public class UserPersistenceAdapterTest {
         );
     }
 
-    private User createUser(){
-        return User.create("test@test.com",
-                "테스트",
-                "테스트1",
-                "password123!",
-                20,
-                "010-1234-5678",
+    private User createUser(SignUpCommand command){
+        return User.create(command.email(),
+                command.name(),
+                command.nickname(),
+                command.password(),
+                command.age(),
+                command.tel(),
                 UserType.LOCAL);
-    }
-
-    private User createSavedUser(){
-        return new User(1L,
-                "test@test.com",
-                "테스트",
-                "테스트1",
-                "password123!",
-                20,
-                "010-1234-5678",
-                UserType.LOCAL,
-                true);
     }
 
     private UserEntity createUserEntity(Long id){
