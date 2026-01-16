@@ -16,7 +16,7 @@ dependencies {
     implementation project(':main-modules:common')
 
     implementation libs.spring.boot.starter.jpa
-    implementation libs.spring.boot.starter.security
+    //implementation libs.spring.boot.starter.security
     implementation libs.bundles.bootstrap
     testImplementation libs.bundles.test
 
