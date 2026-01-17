@@ -25,7 +25,7 @@ public class UserQueryServiceTest {
         String email = "test1@naver.com";
         when(repo.existsByEmail(email)).thenReturn(true);
 
-        boolean res = service.checkEmailAvailable(email);
+        boolean res = service.checkEmailExists(email);
 
         assertTrue(res);
         verify(repo).existsByEmail(email);

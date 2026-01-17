@@ -11,7 +11,7 @@ public class UserQueryService implements UserQueryUseCase {
     private final UserOutPort userRepository;
 
     @Override
-    public boolean checkEmailAvailable(String email) {
+    public boolean checkEmailExists(String email) {
         return userRepository.existsByEmail(email);
     }
 }
