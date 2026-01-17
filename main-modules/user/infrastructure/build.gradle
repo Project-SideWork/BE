@@ -1,18 +1,19 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot'
     id 'io.spring.dependency-management'
 }
 tasks.named('jar') {
-    enabled = false
+    enabled = true
 }
 
 tasks.named('bootJar') {
-    enabled = true
+    enabled = false
 }
 
 dependencies {
     implementation project(':main-modules:common')
+    implementation project(':main-modules:user:domain')
+    implementation project(':main-modules:user:application')
 
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security
@@ -20,13 +21,17 @@ dependencies {
     implementation libs.spring.boot.starter.web.flux
     implementation libs.mysql.connector
     implementation libs.bundles.jwt
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
     implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+    testAnnotationProcessor libs.mapstruct.processor
 
-    testImplementation(libs.spring.boot.starter.test) {
-        exclude group: 'org.mockito', module: 'mockito-core'
-    }
+
+    testImplementation libs.spring.boot.starter.test
     testImplementation libs.database.h2
-
 }
 
 repositories {
