@@ -17,7 +17,7 @@ dependencies {
     implementation project(':main-modules:user:application')
 
     implementation libs.spring.boot.starter.jpa
-    //implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.starter.web.flux
     implementation libs.mysql.connector
