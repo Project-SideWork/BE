@@ -1,11 +1,7 @@
 package com.sidework.user.application;
 
-import com.sidework.user.application.adapter.SignUpCommand;
-import com.sidework.user.application.port.in.UserQueryUseCase;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.application.service.UserQueryService;
-import com.sidework.user.domain.User;
-import com.sidework.user.domain.UserType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +23,7 @@ public class UserQueryServiceTest {
     @Test
     void email로_중복_여부를_조회한다() {
         String email = "test1@naver.com";
-        when(service.checkEmailAvailable(email)).thenReturn(true);
+        when(repo.existsByEmail(email)).thenReturn(true);
 
         boolean res = service.checkEmailAvailable(email);
 
