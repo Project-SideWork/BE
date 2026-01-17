@@ -21,7 +21,7 @@ public class UserController {
 
     @GetMapping("/email")
     public ResponseEntity<ApiResponse<Boolean>> getEmailAvailable(@RequestParam @Email @NotNull String email) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.checkEmailAvailable(email)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.checkEmailExists(email)));
     }
 
     @PostMapping
