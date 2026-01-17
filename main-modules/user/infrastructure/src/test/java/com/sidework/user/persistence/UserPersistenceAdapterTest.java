@@ -1,7 +1,6 @@
 package com.sidework.user.persistence;
 
-import com.sidework.user.application.adapter.SignUpCommand;
-import com.sidework.user.application.exception.InvalidCommandException;
+import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import com.sidework.user.persistence.adapter.UserPersistenceAdapter;

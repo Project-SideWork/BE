@@ -2,7 +2,7 @@ package com.sidework.user.application;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sidework.user.application.adapter.SignUpCommand;
+import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.application.adapter.UserController;
 import com.sidework.user.application.port.in.UserCommandUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;

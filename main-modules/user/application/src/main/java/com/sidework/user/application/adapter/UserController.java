@@ -1,8 +1,11 @@
 package com.sidework.user.application.adapter;
 
 import com.sidework.common.response.ApiResponse;
+import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.application.port.in.UserCommandUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +20,7 @@ public class UserController {
     private final UserQueryUseCase queryService;
 
     @GetMapping("/email")
-    public ResponseEntity<ApiResponse<Boolean>> getEmailAvailable(@RequestParam String email) {
+    public ResponseEntity<ApiResponse<Boolean>> getEmailAvailable(@RequestParam @Email @NotNull String email) {
         return ResponseEntity.ok(ApiResponse.onSuccess(queryService.checkEmailAvailable(email)));
     }
 
