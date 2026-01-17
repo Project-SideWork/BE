@@ -3,6 +3,7 @@ package com.sidework.user.persistence.adapter;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import com.sidework.user.persistence.entity.UserEntity;
+import com.sidework.user.persistence.exception.UserNotFoundException;
 import com.sidework.user.persistence.mapper.UserMapper;
 import com.sidework.user.persistence.repository.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class UserPersistenceAdapter implements UserOutPort {
 
     @Override
     public User findById(Long id) {
-        UserEntity user = repo.findById(id).orElseThrow();
+        UserEntity user = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         return mapper.toDomain(user);
     }
 }
