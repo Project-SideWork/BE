@@ -97,7 +97,7 @@ public class UserControllerTest {
     void 이메일_중복_확인시_중복이면_true를_반환한다() throws Exception {
         // given
         String email = "test@test.com";
-        when(userQueryUseCase.checkEmailAvailable(email)).thenReturn(true);
+        when(userQueryUseCase.checkEmailExists(email)).thenReturn(true);
 
         // when & then
         mockMvc.perform(get("/api/v1/users/email")
@@ -106,14 +106,14 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(true));
 
-        verify(userQueryUseCase).checkEmailAvailable(email);
+        verify(userQueryUseCase).checkEmailExists(email);
     }
 
     @Test
     void 이메일_중복_확인시_중복이_아니면_false를_반환한다() throws Exception {
         // given
         String email = "new@test.com";
-        when(userQueryUseCase.checkEmailAvailable(email)).thenReturn(false);
+        when(userQueryUseCase.checkEmailExists(email)).thenReturn(false);
 
         // when & then
         mockMvc.perform(get("/api/v1/users/email")
@@ -122,7 +122,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(false));
 
-        verify(userQueryUseCase).checkEmailAvailable(email);
+        verify(userQueryUseCase).checkEmailExists(email);
     }
 
     private SignUpCommand createCommand(){
