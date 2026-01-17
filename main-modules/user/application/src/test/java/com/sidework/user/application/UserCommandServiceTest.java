@@ -14,9 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-
 
 @ExtendWith(MockitoExtension.class)
 public class UserCommandServiceTest {
@@ -37,13 +35,10 @@ public class UserCommandServiceTest {
 
         // then
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(repo).save(captor.capture());
 
         User savedUser = captor.getValue();
-        assertEquals(
-                savedUser.getPassword(), encoder.encode(command.password())
-        );
-
-        verify(repo).save(captor.capture());
+        assertEquals(savedUser.getPassword(), encoder.encode(command.password()));
     }
 
     @Test
