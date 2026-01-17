@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+tasks.named('jar') {
+    enabled = false
+}
+
+tasks.named('bootJar') {
+    enabled = true
+}
+
+dependencies {
+    implementation project(':main-modules:common')
+    implementation project(':main-modules:project:domain')
+    implementation project(':main-modules:project:application')
+
+    implementation libs.spring.boot.starter.jpa
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.web.flux
+    implementation libs.mysql.connector
+    implementation libs.bundles.jwt
+
+    implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+    testAnnotationProcessor libs.mapstruct.processor
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.database.h2
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
