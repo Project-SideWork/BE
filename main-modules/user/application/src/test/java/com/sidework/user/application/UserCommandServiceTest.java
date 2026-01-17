@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -24,7 +25,7 @@ public class UserCommandServiceTest {
     @InjectMocks
     private UserCommandService service;
 
-    @Mock
+    @Spy
     private BCryptPasswordEncoder encoder;
 
 
@@ -38,7 +39,9 @@ public class UserCommandServiceTest {
         verify(repo).save(captor.capture());
 
         User savedUser = captor.getValue();
-        assertEquals(savedUser.getPassword(), encoder.encode(command.password()));
+        assertTrue(encoder.matches(command.password(), savedUser.getPassword()));
+        assertNotEquals(command.password(), savedUser.getPassword());
+        verify(encoder).encode(command.password());
     }
 
     @Test
