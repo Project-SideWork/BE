@@ -7,14 +7,16 @@ import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = false)
 public class UserCommandService implements UserCommandUseCase {
     private final UserOutPort userRepository;
-    private final BCryptPasswordEncoder encoder;
+    private final PasswordEncoder encoder;
 
     @Override
     public void signUp(SignUpCommand command) {
