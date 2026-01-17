@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 
 public record SignUpCommand(
         @NotNull @Email String email,
-        @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.") String password,
+        @NotNull @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.") String password,
         @NotNull String name,
         @NotNull String nickname,
         @NotNull Integer age,
