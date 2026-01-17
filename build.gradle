@@ -97,8 +97,12 @@ subprojects.findAll { it.path.contains(':common') }.each { project ->
 }
 
 
-// common 모듈에 플러그인 적용
 subprojects.findAll { it.path.contains(':user:') }.each { project ->
+    project.apply plugin: 'org.springframework.boot'
+    project.apply plugin: 'io.spring.dependency-management'
+}
+
+subprojects.findAll { it.path.contains(':project:') }.each { project ->
     project.apply plugin: 'org.springframework.boot'
     project.apply plugin: 'io.spring.dependency-management'
 }
