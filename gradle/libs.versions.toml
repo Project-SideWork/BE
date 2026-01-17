@@ -8,7 +8,7 @@ springdoc = "2.8.4"
 connector = "8.3.0"
 mapstruct = "1.6.2"
 lombok = "1.18.42"
-
+transactional = "6.1.0"
 
 [libraries]
 
@@ -37,6 +37,7 @@ spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-boot-starter-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
 spring-boot-starter-kafka = { module = "org.springframework.kafka:spring-kafka" }
+spring-boot-starter-transactional = { module = "org.springframework:spring-tx", version.ref = "transactional" }
 spring-boot-spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 
 
