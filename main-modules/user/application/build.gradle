@@ -15,6 +15,7 @@ dependencies {
     implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.spring.doc
     implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.transactional
     implementation libs.lombok
     annotationProcessor libs.lombok
     testImplementation libs.spring.boot.starter.test
@@ -22,6 +23,7 @@ dependencies {
 
     implementation project(':main-modules:common')
     implementation project(':main-modules:user:domain')
+
     implementation("org.springframework:spring-context")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
 
