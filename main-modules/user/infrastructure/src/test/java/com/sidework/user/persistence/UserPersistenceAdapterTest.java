@@ -1,10 +1,12 @@
 package com.sidework.user.persistence;
 
 import com.sidework.user.application.adapter.SignUpCommand;
+import com.sidework.user.application.exception.InvalidCommandException;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import com.sidework.user.persistence.adapter.UserPersistenceAdapter;
 import com.sidework.user.persistence.entity.UserEntity;
+import com.sidework.user.persistence.exception.UserNotFoundException;
 import com.sidework.user.persistence.mapper.UserMapper;
 import com.sidework.user.persistence.repository.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +70,14 @@ public class UserPersistenceAdapterTest {
         assertEquals(1L, user.getId());
 
         verify(repo).findById(1L);
+    }
+
+    @Test
+    void findById로_존재하지_않는_사용자_조회_시_UserNotFoundException을_던진다() {
+        when(repo.findById(2L)).thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class,
+                () -> adapter.findById(2L));
+        verify(repo).findById(2L);
     }
 
     private SignUpCommand createCommand(){
