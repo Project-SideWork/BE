@@ -7,7 +7,7 @@ redisson = "3.52.0"
 springdoc = "2.8.4"
 connector = "8.3.0"
 mapstruct = "1.6.2"
-lombok = "1.18.30"
+lombok = "1.18.42"
 
 
 [libraries]
