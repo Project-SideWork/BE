@@ -1,17 +1,19 @@
 package com.sidework.user.application;
 
-import com.sidework.user.application.adapter.SignUpCommand;
+import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.application.exception.InvalidCommandException;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.application.service.UserCommandService;
 import com.sidework.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
@@ -24,11 +26,24 @@ public class UserCommandServiceTest {
     @InjectMocks
     private UserCommandService service;
 
+    @Mock
+    private BCryptPasswordEncoder encoder;
+
+
     @Test
     void 정상적인_회원가입_요청_DTO로_회원가입에_성공한다() {
         SignUpCommand command = createCommand();
         service.signUp(command);
-        verify(repo).save(any(User.class));
+
+        // then
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+        User savedUser = captor.getValue();
+        assertEquals(
+                savedUser.getPassword(), encoder.encode(command.password())
+        );
+
+        verify(repo).save(captor.capture());
     }
 
     @Test
