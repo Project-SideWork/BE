@@ -10,6 +10,7 @@ import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = UserTestApplication.class)
 public class UserControllerTest {
 
@@ -104,7 +106,7 @@ public class UserControllerTest {
                         .param("email", email))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(true));
+                .andExpect(jsonPath("$.result.isExist").value(true));
 
         verify(userQueryUseCase).checkEmailExists(email);
     }
@@ -120,7 +122,7 @@ public class UserControllerTest {
                         .param("email", email))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(false));
+                .andExpect(jsonPath("$.result.isExist").value(false));
 
         verify(userQueryUseCase).checkEmailExists(email);
     }

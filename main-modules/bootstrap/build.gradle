@@ -14,6 +14,7 @@ tasks.named('bootJar') {
 
 dependencies {
     implementation project(':main-modules:common')
+    implementation project(':main-modules:user:infrastructure')
 
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security

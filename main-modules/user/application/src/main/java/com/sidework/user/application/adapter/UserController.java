@@ -20,8 +20,9 @@ public class UserController {
     private final UserQueryUseCase queryService;
 
     @GetMapping("/email")
-    public ResponseEntity<ApiResponse<Boolean>> getEmailAvailable(@RequestParam @Email @NotNull String email) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.checkEmailExists(email)));
+    public ResponseEntity<ApiResponse<EmailExistResponse>> getEmailAvailable(@RequestParam @Email @NotNull String email) {
+        boolean res = queryService.checkEmailExists(email);
+        return ResponseEntity.ok(ApiResponse.onSuccess(new EmailExistResponse(res)));
     }
 
     @PostMapping
