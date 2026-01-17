@@ -20,7 +20,7 @@ public enum ErrorStatus implements BaseStatusCode {
     EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "TOKEN_003", "유효기간이 만료된 토큰입니다."),
 
     // USER
-    USER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_001", "이미 존재하는 사용자이며, 비밀번호가 틀렸습니다."),
+    USER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_001", "이미 존재하는 사용자입니다."),
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER_002", "해당 사용자를 찾을 수 없습니다."),
     EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_003", "이미 사용 중인 이메일입니다.");
 
