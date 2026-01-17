@@ -94,7 +94,8 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             Exception e,
             WebRequest request
     ) {
-        String errorPoint = Objects.isNull(e.getStackTrace())
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        String errorPoint = (stackTrace == null || stackTrace.length == 0)
                 ? "No Stack Trace Error."
                 : e.getStackTrace()[0].toString();
 
