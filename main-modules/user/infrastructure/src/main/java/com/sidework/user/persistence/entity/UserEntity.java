@@ -9,6 +9,7 @@ import lombok.*;
 @Entity
 @Table(name = "users")
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity extends BaseEntity {
