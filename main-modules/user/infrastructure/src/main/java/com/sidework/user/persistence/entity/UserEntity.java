@@ -18,7 +18,7 @@ public class UserEntity extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "email", nullable = false, length = 15)
+    @Column(name = "email", nullable = false, length = 100)
     private String email;
 
     // 실명
@@ -46,7 +46,7 @@ public class UserEntity extends BaseEntity {
     @Column(name = "type", nullable = false, length = 10)
     private UserType type;
 
-    // 활성 / 비활성 여부 (0 = 활성, 1 = 탈퇴)
+    // 활성 / 비활성 여부 (true = 활성, false = 탈퇴)
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 }
