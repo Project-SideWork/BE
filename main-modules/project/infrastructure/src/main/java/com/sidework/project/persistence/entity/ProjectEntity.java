@@ -6,6 +6,7 @@ import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.ProjectStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "projects")
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectEntity extends BaseEntity {
