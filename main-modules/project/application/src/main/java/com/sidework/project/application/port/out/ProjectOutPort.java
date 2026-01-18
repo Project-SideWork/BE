@@ -4,4 +4,5 @@ import com.sidework.project.domain.Project;
 
 public interface ProjectOutPort {
     void save(Project project);
+    Project findById(Long id);
 }
