@@ -26,6 +26,21 @@ public class Project {
 
     private ProjectStatus status;
 
+    public static Project create(String title,
+                                 String description,
+                                 LocalDate startDt,
+                                 LocalDate endDt,
+                                 MeetingType meetingType) {
+        return Project.builder()
+                .title(title)
+                .description(description)
+                .startDt(startDt)
+                .endDt(endDt)
+                .meetingType(meetingType)
+                .status(ProjectStatus.PREPARING)
+                .build();
+    }
+
     public void delete(){
         this.status = ProjectStatus.CANCELED;
     }
