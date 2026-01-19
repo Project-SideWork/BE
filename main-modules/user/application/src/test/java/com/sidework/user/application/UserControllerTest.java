@@ -6,8 +6,6 @@ import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.application.adapter.UserController;
 import com.sidework.user.application.port.in.UserCommandUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;
-import com.sidework.user.domain.User;
-import com.sidework.user.domain.UserType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -169,16 +167,5 @@ public class UserControllerTest {
                 20,
                 "010-1234-5678"
         );
-    }
-
-
-    private User createUser(SignUpCommand command){
-        return User.create(command.email(),
-                command.name(),
-                command.nickname(),
-                command.password(),
-                command.age(),
-                command.tel(),
-                UserType.LOCAL);
     }
 }
