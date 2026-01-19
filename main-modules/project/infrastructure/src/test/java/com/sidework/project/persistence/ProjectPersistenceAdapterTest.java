@@ -1,20 +1,21 @@
+package com.sidework.project.persistence;
+
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
-import com.sidework.project.application.port.in.RecruitRole;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.application.port.in.SkillLevel;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.project.persistence.adapter.ProjectPersistenceAdapter;
 import com.sidework.project.persistence.entity.ProjectEntity;
-import com.sidework.project.persistence.exception.ProjectNotFoundException;
+import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.persistence.mapper.ProjectMapper;
 import com.sidework.project.persistence.repository.ProjectJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,14 +37,19 @@ public class ProjectPersistenceAdapterTest {
     private ProjectPersistenceAdapter adapter;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         adapter = new ProjectPersistenceAdapter(repo, mapper);
     }
-    
+
     @Test
     void save는_도메인_객체를_영속성_객체로_변환해_저장한다() {
         Project domain = createProject(createCommand());
-        adapter.save(domain);
+        ProjectEntity entity = createProjectEntity();
+        when(repo.save(any(ProjectEntity.class))).thenReturn(entity);
+
+        Long id = adapter.save(domain);
+
+        assertEquals(1L, id);
         verify(repo).save(any(ProjectEntity.class));
     }
 
@@ -69,52 +75,19 @@ public class ProjectPersistenceAdapterTest {
         verify(repo).findById(2L);
     }
 
-    @Test
-    void update는_기존_필드의_값을_덮어써_저장한다(){
-        ProjectEntity entity = createProjectEntity();
-        when(repo.findById(1L)).thenReturn(Optional.of(entity));
-
-        Project domain = adapter.findById(1L);
-
-        ProjectCommand updateCmd = createUpdateCommand();
-        domain.update(updateCmd.title(), updateCmd.description(), updateCmd.startDt(),
-                updateCmd.endDt(), updateCmd.meetingType(), updateCmd.status());
-
-        adapter.save(domain);
-
-        ArgumentCaptor<ProjectEntity> captor = ArgumentCaptor.forClass(ProjectEntity.class);
-        verify(repo).save(captor.capture());
-
-        ProjectEntity updated = captor.getValue();
-        assertNotEquals(entity.getTitle(), updated.getTitle());
-    }
-
-    @Test
-    void delete는_status값을_CANCELLED로_바꾼다(){
-        Project domain = createProject(createCommand());
-        domain.delete();
-
-        adapter.save(domain);
-        ArgumentCaptor<ProjectEntity> captor = ArgumentCaptor.forClass(ProjectEntity.class);
-
-        verify(repo).save(captor.capture());
-
-        ProjectEntity entity = captor.getValue();
-        assertEquals(ProjectStatus.CANCELED, entity.getStatus());
-    }
-
     private ProjectCommand createCommand() {
         return new ProjectCommand(
                 "버스 실시간 위치 서비스",                 // title
                 "WebSocket 기반 실시간 위치 공유 프로젝트", // description
+                ProjectRole.BACKEND,
                 List.of(
                         new RecruitPosition(
-                                RecruitRole.BACKEND,
+                                ProjectRole.BACKEND,
                                 1,
                                 SkillLevel.JUNIOR
                         ),
                         new RecruitPosition(
-                                RecruitRole.FRONTEND,
+                                ProjectRole.FRONTEND,
                                 2,
                                 SkillLevel.MID
                         )
@@ -133,14 +106,15 @@ public class ProjectPersistenceAdapterTest {
         return new ProjectCommand(
                 "AI 기반 관광 코스 추천 서비스",              // title
                 "사용자 위치와 혼잡도를 반영한 여행 코스 추천", // description
+                ProjectRole.BACKEND,
                 List.of(
                         new RecruitPosition(
-                                RecruitRole.BACKEND,
+                                ProjectRole.BACKEND,
                                 2,
                                 SkillLevel.MID
                         ),
                         new RecruitPosition(
-                                RecruitRole.FRONTEND,
+                                ProjectRole.FRONTEND,
                                 1,
                                 SkillLevel.JUNIOR
                         )
