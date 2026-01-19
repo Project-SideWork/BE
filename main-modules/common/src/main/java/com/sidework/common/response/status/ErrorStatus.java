@@ -14,6 +14,9 @@ public enum ErrorStatus implements BaseStatusCode {
     NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON_404", "요청한 리소스를 찾을 수 없습니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON_405", "허용되지 않은 요청 메서드입니다."),
 
+    // ENUM
+    INVALID_ENUM(HttpStatus.BAD_REQUEST, "ENUM_001", "지원하지 않는 Enum 값입니다."),
+
     // JWT
     EMPTY_JWT(HttpStatus.UNAUTHORIZED, "TOKEN_001", "토큰이 비어있습니다."),
     INVALID_JWT(HttpStatus.UNAUTHORIZED, "TOKEN_002", "필요한 정보를 포함하지 않은 토큰입니다."),
@@ -25,7 +28,9 @@ public enum ErrorStatus implements BaseStatusCode {
     EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_003", "이미 사용 중인 이메일입니다."),
 
     // PROJECT
-    PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_001", "해당 프로젝트를 찾을 수 없습니다.");
+    PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_001", "해당 프로젝트를 찾을 수 없습니다."),
+    PROJECT_CANNOT_UPDATE(HttpStatus.BAD_REQUEST, "PROJECT_002", "해당 프로젝트는 수정할 수 없습니다."),
+    PROJECT_CANNOT_DELETE(HttpStatus.FORBIDDEN, "PROJECT_003", "해당 프로젝트를 삭제할 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
