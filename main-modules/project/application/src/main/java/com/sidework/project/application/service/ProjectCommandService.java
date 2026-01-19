@@ -3,6 +3,7 @@ package com.sidework.project.application.service;
 import com.sidework.project.application.exception.InvalidCommandException;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
 import com.sidework.project.application.exception.ProjectNotChangeableException;
+import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
@@ -41,7 +42,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
 
     @Override
     public void update(Long projectId, ProjectCommand command) {
-        projectRepository.existsById(projectId);
+        checkProjectExists(projectId);
         checkDateRangeIsValid(command.startDt(), command.endDt());
         checkProjectTitleExists(1L, command.title());
 
@@ -65,6 +66,12 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         projectRepository.save(project);
     }
 
+
+    private void checkProjectExists(Long projectId) {
+        if(!projectRepository.existsById(projectId)) {
+            throw new ProjectNotFoundException(projectId);
+        }
+    }
 
     private void checkCanDelete(Long projectId, List<ProjectRole> myRoles) {
         if(!myRoles.contains(ProjectRole.OWNER)) {
@@ -90,7 +97,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
             return;
         }
 
-        List<String> titles = projectRepository. findAllTitles(myProjects);
+        List<String> titles = projectRepository.findAllTitles(myProjects);
 
         if (titles.contains(title)) {
             throw new InvalidCommandException("참여 중인 프로젝트 중에 동일한 이름이 있습니다.");

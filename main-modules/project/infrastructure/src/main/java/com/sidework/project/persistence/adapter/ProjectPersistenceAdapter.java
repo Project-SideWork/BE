@@ -18,10 +18,8 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
     private final ProjectMapper mapper;
 
     @Override
-    public void existsById(Long projectId) {
-          if(!repo.existsById(projectId)) {
-              throw new ProjectNotFoundException(projectId);
-          }
+    public boolean existsById(Long projectId) {
+          return repo.existsById(projectId);
     }
 
     @Override
