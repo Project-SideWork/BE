@@ -1,5 +1,5 @@
 package com.sidework.project.domain;
 
 public enum ProjectStatus {
-    RECRUITING, CLOSED, PREPARING, CANCELED
+    RECRUITING, CLOSED, PREPARING, CANCELED, FINISHED
 }
