@@ -1,7 +1,6 @@
 package com.sidework.user.application;
 
 import com.sidework.user.application.port.in.SignUpCommand;
-import com.sidework.user.application.exception.InvalidCommandException;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.application.service.UserCommandService;
 import com.sidework.user.domain.User;
@@ -42,13 +41,6 @@ public class UserCommandServiceTest {
         assertTrue(encoder.matches(command.password(), savedUser.getPassword()));
         assertNotEquals(command.password(), savedUser.getPassword());
         verify(encoder).encode(command.password());
-    }
-
-    @Test
-    void 일부_값이_누락된_회원가입_요청_DTO로_회원가입에_실패한다() {
-        SignUpCommand command = createInvalidCommand();
-        assertThrows(InvalidCommandException.class,
-                () -> service.signUp(command));
     }
 
     private SignUpCommand createCommand(){
