@@ -74,7 +74,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
 
     private void checkDateRangeIsValid(LocalDate startDt, LocalDate endDt) {
         if(startDt.isAfter(endDt)) {
-            throw new InvalidCommandException();
+            throw new InvalidCommandException("시작 일자는 종료 일자보다 빨라야 합니다.");
         }
     }
 
@@ -93,7 +93,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         List<String> titles = projectRepository. findAllTitles(myProjects);
 
         if (titles.contains(title)) {
-            throw new InvalidCommandException();
+            throw new InvalidCommandException("참여 중인 프로젝트 중에 동일한 이름이 있습니다.");
         }
     }
 }
