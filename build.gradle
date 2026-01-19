@@ -1,38 +1,25 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.flywaydb:flyway-gradle-plugin:11.7.2'
-        classpath 'org.flywaydb:flyway-mysql:11.7.2'
-        classpath 'com.mysql:mysql-connector-j:8.3.0'
-    }
-}
-
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.5.6'
-    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springframework.boot' version '3.5.6' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
     id 'org.flywaydb.flyway' version '11.7.2'
+    id 'java'
 }
 
-group = 'com.sidework'
-version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
-// 프로젝트 전역 설정
 allprojects {
     apply plugin: 'java'
+    group = 'com.sidework'
+    version = '0.0.1-SNAPSHOT'
+
+    repositories { mavenCentral() }
+
+    java {
+        toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.release.set(21)
+        options.encoding = 'UTF-8'
+    }
 
     configurations.all {
         resolutionStrategy {
@@ -40,83 +27,35 @@ allprojects {
         }
     }
 
-    group = 'com.sidework'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
-    }
-
-    // Java 컴파일러 설정
-    tasks.withType(JavaCompile).configureEach {
-        options.release.set(21)
-        options.encoding = 'UTF-8'
-    }
-
     dependencies {
-        // jackson
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
         implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1'
 
-        // test
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
         testImplementation 'org.mockito:mockito-core:5.3.1'
         testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
     }
 
-    tasks.withType(Test) {
+    tasks.withType(Test).configureEach {
         useJUnitPlatform()
     }
 }
 
-
-// bootstrap 모듈에 플러그인 적용
-subprojects.findAll { it.path.contains(':bootstrap') }.each { project ->
-    project.apply plugin: 'org.springframework.boot'
-    project.apply plugin: 'io.spring.dependency-management'
-}
-
-// application 하위 모듈들에 플러그인 적용
-subprojects.findAll { it.path.contains(':application') }.each { project ->
-    project.apply plugin: 'org.springframework.boot'
-    project.apply plugin: 'io.spring.dependency-management'
-}
-
-// infrastructure 하위 모듈들에 플러그인 적용
-subprojects.findAll { it.path.contains(':infrastructure:') }.each { project ->
-    project.apply plugin: 'org.springframework.boot'
-    project.apply plugin: 'io.spring.dependency-management'
-}
-
-// common 모듈에 플러그인 적용
-subprojects.findAll { it.path.contains(':common') }.each { project ->
-    project.apply plugin: 'org.springframework.boot'
-    project.apply plugin: 'io.spring.dependency-management'
-}
-
-
-subprojects.findAll { it.path.contains(':user:') }.each { project ->
-    project.apply plugin: 'org.springframework.boot'
-    project.apply plugin: 'io.spring.dependency-management'
-}
-
-subprojects.findAll { it.path.contains(':project:') }.each { project ->
-    project.apply plugin: 'org.springframework.boot'
-    project.apply plugin: 'io.spring.dependency-management'
-}
-
-// domain POJO
-subprojects.findAll { it.path.contains(':domain') }.each { project ->
-    // 설정 없음
-}
-
 subprojects {
-    tasks.withType(org.springframework.boot.gradle.tasks.bundling.BootJar) {
-        enabled = false
+    apply plugin: 'io.spring.dependency-management'
+
+    repositories { mavenCentral() }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.6"
+        }
     }
 }
-tasks.withType(Test) {
-    useJUnitPlatform()
+
+project(":main-modules:bootstrap") {
+    apply plugin: 'org.springframework.boot'
+
+    tasks.named("bootJar") { enabled = true }
+    tasks.named("jar") { enabled = false }
 }
