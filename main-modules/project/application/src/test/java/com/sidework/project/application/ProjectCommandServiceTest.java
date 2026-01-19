@@ -93,6 +93,8 @@ public class ProjectCommandServiceTest {
         ProjectCommand updateCommand = createUpdateCommand();
 
         Project project = createProject(command);
+
+        when(repo.existsById(projectId)).thenReturn(true);
         when(repo.findById(projectId)).thenReturn(project);
 
         service.update(projectId, updateCommand);
@@ -109,6 +111,8 @@ public class ProjectCommandServiceTest {
     void 수정시_시작일보다_종료일이_빠르면_InvalidCommandException을_던진다() {
         Long projectId = 1L;
         ProjectCommand command = createInvalidCommand();
+
+        when(repo.existsById(projectId)).thenReturn(true);
         assertThrows(
                 InvalidCommandException.class,
                 () -> service.update(projectId, command)
@@ -120,7 +124,9 @@ public class ProjectCommandServiceTest {
         Long projectId = 1L;
         ProjectCommand command = createCommand(ProjectStatus.FINISHED);
         Project project = createProject(command);
+        when(repo.existsById(projectId)).thenReturn(true);
         when(repo.findById(projectId)).thenReturn(project);
+
         assertThrows(
                 ProjectNotChangeableException.class,
                 () -> service.update(projectId, command)
@@ -133,7 +139,9 @@ public class ProjectCommandServiceTest {
         Long projectId = 1L;
         ProjectCommand command = createCommand(ProjectStatus.CLOSED);
         Project project = createProject(command);
+        when(repo.existsById(projectId)).thenReturn(true);
         when(repo.findById(projectId)).thenReturn(project);
+
         assertThrows(
                 ProjectNotChangeableException.class,
                 () -> service.update(projectId, command)
@@ -146,7 +154,9 @@ public class ProjectCommandServiceTest {
         Long projectId = 1L;
         ProjectCommand command = createCommand(CANCELED);
         Project project = createProject(command);
+        when(repo.existsById(projectId)).thenReturn(true);
         when(repo.findById(projectId)).thenReturn(project);
+
         assertThrows(
                 ProjectNotChangeableException.class,
                 () -> service.update(projectId, command)
@@ -161,6 +171,8 @@ public class ProjectCommandServiceTest {
         List<Long> projectIds = List.of(1L, 2L);
         List<String> titles = List.of("버스 실시간 위치 서비스", "WebSocket 기반 실시간 위치 공유 프로젝트");
         ProjectCommand command = createCommand(ProjectStatus.PREPARING);
+
+        when(repo.existsById(projectId)).thenReturn(true);
         when(projectUserRepo.queryAllProjectIds(userId)).thenReturn(projectIds);
         when(repo.findAllTitles(projectIds)).thenReturn(titles);
 
