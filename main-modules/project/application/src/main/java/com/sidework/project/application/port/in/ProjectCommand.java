@@ -1,6 +1,8 @@
 package com.sidework.project.application.port.in;
 
 import com.sidework.project.domain.MeetingType;
+import com.sidework.project.domain.Project;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,6 +19,9 @@ public record ProjectCommand(
 
         @NotBlank
         String description,
+
+        @NotNull
+        ProjectRole myRole,
 
         @NotNull
         List<RecruitPosition> recruitPositions,
