@@ -28,7 +28,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> postNewUser(@Validated @RequestBody SignUpCommand command) {
         commandService.signUp(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessVoid());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
     }
 
 }
