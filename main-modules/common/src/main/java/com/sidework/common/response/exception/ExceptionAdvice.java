@@ -95,6 +95,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             WebRequest request
     ) {
         StackTraceElement[] stackTrace = e.getStackTrace();
+        log.error("Unhandled exception", e);
         String errorPoint = (stackTrace == null || stackTrace.length == 0)
                 ? "No Stack Trace Error."
                 : e.getStackTrace()[0].toString();

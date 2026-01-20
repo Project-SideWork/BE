@@ -16,9 +16,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)  // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()  // 모든 요청 허용
+                ).headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
                 );
 
         return http.build();

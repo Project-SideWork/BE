@@ -6,19 +6,14 @@ tasks.named('jar') {
     enabled = true
 }
 
-tasks.named('bootJar') {
-    enabled = false
-}
-
 dependencies {
     implementation project(':main-modules:common')
-    implementation project(':main-modules:user:domain')
-    implementation project(':main-modules:user:application')
+    implementation project(':main-modules:user:user-domain')
+    implementation project(':main-modules:user:user-application')
 
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.starter.web
-    implementation libs.spring.boot.starter.web.flux
     implementation libs.mysql.connector
     implementation libs.bundles.jwt
 
@@ -28,7 +23,6 @@ dependencies {
     implementation libs.mapstruct
     annotationProcessor libs.mapstruct.processor
     testAnnotationProcessor libs.mapstruct.processor
-
 
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.database.h2

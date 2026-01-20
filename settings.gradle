@@ -95,3 +95,11 @@ class FileVisitor extends SimpleFileVisitor<Path> {
 }
 
 includeModulesFrom('main-modules')
+
+project(':main-modules:user:domain').name = 'user-domain'
+project(':main-modules:user:application').name = 'user-application'
+project(':main-modules:user:infrastructure').name = 'user-infrastructure'
+
+project(':main-modules:project:domain').name = 'project-domain'
+project(':main-modules:project:application').name = 'project-application'
+project(':main-modules:project:infrastructure').name = 'project-infrastructure'

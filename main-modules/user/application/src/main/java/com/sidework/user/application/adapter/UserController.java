@@ -20,7 +20,7 @@ public class UserController {
     private final UserQueryUseCase queryService;
 
     @GetMapping("/email")
-    public ResponseEntity<ApiResponse<EmailExistResponse>> getEmailAvailable(@RequestParam @Email @NotNull String email) {
+    public ResponseEntity<ApiResponse<EmailExistResponse>> getEmailAvailable(@RequestParam("email") @Email @NotNull String email) {
         boolean res = queryService.checkEmailExists(email);
         return ResponseEntity.ok(ApiResponse.onSuccess(new EmailExistResponse(res)));
     }
@@ -28,7 +28,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> postNewUser(@Validated @RequestBody SignUpCommand command) {
         commandService.signUp(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessVoid());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
     }
 
 }
