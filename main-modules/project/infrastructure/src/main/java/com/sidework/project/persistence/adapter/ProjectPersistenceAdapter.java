@@ -1,5 +1,6 @@
 package com.sidework.project.persistence.adapter;
 
+import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.domain.Project;
 import com.sidework.project.application.exception.ProjectNotFoundException;
@@ -34,7 +35,10 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
     }
 
     @Override
-    public List<String> findAllTitles(List<Long> projectIds) {
-        return repo.findAllTitlesByIds(projectIds);
+    public List<ProjectTitleDto> findAllTitles(List<Long> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) {
+            return List.of();
+        }
+        return repo.findProjectionsByIds(projectIds);
     }
 }
