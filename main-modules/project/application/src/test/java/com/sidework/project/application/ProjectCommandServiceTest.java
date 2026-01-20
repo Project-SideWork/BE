@@ -1,5 +1,6 @@
 package com.sidework.project.application;
 
+import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.application.exception.InvalidCommandException;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
 import com.sidework.project.application.exception.ProjectNotChangeableException;
@@ -62,7 +63,7 @@ public class ProjectCommandServiceTest {
 
     @Test
     void 시작일보다_종료일이_빠르면_InvalidCommandException을_던진다() {
-        ProjectCommand command = createInvalidCommand();
+        ProjectCommand command = createInvalidDateRangeCommand();
         assertThrows(
                 InvalidCommandException.class,
                 () -> service.create(command)
@@ -74,7 +75,10 @@ public class ProjectCommandServiceTest {
     void 사용자가_참여하고_있는_프로젝트와_동일한_이름으로_프로젝트_생성시_예외를_발생한다() {
         Long userId = 1L;
         List<Long> projectIds = List.of(1L, 2L);
-        List<String> titles = List.of("버스 실시간 위치 서비스", "WebSocket 기반 실시간 위치 공유 프로젝트");
+        List<ProjectTitleDto> titles = List.of(
+                new ProjectTitleDto(1L, "버스 실시간 위치 서비스"),
+                new ProjectTitleDto(2L, "WebSocket 기반 실시간 위치 공유 프로젝트")
+        );
         ProjectCommand command = createCommand(ProjectStatus.PREPARING);
         when(projectUserRepo.queryAllProjectIds(userId)).thenReturn(projectIds);
         when(repo.findAllTitles(projectIds)).thenReturn(titles);
@@ -110,7 +114,7 @@ public class ProjectCommandServiceTest {
     @Test
     void 수정시_시작일보다_종료일이_빠르면_InvalidCommandException을_던진다() {
         Long projectId = 1L;
-        ProjectCommand command = createInvalidCommand();
+        ProjectCommand command = createInvalidDateRangeCommand();
 
         when(repo.existsById(projectId)).thenReturn(true);
         assertThrows(
@@ -168,9 +172,13 @@ public class ProjectCommandServiceTest {
     void 사용자가_참여하고_있는_프로젝트와_동일한_이름으로_프로젝트_수정시_InvalidCommandException을_발생한다() {
         Long userId = 1L;
         Long projectId = 1L;
+
         List<Long> projectIds = List.of(1L, 2L);
-        List<String> titles = List.of("버스 실시간 위치 서비스", "WebSocket 기반 실시간 위치 공유 프로젝트");
-        ProjectCommand command = createCommand(ProjectStatus.PREPARING);
+        List<ProjectTitleDto> titles = List.of(
+                new ProjectTitleDto(1L, "WebSocket 기반 실시간 위치 공유 프로젝트"),
+                new ProjectTitleDto(2L, "AI 기반 관광 코스 추천 서비스")
+        );
+        ProjectCommand command = createUpdateCommand();
 
         when(repo.existsById(projectId)).thenReturn(true);
         when(projectUserRepo.queryAllProjectIds(userId)).thenReturn(projectIds);
@@ -181,6 +189,43 @@ public class ProjectCommandServiceTest {
                 () -> service.update(projectId, command)
         );
 
+
+        verify(repo).existsById(projectId);
+        verify(projectUserRepo).queryAllProjectIds(userId);
+        verify(repo).findAllTitles(projectIds);
+
+    }
+
+    @Test
+    void 현재_수정하고자_하는_프로젝트는_제목이_같아도_예외를_던지지_않는다() {
+        Long userId = 1L;
+        Long projectId = 1L;
+        List<Long> projectIds = List.of(1L, 2L);
+        List<ProjectTitleDto> titles = List.of(
+                new ProjectTitleDto(1L, "AI 기반 관광 코스 추천 서비스"),
+                new ProjectTitleDto(2L, "WebSocket 기반 실시간 위치 공유 프로젝트")
+        );
+        ProjectCommand command = createUpdateCommand();
+        Project project = createSavedProject();
+        String beforeDescription = project.getDescription();
+
+
+        when(repo.existsById(projectId)).thenReturn(true);
+        when(repo.findById(1L)).thenReturn(project);
+        when(projectUserRepo.queryAllProjectIds(userId)).thenReturn(projectIds);
+        when(repo.findAllTitles(projectIds)).thenReturn(titles);
+
+        service.update(projectId, command);
+
+        verify(repo).save(projectArgumentCaptor.capture());
+        Project saved = projectArgumentCaptor.getValue();
+
+        assertEquals(project.getTitle(), saved.getTitle());
+        assertNotEquals(beforeDescription, saved.getDescription());
+
+        verify(repo).existsById(projectId);
+        verify(projectUserRepo).queryAllProjectIds(userId);
+        verify(repo).findAllTitles(projectIds);
     }
 
     @Test
@@ -239,10 +284,9 @@ public class ProjectCommandServiceTest {
                 status         // status
         );
     }
-
-    private ProjectCommand createInvalidCommand() {
+    private ProjectCommand createInvalidDateRangeCommand() {
         return new ProjectCommand(
-                null,
+                "버스 실시간 위치 서비스",
                 "WebSocket 기반 실시간 위치 공유 프로젝트", // description
                 ProjectRole.BACKEND,
                 List.of(
@@ -253,7 +297,7 @@ public class ProjectCommandServiceTest {
                         ),
                         new RecruitPosition(
                                 ProjectRole.FRONTEND,
-                                0,
+                                2,
                                 SkillLevel.MID
                         )
                 ),
@@ -304,6 +348,18 @@ public class ProjectCommandServiceTest {
                 command.endDt(),
                 command.meetingType(),
                 command.status()
+        );
+    }
+    private Project createSavedProject(
+    ) {
+        return new Project(
+                1L,
+                "Dummy",
+                "Dummy",
+                LocalDate.now(),
+                LocalDate.now(),
+                MeetingType.HYBRID,
+                ProjectStatus.PREPARING
         );
     }
 }
