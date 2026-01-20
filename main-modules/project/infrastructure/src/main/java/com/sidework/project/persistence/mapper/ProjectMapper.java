@@ -11,20 +11,22 @@ import java.time.ZoneId;
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
 
+    ZoneId PROJECT_ZONE = ZoneId.of("Asia/Seoul");
+
     ProjectEntity toEntity(Project project);
     Project toDomain(ProjectEntity entity);
 
     default Instant map(LocalDate value) {
         if (value == null) return null;
         return value
-                .atStartOfDay(ZoneId.systemDefault())
+                .atStartOfDay(PROJECT_ZONE)
                 .toInstant();
     }
 
     default LocalDate map(Instant value) {
         if (value == null) return null;
         return value
-                .atZone(ZoneId.systemDefault())
+                .atZone(PROJECT_ZONE)
                 .toLocalDate();
     }
 }
