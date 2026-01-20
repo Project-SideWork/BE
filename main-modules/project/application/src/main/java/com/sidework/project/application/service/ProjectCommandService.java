@@ -58,6 +58,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
 
     @Override
     public void delete(Long userId, Long projectId) {
+        checkProjectExists(projectId);
         List<ProjectRole> myRoles = projectUserRepository.queryUserRolesByProject(userId, projectId);
         checkCanDelete(projectId, myRoles);
 
@@ -75,7 +76,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
     }
 
     private void checkCanDelete(Long projectId, List<ProjectRole> myRoles) {
-        if(!myRoles.contains(ProjectRole.OWNER)) {
+        if(myRoles == null || !myRoles.contains(ProjectRole.OWNER)) {
             throw new ProjectDeleteAuthorityException(projectId);
         }
     }
