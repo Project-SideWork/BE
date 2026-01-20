@@ -1,5 +1,6 @@
 package com.sidework.project.application.service;
 
+import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.application.exception.InvalidCommandException;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
 import com.sidework.project.application.exception.ProjectNotChangeableException;
@@ -27,7 +28,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
     //TODO: UserDetails 도입 후 하드코딩 제거
     public void create(ProjectCommand command) {
         checkDateRangeIsValid(command.startDt(), command.endDt());
-        checkProjectTitleExists(1L, command.title());
+        checkProjectTitleExists(1L, command.title(), null);
 
         Project project = Project.create(command.title(), command.description(),
                 command.startDt(), command.endDt(), command.meetingType());
@@ -44,7 +45,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
     public void update(Long projectId, ProjectCommand command) {
         checkProjectExists(projectId);
         checkDateRangeIsValid(command.startDt(), command.endDt());
-        checkProjectTitleExists(1L, command.title());
+        checkProjectTitleExists(1L, command.title(), projectId);
 
         Project project = projectRepository.findById(projectId);
         checkProjectIsChangeable(projectId, project.getStatus());
@@ -91,15 +92,19 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         }
     }
 
-    private void checkProjectTitleExists(Long userId, String title) {
+    private void checkProjectTitleExists(Long userId, String title, Long projectId) {
         List<Long> myProjects = projectUserRepository.queryAllProjectIds(userId);
+
         if (myProjects == null || myProjects.isEmpty()) {
             return;
         }
 
-        List<String> titles = projectRepository.findAllTitles(myProjects);
+        List<ProjectTitleDto> titles = projectRepository.findAllTitles(myProjects);
+        boolean titleExists = titles.stream()
+                .filter(dto -> !dto.id().equals(projectId))
+                .anyMatch(dto -> dto.title().equals(title));
 
-        if (titles.contains(title)) {
+        if (titleExists) {
             throw new InvalidCommandException("참여 중인 프로젝트 중에 동일한 이름이 있습니다.");
         }
     }
