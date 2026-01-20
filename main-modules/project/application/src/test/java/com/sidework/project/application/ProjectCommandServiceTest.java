@@ -236,6 +236,7 @@ public class ProjectCommandServiceTest {
         List<ProjectRole> roles = List.of(ProjectRole.OWNER, ProjectRole.BACKEND);
         Project project = createProject(createCommand(ProjectStatus.RECRUITING));
 
+        when(repo.existsById(projectId)).thenReturn(true);
         when(repo.findById(projectId)).thenReturn(project);
         when(projectUserRepo.queryUserRolesByProject(userId, projectId)).thenReturn(roles);
 
@@ -262,6 +263,7 @@ public class ProjectCommandServiceTest {
         Long projectId = 1L;
         List<ProjectRole> roles = List.of(ProjectRole.BACKEND);
 
+        when(repo.existsById(projectId)).thenReturn(true);
         when(projectUserRepo.queryUserRolesByProject(userId, projectId)).thenReturn(roles);
 
         assertThrows(
