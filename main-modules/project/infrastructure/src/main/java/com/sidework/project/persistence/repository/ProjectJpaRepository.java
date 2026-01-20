@@ -1,5 +1,6 @@
 package com.sidework.project.persistence.repository;
 
+import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.persistence.entity.ProjectEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,9 +13,9 @@ import java.util.List;
 public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Long> {
     @Query(
             """
-            SELECT p.title FROM ProjectEntity p
+            SELECT new com.sidework.project.application.dto.ProjectTitleDto(p.id, p.title) FROM ProjectEntity p
             WHERE p.id IN (:ids)
             """
     )
-    List<String> findAllTitlesByIds(@Param("ids") List<Long> ids);
+    List<ProjectTitleDto> findProjectionsByIds(@Param("ids") List<Long> ids);
 }
