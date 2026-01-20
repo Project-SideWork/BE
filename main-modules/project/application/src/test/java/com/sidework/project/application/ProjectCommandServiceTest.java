@@ -4,6 +4,7 @@ import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.application.exception.InvalidCommandException;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
 import com.sidework.project.application.exception.ProjectNotChangeableException;
+import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
@@ -241,6 +242,18 @@ public class ProjectCommandServiceTest {
         service.delete(userId, projectId);
 
         assertEquals(CANCELED, project.getStatus());
+    }
+
+    @Test
+    void 존재하지_않는_projectId로_삭제_시도_시_ProjectNotFoundException을_던진다() {
+        Long userId = 1L;
+        Long projectId = 1L;
+
+        when(repo.existsById(projectId)).thenReturn(false);
+        assertThrows(
+                ProjectNotFoundException.class,
+                () -> service.delete(userId, projectId)
+        );
     }
 
     @Test
