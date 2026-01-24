@@ -103,3 +103,7 @@ project(':main-modules:user:infrastructure').name = 'user-infrastructure'
 project(':main-modules:project:domain').name = 'project-domain'
 project(':main-modules:project:application').name = 'project-application'
 project(':main-modules:project:infrastructure').name = 'project-infrastructure'
+
+project(':main-modules:profile:domain').name = 'profile-domain'
+project(':main-modules:profile:application').name = 'profile-application'
+project(':main-modules:profile:infrastructure').name = 'profile-infrastructure'
