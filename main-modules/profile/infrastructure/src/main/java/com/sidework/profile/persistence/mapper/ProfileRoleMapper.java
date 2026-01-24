@@ -10,5 +10,5 @@ import com.sidework.profile.persistence.entity.RoleEntity;
 public interface ProfileRoleMapper
 {
 	ProfileRole toDomain(ProfileRoleEntity entity);
-	ProfileRoleEntity (ProfileRole domain);
+	ProfileRoleEntity toEntity (ProfileRole domain);
 }
