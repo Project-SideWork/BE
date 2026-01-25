@@ -20,6 +20,8 @@ dependencies {
     implementation project(':main-modules:profile:profile-domain')
     implementation project(':main-modules:user:user-application')
     implementation project(':main-modules:user:user-domain')
+    implementation project(':main-modules:project:project-domain')
+    implementation project(':main-modules:project:project-application')
     implementation("org.springframework:spring-context")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
 }

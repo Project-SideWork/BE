@@ -14,6 +14,8 @@ import com.sidework.profile.domain.Portfolio;
 import com.sidework.profile.domain.Role;
 import com.sidework.profile.domain.School;
 import com.sidework.profile.domain.Skill;
+import com.sidework.project.application.port.in.ProjectQueryUseCase;
+import com.sidework.project.domain.Project;
 import com.sidework.user.application.port.in.UserQueryUseCase;
 import com.sidework.profile.domain.Profile;
 import com.sidework.profile.domain.ProfileRole;
@@ -42,12 +44,26 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	private final RoleOutPort roleRepository;
 
 	private final UserQueryUseCase userQueryUseCase;
+	private final ProjectQueryUseCase projectQueryUseCase;
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long userId) {
 		Profile profile = profileRepository.getProfileByUserId(userId);
 		if (profile == null) {
 			User user = userQueryUseCase.findById(userId);
+			List<Project> projects = projectQueryUseCase.queryByUserId(userId);
+			List<UserProfileResponse.ProjectInfo> projectInfos = projects.stream()
+				.map(project -> new UserProfileResponse.ProjectInfo(
+					project.getId(),
+					project.getTitle(),
+					project.getDescription(),
+					project.getStartDt(),
+					project.getEndDt(),
+					project.getMeetingType(),
+					project.getStatus()
+				))
+				.collect(Collectors.toList());
+
 			return new UserProfileResponse(
 					user.getId(),
 					user.getEmail(),
@@ -59,7 +75,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 					new ArrayList<>(),
 					new ArrayList<>(),
 					new ArrayList<>(),
-					new ArrayList<>()
+					new ArrayList<>(),
+					projectInfos
 			);
 		}
 
@@ -174,6 +191,19 @@ public class ProfileQueryService implements ProfileQueryUseCase
 				.collect(Collectors.toList());
 		}
 
+		List<Project> projects = projectQueryUseCase.queryByUserId(userId);
+		List<UserProfileResponse.ProjectInfo> projectInfos = projects.stream()
+			.map(project -> new UserProfileResponse.ProjectInfo(
+				project.getId(),
+				project.getTitle(),
+				project.getDescription(),
+				project.getStartDt(),
+				project.getEndDt(),
+				project.getMeetingType(),
+				project.getStatus()
+			))
+			.collect(Collectors.toList());
+
 		return new UserProfileResponse(
 				user.getId(),
 				user.getEmail(),
@@ -185,7 +215,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 				roles,
 				schools,
 				skills,
-				portfolios
+				portfolios,
+				projectInfos
 		);
 	}
 

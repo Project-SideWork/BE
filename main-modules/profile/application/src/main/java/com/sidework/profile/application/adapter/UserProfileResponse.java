@@ -2,12 +2,13 @@ package com.sidework.profile.application.adapter;
 
 import com.sidework.profile.domain.PortfolioType;
 import com.sidework.profile.domain.SchoolStateType;
+import com.sidework.project.domain.MeetingType;
+import com.sidework.project.domain.ProjectStatus;
 
 import java.time.LocalDate;
 import java.util.List;
 
 
-//TODO: 프로젝트 정보 연동
 public record UserProfileResponse(
 	Long userId,
 	String email,
@@ -19,7 +20,8 @@ public record UserProfileResponse(
 	List<RoleInfo> roles, //직군 정보
 	List<SchoolInfo> schools, // 학교 장보
 	List<SkillInfo> skills, //기술 스택
-	List<PortfolioInfo> portfolios // 포폴 정보
+	List<PortfolioInfo> portfolios, // 포폴 정보
+	List<ProjectInfo> projects // 프로젝트 정보
 ) {
 	public record RoleInfo(
 		Long roleId,
@@ -47,5 +49,14 @@ public record UserProfileResponse(
 		LocalDate startDate,
 		LocalDate endDate,
 		String content
+	) {}
+	public record ProjectInfo(
+		Long projectId,
+		String title,
+		String description,
+		LocalDate startDate,
+		LocalDate endDate,
+		MeetingType meetingType,
+		ProjectStatus status
 	) {}
 }
