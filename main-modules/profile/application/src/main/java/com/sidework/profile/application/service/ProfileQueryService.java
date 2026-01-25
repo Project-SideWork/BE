@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sidework.profile.application.adapter.UserProfileResponse;
-import com.sidework.profile.application.exception.RoleNotFoundException;
 import com.sidework.profile.application.port.in.ProfileQueryUseCase;
 import com.sidework.profile.application.port.out.PortfolioOutPort;
 import com.sidework.profile.application.port.out.ProfileOutPort;
