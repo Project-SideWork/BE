@@ -30,7 +30,7 @@ public class ProfileSchoolEntity extends BaseEntity {
 	private Long schoolId;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "state", nullable = false, length = 10)
+	@Column(name = "state", nullable = false, length = 30)
 	private SchoolStateType state;
 
 	@Column(name = "major", length = 20)
