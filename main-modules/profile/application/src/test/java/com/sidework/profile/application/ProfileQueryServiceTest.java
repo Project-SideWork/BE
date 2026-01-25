@@ -72,6 +72,7 @@ class ProfileQueryServiceTest {
 		User user = createUser(userId);
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(null);
 		when(userQueryUseCase.findById(userId)).thenReturn(user);
+		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
 
 		// when
 		UserProfileResponse response = service.getProfileByUserId(userId);
