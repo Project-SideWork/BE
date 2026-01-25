@@ -29,11 +29,11 @@ public class SchoolPersistenceAdapter implements SchoolOutPort {
 	}
 
 	@Override
-	public List<School> findByIds(List<Long> ids) {
+	public List<School> findByIdIn(List<Long> ids) {
 		if (ids == null || ids.isEmpty()) {
 			return List.of();
 		}
-		List<SchoolEntity> entities = schoolRepository.findAllById(ids);
+		List<SchoolEntity> entities = schoolRepository.findByIdIn(ids);
 		return entities.stream()
 			.map(schoolMapper::toDomain)
 			.collect(Collectors.toList());

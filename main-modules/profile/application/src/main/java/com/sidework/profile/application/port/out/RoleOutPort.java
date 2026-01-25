@@ -7,5 +7,5 @@ import com.sidework.profile.domain.Role;
 public interface RoleOutPort
 {
 	Role findById(Long id);
-	List<Role> findByIds(List<Long> ids);
+	List<Role> findByIdIn(List<Long> ids);
 }

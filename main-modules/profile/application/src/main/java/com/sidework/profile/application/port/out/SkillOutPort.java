@@ -7,5 +7,5 @@ import com.sidework.profile.domain.Skill;
 public interface SkillOutPort
 {
 	Skill findById(Long id);
-	List<Skill> findByIds(List<Long> ids);
+	List<Skill> findByIdIn(List<Long> ids);
 }

@@ -29,11 +29,11 @@ public class SkillPersistenceAdapter implements SkillOutPort {
 	}
 
 	@Override
-	public List<Skill> findByIds(List<Long> ids) {
+	public List<Skill> findByIdIn(List<Long> ids) {
 		if (ids == null || ids.isEmpty()) {
 			return List.of();
 		}
-		List<SkillEntity> entities = skillRepository.findAllById(ids);
+		List<SkillEntity> entities = skillRepository.findByIdIn(ids);
 		return entities.stream()
 			.map(skillMapper::toDomain)
 			.collect(Collectors.toList());

@@ -7,5 +7,5 @@ import com.sidework.profile.domain.Portfolio;
 public interface PortfolioOutPort
 {
 	Portfolio findById(Long id);
-	List<Portfolio> findByIds(List<Long> ids);
+	List<Portfolio> findByIdIn(List<Long> ids);
 }

@@ -29,11 +29,11 @@ public class PortfolioPersistenceAdapter implements PortfolioOutPort {
 	}
 
 	@Override
-	public List<Portfolio> findByIds(List<Long> ids) {
+	public List<Portfolio> findByIdIn(List<Long> ids) {
 		if (ids == null || ids.isEmpty()) {
 			return List.of();
 		}
-		List<PortfolioEntity> entities = portfolioRepository.findAllById(ids);
+		List<PortfolioEntity> entities = portfolioRepository.findByIdIn(ids);
 		return entities.stream()
 			.map(portfolioMapper::toDomain)
 			.collect(Collectors.toList());

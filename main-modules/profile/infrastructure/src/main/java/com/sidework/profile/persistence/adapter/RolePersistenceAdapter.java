@@ -29,11 +29,11 @@ public class RolePersistenceAdapter implements RoleOutPort {
 	}
 
 	@Override
-	public List<Role> findByIds(List<Long> ids) {
+	public List<Role> findByIdIn(List<Long> ids) {
 		if (ids == null || ids.isEmpty()) {
 			return List.of();
 		}
-		List<RoleEntity> roleEntities = roleRepository.findAllById(ids);
+		List<RoleEntity> roleEntities = roleRepository.findByIdIn(ids);
 		return roleEntities.stream()
 			.map(roleMapper::toDomain)
 			.collect(Collectors.toList());

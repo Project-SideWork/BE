@@ -73,7 +73,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			List<Long> profileRoleIds = profileRoles.stream()
 				.map(ProfileRole::getRoleId)
 				.collect(Collectors.toList());
-			Map<Long,Role> roleMap = roleRepository.findByIds(profileRoleIds).stream()
+			Map<Long,Role> roleMap = roleRepository.findByIdIn(profileRoleIds).stream()
 				.collect(Collectors.toMap(Role::getId, Function.identity()));
 
 			roles = profileRoles.stream()
@@ -96,7 +96,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			List<Long> schoolIds = profileSchools.stream()
 				.map(ProfileSchool::getSchoolId)
 				.collect(Collectors.toList());
-			Map<Long, School> schoolMap = schoolRepository.findByIds(schoolIds).stream()
+			Map<Long, School> schoolMap = schoolRepository.findByIdIn(schoolIds).stream()
 				.collect(Collectors.toMap(School::getId, Function.identity()));
 			
 			schools = profileSchools.stream()
@@ -126,7 +126,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			List<Long> skillIds = profileSkills.stream()
 				.map(ProfileSkill::getSkillId)
 				.collect(Collectors.toList());
-			Map<Long, Skill> skillMap = skillRepository.findByIds(skillIds).stream()
+			Map<Long, Skill> skillMap = skillRepository.findByIdIn(skillIds).stream()
 				.collect(Collectors.toMap(Skill::getId, Function.identity()));
 
 			skills = profileSkills.stream()
@@ -153,7 +153,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			List<Long> portfolioIds = projectPortfolios.stream()
 				.map(ProjectPortfolio::getPortfolioId)
 				.collect(Collectors.toList());
-			Map<Long, Portfolio> portfolioMap = portfolioRepository.findByIds(portfolioIds).stream()
+			Map<Long, Portfolio> portfolioMap = portfolioRepository.findByIdIn(portfolioIds).stream()
 				.collect(Collectors.toMap(Portfolio::getId, Function.identity()));
 
 			portfolios = projectPortfolios.stream()

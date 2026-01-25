@@ -7,5 +7,5 @@ import com.sidework.profile.domain.School;
 public interface SchoolOutPort
 {
 	School findById(Long id);
-	List<School> findByIds(List<Long> ids);
+	List<School> findByIdIn(List<Long> ids);
 }
