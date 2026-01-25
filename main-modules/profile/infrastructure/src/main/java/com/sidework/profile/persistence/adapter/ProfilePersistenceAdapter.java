@@ -54,7 +54,7 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	@Override
 	public Profile getProfileByUserId(Long userId) {
 		ProfileEntity entity = profileRepository.findByUserId(userId)
-			.orElseThrow(ProfileNotFoundException::new);
+			.orElseThrow(() -> new ProfileNotFoundException(userId));
 		return profileMapper.toDomain(entity);
 	}
 

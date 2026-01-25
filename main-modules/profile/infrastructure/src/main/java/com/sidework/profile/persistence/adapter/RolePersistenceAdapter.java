@@ -24,7 +24,7 @@ public class RolePersistenceAdapter implements RoleOutPort {
 	@Override
 	public Role findById(Long id) {
 		RoleEntity roleEntity = roleRepository.findById(id)
-			.orElseThrow(RoleNotFoundException::new);
+			.orElseThrow(() -> new RoleNotFoundException(id));
 		return roleMapper.toDomain(roleEntity);
 	}
 
