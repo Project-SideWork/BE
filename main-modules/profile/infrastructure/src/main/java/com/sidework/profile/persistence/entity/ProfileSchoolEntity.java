@@ -39,7 +39,7 @@ public class ProfileSchoolEntity extends BaseEntity {
 	@Column(name = "start_dt", nullable = false)
 	private LocalDate startDate;
 
-	@Column(name = "end_dt", nullable = false)
+	@Column(name = "end_dt", nullable = true)
 	private LocalDate endDate;
 }
 
