@@ -86,6 +86,7 @@ class ProfileControllerTest {
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
+			new ArrayList<>(),
 			new ArrayList<>()
 		);
 	}
@@ -99,6 +100,7 @@ class ProfileControllerTest {
 			25,
 			"010-1234-5678",
 			null,
+			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),

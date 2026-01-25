@@ -18,6 +18,10 @@ import com.sidework.profile.domain.Role;
 import com.sidework.profile.domain.School;
 import com.sidework.profile.domain.SchoolStateType;
 import com.sidework.profile.domain.Skill;
+import com.sidework.project.application.port.in.ProjectQueryUseCase;
+import com.sidework.project.domain.MeetingType;
+import com.sidework.project.domain.Project;
+import com.sidework.project.domain.ProjectStatus;
 import com.sidework.user.application.port.in.UserQueryUseCase;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
@@ -55,6 +59,9 @@ class ProfileQueryServiceTest {
 	@Mock
 	private UserQueryUseCase userQueryUseCase;
 
+	@Mock
+	private ProjectQueryUseCase projectQueryUseCase;
+
 	@InjectMocks
 	private ProfileQueryService service;
 
@@ -79,9 +86,11 @@ class ProfileQueryServiceTest {
 		assertTrue(response.schools().isEmpty());
 		assertTrue(response.skills().isEmpty());
 		assertTrue(response.portfolios().isEmpty());
+		assertTrue(response.projects().isEmpty());
 
 		verify(profileRepository).getProfileByUserId(userId);
 		verify(userQueryUseCase).findById(userId);
+		verify(projectQueryUseCase).queryByUserId(userId);
 	}
 
 	@Test
@@ -103,6 +112,7 @@ class ProfileQueryServiceTest {
 		List<School> schools = createSchools();
 		List<Skill> skills = createSkills();
 		List<Portfolio> portfolios = createPortfolios();
+		List<Project> projects = createProjects();
 
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
 		when(userQueryUseCase.findById(userId)).thenReturn(user);
@@ -114,6 +124,7 @@ class ProfileQueryServiceTest {
 		when(schoolRepository.findByIdIn(anyList())).thenReturn(schools);
 		when(skillRepository.findByIdIn(anyList())).thenReturn(skills);
 		when(portfolioRepository.findByIdIn(anyList())).thenReturn(portfolios);
+		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
 
 		// when
 		UserProfileResponse response = service.getProfileByUserId(userId);
@@ -126,6 +137,7 @@ class ProfileQueryServiceTest {
 		assertEquals(1, response.schools().size());
 		assertEquals(3, response.skills().size());
 		assertEquals(2, response.portfolios().size());
+		assertEquals(2, response.projects().size());
 
 		verify(profileRepository).getProfileByUserId(userId);
 		verify(userQueryUseCase).findById(userId);
@@ -133,6 +145,7 @@ class ProfileQueryServiceTest {
 		verify(profileRepository).getProfileSchools(profileId);
 		verify(profileRepository).getProfileSkills(profileId);
 		verify(profileRepository).getProjectPortfolios(profileId);
+		verify(projectQueryUseCase).queryByUserId(userId);
 	}
 
 	@Test
@@ -149,6 +162,7 @@ class ProfileQueryServiceTest {
 		when(profileRepository.getProfileSchools(profileId)).thenReturn(new ArrayList<>());
 		when(profileRepository.getProfileSkills(profileId)).thenReturn(new ArrayList<>());
 		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(new ArrayList<>());
+		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
 
 		// when
 		UserProfileResponse response = service.getProfileByUserId(userId);
@@ -160,6 +174,58 @@ class ProfileQueryServiceTest {
 		assertTrue(response.schools().isEmpty());
 		assertTrue(response.skills().isEmpty());
 		assertTrue(response.portfolios().isEmpty());
+		assertTrue(response.projects().isEmpty());
+	}
+
+	@Test
+	void 프로필이_없을_때_프로젝트_정보도_포함하여_반환한다() {
+		// given
+		Long userId = 1L;
+		User user = createUser(userId);
+		List<Project> projects = createProjects();
+
+		when(profileRepository.getProfileByUserId(userId)).thenReturn(null);
+		when(userQueryUseCase.findById(userId)).thenReturn(user);
+		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
+
+		// when
+		UserProfileResponse response = service.getProfileByUserId(userId);
+
+		// then
+		assertNotNull(response);
+		assertEquals(userId, response.userId());
+		assertNull(response.profileId());
+		assertEquals(2, response.projects().size());
+		assertEquals("협업 플랫폼 개발", response.projects().get(0).title());
+		assertEquals(MeetingType.HYBRID, response.projects().get(0).meetingType());
+		assertEquals(ProjectStatus.RECRUITING, response.projects().get(0).status());
+
+		verify(projectQueryUseCase).queryByUserId(userId);
+	}
+
+	@Test
+	void 프로젝트가_없을_때_빈_리스트를_반환한다() {
+		// given
+		Long userId = 1L;
+		Long profileId = 1L;
+		User user = createUser(userId);
+		Profile profile = createProfile(profileId, userId);
+
+		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
+		when(userQueryUseCase.findById(userId)).thenReturn(user);
+		when(profileRepository.getProfileRoles(profileId)).thenReturn(new ArrayList<>());
+		when(profileRepository.getProfileSchools(profileId)).thenReturn(new ArrayList<>());
+		when(profileRepository.getProfileSkills(profileId)).thenReturn(new ArrayList<>());
+		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(new ArrayList<>());
+		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
+
+		// when
+		UserProfileResponse response = service.getProfileByUserId(userId);
+
+		// then
+		assertNotNull(response);
+		assertTrue(response.projects().isEmpty());
+		verify(projectQueryUseCase).queryByUserId(userId);
 	}
 
 	private User createUser(Long userId) {
@@ -260,6 +326,29 @@ class ProfileQueryServiceTest {
 				.startDate(LocalDate.of(2023, 9, 1))
 				.endDate(LocalDate.of(2024, 1, 31))
 				.content("사이드 프로젝트")
+				.build()
+		);
+	}
+
+	private List<Project> createProjects() {
+		return List.of(
+			Project.builder()
+				.id(1L)
+				.title("협업 플랫폼 개발")
+				.description("사이드 프로젝트 협업을 위한 플랫폼 개발 프로젝트입니다.")
+				.startDt(LocalDate.of(2024, 1, 1))
+				.endDt(LocalDate.of(2024, 6, 30))
+				.meetingType(MeetingType.HYBRID)
+				.status(ProjectStatus.RECRUITING)
+				.build(),
+			Project.builder()
+				.id(2L)
+				.title("웹 서비스 구축")
+				.description("React와 Spring Boot를 활용한 풀스택 웹 서비스 개발")
+				.startDt(LocalDate.of(2024, 3, 1))
+				.endDt(LocalDate.of(2024, 8, 31))
+				.meetingType(MeetingType.ONLINE)
+				.status(ProjectStatus.PREPARING)
 				.build()
 		);
 	}
