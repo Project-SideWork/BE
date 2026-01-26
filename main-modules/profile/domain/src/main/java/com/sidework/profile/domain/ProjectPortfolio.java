@@ -14,4 +14,11 @@ public class ProjectPortfolio
 	private Long id;
 	private Long profileId;
 	private Long portfolioId;
+
+	public static ProjectPortfolio create(Long profileId, Long portfolioId) {
+		return ProjectPortfolio.builder()
+			.profileId(profileId)
+			.portfolioId(portfolioId)
+			.build();
+	}
 }

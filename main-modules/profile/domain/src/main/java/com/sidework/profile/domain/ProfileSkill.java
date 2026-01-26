@@ -15,4 +15,10 @@ public class ProfileSkill
 	private Long profileId;
 	private Long skillId;
 
+	public static ProfileSkill create(Long profileId, Long skillId) {
+		return ProfileSkill.builder()
+			.profileId(profileId)
+			.skillId(skillId)
+			.build();
+	}
 }

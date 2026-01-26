@@ -21,4 +21,18 @@ public class ProfileSchool
 	private LocalDate startDate;
 	private LocalDate endDate;
 
+	public static ProfileSchool create(
+		Long schoolId,
+		SchoolStateType state,
+		String major,
+		LocalDate startDt,
+		LocalDate endDt
+		) {
+		return ProfileSchool.builder()
+			.schoolId(schoolId)
+			.state(state)
+			.major(major)
+			.startDate(startDt)
+			.endDate(endDt).build();
+	}
 }
