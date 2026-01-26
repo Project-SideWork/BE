@@ -1,0 +1,19 @@
+package com.sidework.profile.application.port.out;
+
+import com.sidework.profile.domain.Profile;
+import com.sidework.profile.domain.ProfileRole;
+import com.sidework.profile.domain.ProfileSchool;
+import com.sidework.profile.domain.ProfileSkill;
+import com.sidework.profile.domain.ProjectPortfolio;
+
+import java.util.List;
+
+public interface ProfileOutPort
+{
+	boolean existsByUserId(Long userId);
+	Profile getProfileByUserId(Long userId);
+	List<ProfileRole> getProfileRoles(Long profileId);
+	List<ProfileSchool> getProfileSchools(Long profileId);
+	List<ProfileSkill> getProfileSkills(Long profileId);
+	List<ProjectPortfolio> getProjectPortfolios(Long profileId);
+}

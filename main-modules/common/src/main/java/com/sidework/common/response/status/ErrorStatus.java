@@ -30,7 +30,23 @@ public enum ErrorStatus implements BaseStatusCode {
     // PROJECT
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_001", "해당 프로젝트를 찾을 수 없습니다."),
     PROJECT_CANNOT_UPDATE(HttpStatus.BAD_REQUEST, "PROJECT_002", "해당 프로젝트는 수정할 수 없습니다."),
-    PROJECT_CANNOT_DELETE(HttpStatus.FORBIDDEN, "PROJECT_003", "해당 프로젝트를 삭제할 권한이 없습니다.");
+    PROJECT_CANNOT_DELETE(HttpStatus.FORBIDDEN, "PROJECT_003", "해당 프로젝트를 삭제할 권한이 없습니다."),
+
+    // PROFILE
+    PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROFILE_001", "해당 프로필을 찾을 수 없습니다."),
+    PROFILE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "PROFILE_002", "이미 프로필이 존재합니다."),
+
+    // ROLE
+    ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_001", "해당 역할을 찾을 수 없습니다."),
+
+    // SCHOOL
+    SCHOOL_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHOOL_001", "해당 학교를 찾을 수 없습니다."),
+
+    // SKILL
+    SKILL_NOT_FOUND(HttpStatus.NOT_FOUND, "SKILL_001", "해당 스킬을 찾을 수 없습니다."),
+
+    // PORTFOLIO
+    PORTFOLIO_NOT_FOUND(HttpStatus.NOT_FOUND, "PORTFOLIO_001", "해당 대외활동을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

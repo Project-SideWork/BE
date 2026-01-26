@@ -18,6 +18,10 @@ dependencies {
     implementation project(':main-modules:project:project-infrastructure')
     implementation project(':main-modules:user:user-application')
     implementation project(':main-modules:user:user-infrastructure')
+    implementation project(':main-modules:profile:profile-application')
+    implementation project(':main-modules:profile:profile-infrastructure')
+    
+
 
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security

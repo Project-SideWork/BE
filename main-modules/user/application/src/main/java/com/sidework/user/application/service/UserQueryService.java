@@ -2,6 +2,7 @@ package com.sidework.user.application.service;
 
 import com.sidework.user.application.port.in.UserQueryUseCase;
 import com.sidework.user.application.port.out.UserOutPort;
+import com.sidework.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,5 +16,10 @@ public class UserQueryService implements UserQueryUseCase {
     @Override
     public boolean checkEmailExists(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public User findById(Long id) {
+        return userRepository.findById(id);
     }
 }
