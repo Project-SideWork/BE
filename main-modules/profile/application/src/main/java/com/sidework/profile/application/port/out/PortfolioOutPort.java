@@ -8,4 +8,6 @@ public interface PortfolioOutPort
 {
 	Portfolio findById(Long id);
 	List<Portfolio> findByIdIn(List<Long> ids);
+	void savePortfolios(List<Portfolio> portfolios);
+	void deletePortfolios(List<Long> ids);
 }
