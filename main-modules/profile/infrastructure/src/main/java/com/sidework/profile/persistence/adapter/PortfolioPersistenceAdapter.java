@@ -38,4 +38,14 @@ public class PortfolioPersistenceAdapter implements PortfolioOutPort {
 			.map(portfolioMapper::toDomain)
 			.collect(Collectors.toList());
 	}
+
+	@Override
+	public void savePortfolios(List<Portfolio> portfolios) {
+
+	}
+
+	@Override
+	public void deletePortfolios(List<Long> ids) {
+
+	}
 }

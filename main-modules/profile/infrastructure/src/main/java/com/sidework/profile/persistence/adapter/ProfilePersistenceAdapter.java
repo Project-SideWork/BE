@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sidework.profile.application.port.in.ProfileUpdateCommand;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.domain.Profile;
 import com.sidework.profile.domain.ProfileRole;
@@ -88,5 +89,45 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 		return entities.stream()
 			.map(projectPortfolioMapper::toDomain)
 			.collect(Collectors.toList());
+	}
+
+	@Override
+	public void saveProfileRoles(List<ProfileRole> profileRoles) {
+
+	}
+
+	@Override
+	public void saveProfileSchools(List<ProfileSchool> profileSchools) {
+
+	}
+
+	@Override
+	public void saveProfileSkills(List<ProfileSkill> profileSkills) {
+
+	}
+
+	@Override
+	public void saveProjectPortfolios(List<ProjectPortfolio> projectPortfolios) {
+
+	}
+
+	@Override
+	public void deleteAllProfileRolesByProfileId(Long profileId) {
+
+	}
+
+	@Override
+	public void deleteAllProfileSchoolsByProfileId(Long profileId) {
+
+	}
+
+	@Override
+	public void deleteAllProfileSkillsByProfileId(Long profileId) {
+
+	}
+
+	@Override
+	public void deleteAllProjectPortfoliosByProfileId(Long profileId) {
+
 	}
 }
