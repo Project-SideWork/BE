@@ -4,8 +4,7 @@ import java.util.List;
 
 import com.sidework.profile.domain.Skill;
 
-public interface SkillOutPort
-{
+public interface SkillOutPort {
 	Skill findById(Long id);
 	List<Skill> findByIdIn(List<Long> ids);
 }
