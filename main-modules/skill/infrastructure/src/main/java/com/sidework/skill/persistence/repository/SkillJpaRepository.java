@@ -1,0 +1,17 @@
+package com.sidework.skill.persistence.repository;
+
+import com.sidework.skill.persistence.entity.SkillEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface SkillJpaRepository extends JpaRepository<SkillEntity, Long> {
+    List<SkillEntity> findByIdIn(List<Long> ids);
+
+    @Query("select s.id from SkillEntity s where s.id in :ids")
+    List<Long> findAllIdsByIdIn(@Param("ids") List<Long> ids);
+}
