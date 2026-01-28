@@ -60,7 +60,7 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
     }
 
     private RequiredSkillChangeSet resolveSkillChanges(Long projectId, List<Long> skillIds) {
-        // 원래 저장되어 있었던 ProjectPreferredSkill의 Skill ID 목록.
+        // 원래 저장되어 있었던 ProjectRequiredSkill의 Skill ID 목록.
         Set<Long> originalIds = new HashSet<>(
                 repo.findAllSkillIdsByProject(projectId)
         );
