@@ -10,6 +10,8 @@ import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.*;
+import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
+import com.sidework.skill.application.port.in.ProjectRequiredCommandUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = false)
 public class ProjectCommandService implements ProjectCommandUseCase {
+    private final ProjectPreferredSkillCommandUseCase preferredSkillCommandService;
+    private final ProjectRequiredCommandUseCase requiredSkillCommandService;
     private final ProjectOutPort projectRepository;
     private final ProjectUserOutPort projectUserRepository;
 
@@ -39,6 +43,11 @@ public class ProjectCommandService implements ProjectCommandUseCase {
 
         projectUserRepository.save(projectUser);
         projectUserRepository.save(ownerUser);
+
+        requiredSkillCommandService.create(savedId, command.requiredStacks());
+        if(!command.requiredStacks().isEmpty()) {
+            preferredSkillCommandService.create(savedId, command.preferredStacks());
+        }
     }
 
     @Override
@@ -54,6 +63,11 @@ public class ProjectCommandService implements ProjectCommandUseCase {
                 command.endDt(), command.meetingType(), command.status()
         );
         projectRepository.save(project);
+
+        requiredSkillCommandService.update(projectId, command.requiredStacks());
+        if(!command.requiredStacks().isEmpty()) {
+            preferredSkillCommandService.update(projectId, command.preferredStacks());
+        }
     }
 
     @Override
