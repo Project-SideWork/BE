@@ -2,7 +2,6 @@ package com.sidework.skill.application.service;
 
 
 import com.sidework.common.exception.InvalidCommandException;
-import com.sidework.skill.application.port.in.ProjectPreferredSkillCommand;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
 import com.sidework.skill.application.port.out.ProjectPreferredSkillOutPort;
 import com.sidework.skill.application.port.out.SkillOutPort;
@@ -25,14 +24,14 @@ public class ProjectPreferredSkillCommandService implements ProjectPreferredSkil
     private final SkillOutPort skillRepo;
 
     @Override
-    public void create(Long projectId, ProjectPreferredSkillCommand command) {
-        List<ProjectPreferredSkill> domains = convert(projectId, command.skillIds());
+    public void create(Long projectId, List<Long> skillIds) {
+        List<ProjectPreferredSkill> domains = convert(projectId, skillIds);
         repo.saveAll(domains);
     }
 
     @Override
-    public void update(Long projectId, ProjectPreferredSkillCommand command) {
-        Pair<List<ProjectPreferredSkill>, List<ProjectPreferredSkill>> categorized = categorize(projectId, command.skillIds());
+    public void update(Long projectId, List<Long> skillIds) {
+        Pair<List<ProjectPreferredSkill>, List<ProjectPreferredSkill>> categorized = categorize(projectId, skillIds);
         repo.saveAll(categorized.getLeft());
         repo.deleteAll(categorized.getRight());
     }
