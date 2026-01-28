@@ -32,8 +32,16 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
     public void update(Long projectId, List<Long> skillIds) {
         RequiredSkillChangeSet resolved = resolveSkillChanges(projectId, skillIds);
 
-        repo.saveAll(resolved.toAdd());
-        repo.deleteAll(resolved.toRemove());
+        if (!resolved.toAdd().isEmpty()) {
+            repo.saveAll(resolved.toAdd());
+        }
+
+        if (!resolved.toRemoveIds().isEmpty()) {
+            repo.deleteByProjectIdAndSkillIdIn(
+                    projectId,
+                    resolved.toRemoveIds()
+            );
+        }
     }
 
     private List<ProjectRequiredSkill> createRequiredSkills(Long projectId, List<Long> skillIds) {
@@ -60,10 +68,9 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
     }
 
     private RequiredSkillChangeSet resolveSkillChanges(Long projectId, List<Long> skillIds) {
-        // 원래 저장되어 있었던 ProjectRequiredSkill의 Skill ID 목록.
-        Set<Long> originalIds = new HashSet<>(
-                repo.findAllSkillIdsByProject(projectId)
-        );
+
+        Set<Long> originalIds =
+                new HashSet<>(repo.findAllSkillIdsByProject(projectId));
 
         Set<Long> requestedIds = new HashSet<>(skillIds);
 
@@ -89,14 +96,10 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
                 )
                 .toList();
 
-        List<ProjectRequiredSkill> toRemove = originalIds.stream()
+        List<Long> toRemoveSkillIds = originalIds.stream()
                 .filter(id -> !requestedIds.contains(id))
-                .map(id -> ProjectRequiredSkill.builder()
-                        .projectId(projectId)
-                        .skillId(id)
-                        .build()
-                )
                 .toList();
-        return new RequiredSkillChangeSet(toAdd, toRemove);
+
+        return new RequiredSkillChangeSet(toAdd, toRemoveSkillIds);
     }
 }

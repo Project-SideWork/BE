@@ -6,7 +6,6 @@ import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCas
 import com.sidework.skill.application.port.out.ProjectPreferredSkillOutPort;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import com.sidework.skill.domain.ProjectPreferredSkill;
-import com.sidework.skill.domain.ProjectRequiredSkill;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,9 +30,17 @@ public class ProjectPreferredSkillCommandService implements ProjectPreferredSkil
 
     @Override
     public void update(Long projectId, List<Long> skillIds) {
-        PreferredSkillChangeSet categorized = resolveSkillChanges(projectId, skillIds);
-        repo.saveAll(categorized.toAdd());
-        repo.deleteAll(categorized.toRemove());
+        PreferredSkillChangeSet resolved = resolveSkillChanges(projectId, skillIds);
+        if (!resolved.toAdd().isEmpty()) {
+            repo.saveAll(resolved.toAdd());
+        }
+
+        if (!resolved.toRemoveIds().isEmpty()) {
+            repo.deleteByProjectIdAndSkillIdIn(
+                    projectId,
+                    resolved.toRemoveIds()
+            );
+        }
     }
 
     private List<ProjectPreferredSkill> createPreferredSkills(Long projectId, List<Long> skillIds) {
@@ -60,10 +67,9 @@ public class ProjectPreferredSkillCommandService implements ProjectPreferredSkil
     }
 
     private PreferredSkillChangeSet resolveSkillChanges(Long projectId, List<Long> skillIds) {
-        // 원래 저장되어 있었던 ProjectPreferredSkill의 Skill ID 목록.
-        Set<Long> originalIds = new HashSet<>(
-                repo.findAllSkillIdsByProject(projectId)
-        );
+
+        Set<Long> originalIds =
+                new HashSet<>(repo.findAllSkillIdsByProject(projectId));
 
         Set<Long> requestedIds = new HashSet<>(skillIds);
 
@@ -89,14 +95,10 @@ public class ProjectPreferredSkillCommandService implements ProjectPreferredSkil
                 )
                 .toList();
 
-        List<ProjectPreferredSkill> toRemove = originalIds.stream()
+        List<Long> toRemoveSkillIds = originalIds.stream()
                 .filter(id -> !requestedIds.contains(id))
-                .map(id -> ProjectPreferredSkill.builder()
-                        .projectId(projectId)
-                        .skillId(id)
-                        .build()
-                )
                 .toList();
-        return new PreferredSkillChangeSet(toAdd, toRemove);
+
+        return new PreferredSkillChangeSet(toAdd, toRemoveSkillIds);
     }
 }
