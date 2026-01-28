@@ -12,6 +12,16 @@ import java.util.List;
 public interface SkillJpaRepository extends JpaRepository<SkillEntity, Long> {
     List<SkillEntity> findByIdIn(List<Long> ids);
 
-    @Query("select s.id from SkillEntity s where s.id in :ids")
+    @Query("""
+            select s.id from SkillEntity s where s.id in :ids
+            """)
     List<Long> findAllIdsByIdIn(@Param("ids") List<Long> ids);
+
+    @Query("""
+    SELECT s.id
+    FROM SkillEntity s
+    WHERE s.id IN :ids
+      AND s.isActive = true
+    """)
+    List<Long> findActiveIdsByIdIn(@Param("ids") List<Long> ids);
 }

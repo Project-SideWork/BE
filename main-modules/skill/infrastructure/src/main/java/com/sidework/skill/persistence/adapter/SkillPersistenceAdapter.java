@@ -16,12 +16,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SkillPersistenceAdapter implements SkillOutPort {
 
-    private final SkillJpaRepository skillRepository;
+    private final SkillJpaRepository repo;
     private final SkillMapper skillMapper;
 
     @Override
+    public List<Long> findActiveSkillsByIdIn(List<Long> ids) {
+        return repo.findActiveIdsByIdIn(ids);
+    }
+
+    @Override
     public Skill findById(Long id) {
-        SkillEntity entity = skillRepository.findById(id)
+        SkillEntity entity = repo.findById(id)
                 .orElseThrow(() -> new SkillNotFoundException(id));
         return skillMapper.toDomain(entity);
     }
@@ -31,7 +36,7 @@ public class SkillPersistenceAdapter implements SkillOutPort {
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
-        List<SkillEntity> entities = skillRepository.findByIdIn(ids);
+        List<SkillEntity> entities = repo.findByIdIn(ids);
         return entities.stream()
                 .map(skillMapper::toDomain)
                 .collect(Collectors.toList());
@@ -39,11 +44,11 @@ public class SkillPersistenceAdapter implements SkillOutPort {
 
     @Override
     public boolean existsById(Long id) {
-        return skillRepository.existsById(id);
+        return repo.existsById(id);
     }
 
     @Override
     public List<Long> findIdsByIdIn(List<Long> ids) {
-        return skillRepository.findAllIdsByIdIn(ids);
+        return repo.findAllIdsByIdIn(ids);
     }
 }
