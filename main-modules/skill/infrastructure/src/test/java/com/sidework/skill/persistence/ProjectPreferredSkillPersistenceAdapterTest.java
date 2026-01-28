@@ -10,10 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +27,7 @@ public class ProjectPreferredSkillPersistenceAdapterTest {
     private ProjectPreferredSkillJpaRepository repo;
     private final ProjectPreferredSkillMapper mapper = Mappers.getMapper(ProjectPreferredSkillMapper.class);
     private ProjectPreferredSkillPersistenceAdapter adapter;
+    ArgumentCaptor<List<ProjectPreferredSkillEntity>> captor = ArgumentCaptor.forClass(List.class);
 
     @BeforeEach
     public void setUp() {
@@ -33,10 +38,19 @@ public class ProjectPreferredSkillPersistenceAdapterTest {
     void save는_도메인_객체를_영속성_객체로_변환해_저장한다() {
         ProjectPreferredSkill domain = createDomain();
         ProjectPreferredSkillEntity entity = createEntity();
-        when(repo.save(any(ProjectPreferredSkillEntity.class))).thenReturn(entity);
+        when(repo.saveAll(anyList()))
+                .thenReturn(List.of(entity));
 
-        adapter.save(domain);
-        verify(repo).save(any(ProjectPreferredSkillEntity.class));
+        adapter.saveAll(List.of(domain));
+
+        verify(repo).saveAll(captor.capture());
+
+        List<ProjectPreferredSkillEntity> savedEntities = captor.getValue();
+        assertEquals(1, savedEntities.size());
+
+        ProjectPreferredSkillEntity saved = savedEntities.get(0);
+        assertEquals(domain.getSkillId(), saved.getSkillId());
+        assertEquals(domain.getProjectId(), saved.getProjectId());
     }
 
 
