@@ -46,9 +46,4 @@ public class SkillPersistenceAdapter implements SkillOutPort {
     public boolean existsById(Long id) {
         return repo.existsById(id);
     }
-
-    @Override
-    public List<Long> findIdsByIdIn(List<Long> ids) {
-        return repo.findAllIdsByIdIn(ids);
-    }
 }

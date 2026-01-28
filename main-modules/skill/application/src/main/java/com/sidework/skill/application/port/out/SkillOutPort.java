@@ -9,6 +9,5 @@ public interface SkillOutPort {
     Skill findById(Long id);
     List<Skill> findByIdIn(List<Long> ids);
     boolean existsById(Long id);
-    List<Long> findIdsByIdIn(List<Long> ids);
 }
 

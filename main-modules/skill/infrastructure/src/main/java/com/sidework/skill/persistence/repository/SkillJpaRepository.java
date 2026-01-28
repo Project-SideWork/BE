@@ -10,12 +10,14 @@ import java.util.List;
 
 @Repository
 public interface SkillJpaRepository extends JpaRepository<SkillEntity, Long> {
-    List<SkillEntity> findByIdIn(List<Long> ids);
 
     @Query("""
-            select s.id from SkillEntity s where s.id in :ids
-            """)
-    List<Long> findAllIdsByIdIn(@Param("ids") List<Long> ids);
+    SELECT s
+    FROM SkillEntity s
+    WHERE s.id IN :ids
+      AND s.isActive = true and s.categoryId is not null
+    """)
+    List<SkillEntity> findByIdIn(List<Long> ids);
 
     @Query("""
     SELECT s.id
