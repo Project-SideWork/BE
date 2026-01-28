@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ProjectRequiredSkillOutPort {
     void saveAll(List<ProjectRequiredSkill> domains);
-    boolean existsById(Long id);
+    void deleteByProjectIdAndSkillIdIn(Long projectId, List<Long> deleted);
     List<Long> findAllSkillIdsByProject(Long projectId);
     void deleteAll(List<ProjectRequiredSkill> domains);
 }
