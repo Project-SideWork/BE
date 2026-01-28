@@ -8,5 +8,4 @@ public interface ProjectPreferredSkillOutPort {
     void saveAll(List<ProjectPreferredSkill> domains);
     void deleteByProjectIdAndSkillIdIn(Long projectId, List<Long> deleted);
     List<Long> findAllSkillIdsByProject(Long projectId);
-    void deleteAll(List<ProjectPreferredSkill> domains);
 }
