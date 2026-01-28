@@ -26,8 +26,8 @@ public class ProjectPreferredSkillPersistenceAdapter implements ProjectPreferred
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return repo.existsById(id);
+    public void deleteByProjectIdAndSkillIdIn(Long projectId, List<Long> deleted) {
+        repo.deleteByProjectIdAndSkillIdIn(projectId, deleted);
     }
 
     @Override
