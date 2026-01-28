@@ -20,7 +20,8 @@ public interface ProfileOutPort
 	void saveProfileRoles(List<ProfileRole> profileRoles);
 	void saveProfileSchools(List<ProfileSchool> profileSchools);
 	void saveProfileSkills(List<ProfileSkill> profileSkills);
-	void saveProjectPortfolios(List<ProjectPortfolio> projectPortfolios);void deleteAllProfileRolesByProfileId(Long profileId);
+	void saveProjectPortfolios(List<ProjectPortfolio> projectPortfolios);
+	void deleteAllProfileRolesByProfileId(Long profileId);
 	void deleteAllProfileSchoolsByProfileId(Long profileId);
 	void deleteAllProfileSkillsByProfileId(Long profileId);
 	void deleteAllProjectPortfoliosByProfileId(Long profileId);
