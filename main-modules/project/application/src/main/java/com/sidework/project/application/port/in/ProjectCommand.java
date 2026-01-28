@@ -39,9 +39,9 @@ public record ProjectCommand(
         String meetingDetail,
 
         @NotNull
-        List<String> requiredStacks,
+        List<Long> requiredStacks,
 
-        List<String> preferredStacks,
+        List<Long> preferredStacks,
 
         @NotNull
         ProjectStatus status
