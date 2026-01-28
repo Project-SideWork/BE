@@ -40,12 +40,26 @@ public class PortfolioPersistenceAdapter implements PortfolioOutPort {
 	}
 
 	@Override
-	public void savePortfolios(List<Portfolio> portfolios) {
+	public List<Long> savePortfolios(List<Portfolio> portfolios) {
+		if (portfolios == null || portfolios.isEmpty()) {
+			return List.of();
+		}
+		List<PortfolioEntity> entities = portfolios.stream()
+			.map(portfolioMapper::toEntity) // id ignore
+			.toList();
 
+		List<PortfolioEntity> saved = portfolioRepository.saveAll(entities);
+
+		return saved.stream()
+			.map(PortfolioEntity::getId)
+			.toList();
 	}
 
 	@Override
 	public void deletePortfolios(List<Long> ids) {
-
+		if (ids == null || ids.isEmpty()) {
+			return;
+		}
+		portfolioRepository.deleteAllById(ids);
 	}
 }
