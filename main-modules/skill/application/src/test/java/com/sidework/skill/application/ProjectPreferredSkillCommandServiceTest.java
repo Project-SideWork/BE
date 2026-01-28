@@ -60,6 +60,19 @@ public class ProjectPreferredSkillCommandServiceTest {
     }
 
     @Test
+    void 프로젝트_생성시_카테고리에_해당하는_ID가_포함되면_InvalidCommandException을_던진다() {
+        List<Long> command = createCommand();
+        when(skillRepo.findActiveSkillsByIdIn(command)).thenReturn(List.of(1L, 2L));
+
+        assertThrows(
+                InvalidCommandException.class,
+                () -> service.create(1L, command)
+        );
+
+        verify(skillRepo).findActiveSkillsByIdIn(command);
+    }
+
+    @Test
     void 프로젝트_수정시_신규기술_추가에_성공한다() {
         List<Long> command = createCommand();
         when(skillRepo.findIdsByIdIn(List.of(1L, 2L, 3L))).thenReturn(List.of(1L,2L,3L));
@@ -83,6 +96,19 @@ public class ProjectPreferredSkillCommandServiceTest {
 
         List<ProjectPreferredSkill> deleted = captor.getValue();
         assertEquals(1, deleted.size());
+    }
+
+    @Test
+    void 프로젝트_수정시_카테고리에_해당하는_ID가_포함되면_InvalidCommandException을_던진다() {
+        List<Long> command = createCommand();
+        when(skillRepo.findActiveSkillsByIdIn(command)).thenReturn(List.of(1L, 2L));
+
+        assertThrows(
+                InvalidCommandException.class,
+                () -> service.update(1L, command)
+        );
+
+        verify(skillRepo).findActiveSkillsByIdIn(command);
     }
 
     private List<Long> createCommand() {
