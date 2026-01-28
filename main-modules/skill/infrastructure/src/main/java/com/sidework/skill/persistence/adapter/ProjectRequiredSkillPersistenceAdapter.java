@@ -27,19 +27,14 @@ public class ProjectRequiredSkillPersistenceAdapter implements ProjectRequiredSk
 
     @Override
     public void deleteByProjectIdAndSkillIdIn(Long projectId, List<Long> deleted) {
+        if (deleted == null || deleted.isEmpty()) {
+            return;
+        }
         repo.deleteByProjectIdAndSkillIdIn(projectId, deleted);
     }
 
     @Override
     public List<Long> findAllSkillIdsByProject(Long projectId) {
         return repo.findAllSkillByProjectId(projectId);
-    }
-
-    @Override
-    public void deleteAll(List<ProjectRequiredSkill> domains) {
-        List<ProjectRequiredSkillEntity> entities = domains.stream().map(
-                mapper::toEntity
-        ).toList();
-        repo.deleteAll(entities);
     }
 }

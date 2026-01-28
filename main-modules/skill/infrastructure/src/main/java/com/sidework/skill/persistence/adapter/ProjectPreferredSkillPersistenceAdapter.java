@@ -27,19 +27,14 @@ public class ProjectPreferredSkillPersistenceAdapter implements ProjectPreferred
 
     @Override
     public void deleteByProjectIdAndSkillIdIn(Long projectId, List<Long> deleted) {
+        if (deleted == null || deleted.isEmpty()) {
+            return;
+        }
         repo.deleteByProjectIdAndSkillIdIn(projectId, deleted);
     }
 
     @Override
     public List<Long> findAllSkillIdsByProject(Long projectId) {
        return repo.findAllSkillByProjectId(projectId);
-    }
-
-    @Override
-    public void deleteAll(List<ProjectPreferredSkill> domains) {
-        List<ProjectPreferredSkillEntity> entities = domains.stream().map(
-                mapper::toEntity
-        ).toList();
-        repo.deleteAll(entities);
     }
 }
