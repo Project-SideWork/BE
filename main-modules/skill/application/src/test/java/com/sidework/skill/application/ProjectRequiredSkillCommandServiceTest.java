@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +35,9 @@ public class ProjectRequiredSkillCommandServiceTest {
 
     @Captor
     ArgumentCaptor<List<ProjectRequiredSkill>> captor;
+
+    @Captor
+    ArgumentCaptor<List<Long>> idsCaptor;
 
     @Test
     void 정상적인_프로젝트_우대기술_생성_DTO로_프로젝트_생성에_성공한다() {
@@ -90,9 +94,9 @@ public class ProjectRequiredSkillCommandServiceTest {
         when(repo.findAllSkillIdsByProject(1L)).thenReturn(List.of(1L, 2L, 3L));
         service.update(1L, command);
 
-        verify(repo).deleteAll(captor.capture());
+        verify(repo).deleteByProjectIdAndSkillIdIn(eq(1L), idsCaptor.capture());
 
-        List<ProjectRequiredSkill> deleted = captor.getValue();
+        List<Long> deleted = idsCaptor.getValue();
         assertEquals(1, deleted.size());
     }
 
