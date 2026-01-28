@@ -6,6 +6,7 @@ import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCas
 import com.sidework.skill.application.port.out.ProjectPreferredSkillOutPort;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import com.sidework.skill.domain.ProjectPreferredSkill;
+import com.sidework.skill.domain.ProjectRequiredSkill;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class ProjectPreferredSkillCommandService implements ProjectPreferredSkil
 
     @Override
     public void create(Long projectId, List<Long> skillIds) {
-        List<ProjectPreferredSkill> domains = convert(projectId, skillIds);
+        List<ProjectPreferredSkill> domains = createPreferredSkills(projectId, skillIds);
         repo.saveAll(domains);
     }
 
@@ -35,18 +36,27 @@ public class ProjectPreferredSkillCommandService implements ProjectPreferredSkil
         repo.deleteAll(categorized.toRemove());
     }
 
-    private List<ProjectPreferredSkill> convert(Long projectId, List<Long> skillIds) {
-        return skillIds.stream()
-                .map(id -> {
-                        if(!skillRepo.existsById(id)) {
-                            throw new InvalidCommandException(String.format("추가하고자 하는 기술(id=%d)을 찾을 수 없습니다.", id));
-                        }
-                        return ProjectPreferredSkill.builder()
-                                    .projectId(projectId)
-                                    .skillId(id)
-                                    .build();
-                }
-                ).toList();
+    private List<ProjectPreferredSkill> createPreferredSkills(Long projectId, List<Long> skillIds) {
+        Set<Long> requested = new HashSet<>(skillIds);
+
+        Set<Long> activeSkillIds =
+                new HashSet<>(skillRepo.findActiveSkillsByIdIn(skillIds));
+
+        Set<Long> invalid = requested.stream()
+                .filter(id -> !activeSkillIds.contains(id))
+                .collect(Collectors.toSet());
+
+        if (!invalid.isEmpty()) {
+            throw new InvalidCommandException(
+                    "존재하지 않거나 비활성화된 우대 기술 id: " + invalid
+            );
+        }
+        return requested.stream()
+                .map(id -> ProjectPreferredSkill.builder()
+                        .projectId(projectId)
+                        .skillId(id)
+                        .build())
+                .toList();
     }
 
     private PreferredSkillChangeSet resolveSkillChanges(Long projectId, List<Long> skillIds) {
@@ -57,14 +67,17 @@ public class ProjectPreferredSkillCommandService implements ProjectPreferredSkil
 
         Set<Long> requestedIds = new HashSet<>(skillIds);
 
-        Set<Long> existingSkillIds = new HashSet<>(skillRepo.findIdsByIdIn(requestedIds.stream().toList()));
+        Set<Long> activeSkillIds =
+                new HashSet<>(skillRepo.findActiveSkillsByIdIn(skillIds));
 
-        Set<Long> missing = requestedIds.stream()
-                .filter(id -> !existingSkillIds.contains(id))
+        Set<Long> invalid = requestedIds.stream()
+                .filter(id -> !activeSkillIds.contains(id))
                 .collect(Collectors.toSet());
 
-        if (!missing.isEmpty()) {
-            throw new InvalidCommandException("존재하지 않는 기술 id: " + missing);
+        if (!invalid.isEmpty()) {
+            throw new InvalidCommandException(
+                    "존재하지 않거나 비활성화된 기술 id: " + invalid
+            );
         }
 
         List<ProjectPreferredSkill> toAdd = requestedIds.stream()

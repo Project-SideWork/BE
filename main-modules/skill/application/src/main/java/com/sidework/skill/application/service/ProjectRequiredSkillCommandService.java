@@ -24,7 +24,7 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
 
     @Override
     public void create(Long projectId, List<Long> skillIds) {
-        List<ProjectRequiredSkill> domains = convert(projectId, skillIds);
+        List<ProjectRequiredSkill> domains = createRequiredSkills(projectId, skillIds);
         repo.saveAll(domains);
     }
 
@@ -36,18 +36,27 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
         repo.deleteAll(resolved.toRemove());
     }
 
-    private List<ProjectRequiredSkill> convert(Long projectId, List<Long> skillIds) {
-        return skillIds.stream()
-                .map(id -> {
-                            if(!skillRepo.existsById(id)) {
-                                throw new InvalidCommandException(String.format("추가하고자 하는 기술(id=%d)을 찾을 수 없습니다.", id));
-                            }
-                            return ProjectRequiredSkill.builder()
-                                    .projectId(projectId)
-                                    .skillId(id)
-                                    .build();
-                        }
-                ).toList();
+    private List<ProjectRequiredSkill> createRequiredSkills(Long projectId, List<Long> skillIds) {
+        Set<Long> requested = new HashSet<>(skillIds);
+
+        Set<Long> activeSkillIds =
+                new HashSet<>(skillRepo.findActiveSkillsByIdIn(skillIds));
+
+        Set<Long> invalid = requested.stream()
+                .filter(id -> !activeSkillIds.contains(id))
+                .collect(Collectors.toSet());
+
+        if (!invalid.isEmpty()) {
+            throw new InvalidCommandException(
+                    "존재하지 않거나 비활성화된 필수 기술 id: " + invalid
+            );
+        }
+        return requested.stream()
+                .map(id -> ProjectRequiredSkill.builder()
+                        .projectId(projectId)
+                        .skillId(id)
+                        .build())
+                .toList();
     }
 
     private RequiredSkillChangeSet resolveSkillChanges(Long projectId, List<Long> skillIds) {
@@ -58,14 +67,17 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
 
         Set<Long> requestedIds = new HashSet<>(skillIds);
 
-        Set<Long> existingSkillIds = new HashSet<>(skillRepo.findIdsByIdIn(requestedIds.stream().toList()));
+        Set<Long> activeSkillIds =
+                new HashSet<>(skillRepo.findActiveSkillsByIdIn(skillIds));
 
-        Set<Long> missing = requestedIds.stream()
-                .filter(id -> !existingSkillIds.contains(id))
+        Set<Long> invalid = requestedIds.stream()
+                .filter(id -> !activeSkillIds.contains(id))
                 .collect(Collectors.toSet());
 
-        if (!missing.isEmpty()) {
-            throw new InvalidCommandException("존재하지 않는 기술 id: " + missing);
+        if (!invalid.isEmpty()) {
+            throw new InvalidCommandException(
+                    "존재하지 않거나 비활성화된 기술 id: " + invalid
+            );
         }
 
         List<ProjectRequiredSkill> toAdd = requestedIds.stream()
