@@ -1,8 +1,6 @@
 package com.sidework.profile.application.service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,19 +17,19 @@ import com.sidework.profile.domain.ProfileSchool;
 import com.sidework.profile.domain.ProfileSkill;
 import com.sidework.profile.domain.ProjectPortfolio;
 import com.sidework.user.application.port.in.UserQueryUseCase;
-import com.sidework.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = false)
+@Slf4j
 public class ProfileCommandService implements ProfileCommandUseCase {
 
 	private final ProfileOutPort profileRepository;
 	private final PortfolioOutPort portfolioRepository;
 
-	private final UserQueryUseCase userRepository;
 	@Override
 	public void update(Long userId, ProfileUpdateCommand command)
 	{
@@ -46,7 +44,7 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 			profileRepository.deleteAllProfileSchoolsByProfileId(profile.getId());
 			List<ProfileSchool> schools = command.schools().stream()
 				.map(school ->
-					ProfileSchool.create(profile.getId(),school.state(),school.major(),school.startDate(),school.endDate()))
+					ProfileSchool.create(profile.getId(),school.schoolId(),school.state(),school.major(),school.startDate(),school.endDate()))
 				.toList();
 			profileRepository.saveProfileSchools(schools);
 		}
@@ -60,55 +58,45 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		}
 
 		//TODO: 포폴 <-> 프로필 연결 확인
-		if (command.portfolios()!=null)
-		{
+		if (command.portfolios() != null) {
+			Long profileId= profile.getId();
+
+			List<ProjectPortfolio> existedPortfolios = profileRepository.getProjectPortfolios(profileId);
+
 			profileRepository.deleteAllProjectPortfoliosByProfileId(profile.getId());
-			if(!command.portfolios().isEmpty())
+
+			if (!existedPortfolios.isEmpty()) {
+				portfolioRepository.deletePortfolios(
+					existedPortfolios.stream()
+						.map(ProjectPortfolio::getPortfolioId)
+						.toList()
+				);
+			}
+
+			if (!command.portfolios().isEmpty())
 			{
-				List<Long> portfolioIds = command.portfolios().stream()
-					.map(ProfileUpdateCommand.PortfolioUpdateRequest::portfolioId)
-					.filter(id -> id != null)
-					.toList();
+				List<Long> savedPortfolios= portfolioRepository.savePortfolios(
+					command.portfolios().stream()
+						.map(portfolio ->
+							Portfolio.create(
+								portfolio.type(),
+								portfolio.startDate(),
+								portfolio.endDate(),
+								portfolio.content()
+							)
+						)
+						.toList()
+				);
 
-				//기존 존재 포폴
-				Map<Long, Portfolio> existingPortfolioMap =
-					portfolioIds.isEmpty()
-						? Map.of()
-						: portfolioRepository.findByIdIn(portfolioIds).stream()
-						.collect(Collectors.toMap(Portfolio::getId, p -> p));
-
-				List<Portfolio> portfoliosToSave = command.portfolios().stream()
-					.map(req -> {
-						if (req.portfolioId() != null &&
-							existingPortfolioMap.containsKey(req.portfolioId())) {
-							//기존 존재 포폴은 업뎃
-							return Portfolio.builder()
-								.id(req.portfolioId())
-								.type(req.type())
-								.startDate(req.startDate())
-								.endDate(req.endDate())
-								.content(req.content())
-								.build();
-						}
-						//새로 생긴 포폴은 신규 생성
-						return Portfolio.create(
-							req.type(),
-							req.startDate(),
-							req.endDate(),
-							req.content()
-						);
-					})
-					.toList();
-
-				portfolioRepository.savePortfolios(portfoliosToSave);
-
-				List<ProjectPortfolio> projectPortfolios = portfoliosToSave.stream()
-					.map(p -> ProjectPortfolio.create(profile.getId(), p.getId()))
-					.toList();
+				List<ProjectPortfolio> projectPortfolios =
+					savedPortfolios.stream()
+						.map(p -> ProjectPortfolio.create(profile.getId(),p))
+						.toList();
 
 				profileRepository.saveProjectPortfolios(projectPortfolios);
 			}
 		}
+
 
 		if(command.roleIds()!=null)
 		{
