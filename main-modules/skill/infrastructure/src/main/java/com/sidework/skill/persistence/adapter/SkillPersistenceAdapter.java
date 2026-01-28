@@ -41,9 +41,4 @@ public class SkillPersistenceAdapter implements SkillOutPort {
                 .map(skillMapper::toDomain)
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public boolean existsById(Long id) {
-        return repo.existsById(id);
-    }
 }
