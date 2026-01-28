@@ -21,6 +21,9 @@ public class SkillPersistenceAdapter implements SkillOutPort {
 
     @Override
     public List<Long> findActiveSkillsByIdIn(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
         return repo.findActiveIdsByIdIn(ids);
     }
 
