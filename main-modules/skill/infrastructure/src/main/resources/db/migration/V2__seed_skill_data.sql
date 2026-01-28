@@ -1,90 +1,90 @@
--- 기본 스킬 데이터 (id는 AUTO_INCREMENT로 자동 생성하는 게 좋지만, 요청대로 작성)
+INSERT INTO skills (id, name) VALUES
+(1, 'Backend'),
+(2, 'Frontend'),
+(3, 'Mobile'),
+(4, 'Database'),
+(5, 'DevOps'),
+(6, 'Tools'),
+(7, 'Message Queue & Cache'),
+(8, 'Testing'),
+(9, 'AI/ML');
 
--- Backend
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(1, 'Java', NOW(6), NOW(6)),
-(2, 'Spring', NOW(6), NOW(6)),
-(3, 'Java Spring Boot', NOW(6), NOW(6)),
-(4, 'Node.js', NOW(6), NOW(6)),
-(5, 'Express', NOW(6), NOW(6)),
-(6, 'Python', NOW(6), NOW(6)),
-(7, 'Django', NOW(6), NOW(6)),
-(8, 'FastAPI', NOW(6), NOW(6)),
-(9, 'Kotlin Spring Boot', NOW(6), NOW(6)),
-(10, 'Go', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('Java', 1),
+('Spring', 1),
+('Java Spring Boot', 1),
+('Node.js', 1),
+('Express', 1),
+('Python', 1),
+('Django', 1),
+('FastAPI', 1),
+('Kotlin Spring Boot', 1),
+('Go', 1);
 
--- Frontend
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(11, 'JavaScript', NOW(6), NOW(6)),
-(12, 'TypeScript', NOW(6), NOW(6)),
-(13, 'React', NOW(6), NOW(6)),
-(14, 'Vue.js', NOW(6), NOW(6)),
-(15, 'Angular', NOW(6), NOW(6)),
-(16, 'Next.js', NOW(6), NOW(6)),
-(17, 'Svelte', NOW(6), NOW(6)),
-(18, 'HTML', NOW(6), NOW(6)),
-(19, 'CSS', NOW(6), NOW(6)),
-(20, 'Tailwind CSS', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('JavaScript', 2),
+('TypeScript', 2),
+('React', 2),
+('Vue.js', 2),
+('Angular', 2),
+('Next.js', 2),
+('Svelte', 2),
+('HTML', 2),
+('CSS', 2),
+('Tailwind CSS', 2);
 
--- Mobile
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(21, 'React Native', NOW(6), NOW(6)),
-(22, 'Flutter', NOW(6), NOW(6)),
-(23, 'Swift', NOW(6), NOW(6)),
-(24, 'Kotlin', NOW(6), NOW(6)),
-(25, 'Android', NOW(6), NOW(6)),
-(26, 'iOS', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('React Native', 3),
+('Flutter', 3),
+('Swift', 3),
+('Kotlin', 3),
+('Android', 3),
+('iOS', 3);
 
--- Database
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(27, 'MySQL', NOW(6), NOW(6)),
-(28, 'PostgreSQL', NOW(6), NOW(6)),
-(29, 'MongoDB', NOW(6), NOW(6)),
-(30, 'Redis', NOW(6), NOW(6)),
-(31, 'Oracle', NOW(6), NOW(6)),
-(32, 'MariaDB', NOW(6), NOW(6)),
-(33, 'SQLite', NOW(6), NOW(6)),
-(34, 'DynamoDB', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('MySQL', 4),
+('PostgreSQL', 4),
+('MongoDB', 4),
+('Redis', 4),
+('Oracle', 4),
+('MariaDB', 4),
+('SQLite', 4),
+('DynamoDB', 4);
 
--- DevOps
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(35, 'Docker', NOW(6), NOW(6)),
-(36, 'Kubernetes', NOW(6), NOW(6)),
-(37, 'AWS', NOW(6), NOW(6)),
-(38, 'GCP', NOW(6), NOW(6)),
-(39, 'Azure', NOW(6), NOW(6)),
-(40, 'Jenkins', NOW(6), NOW(6)),
-(41, 'GitHub Actions', NOW(6), NOW(6)),
-(42, 'GitLab CI/CD', NOW(6), NOW(6)),
-(43, 'Terraform', NOW(6), NOW(6)),
-(44, 'Ansible', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('Docker', 5),
+('Kubernetes', 5),
+('AWS', 5),
+('GCP', 5),
+('Azure', 5),
+('Jenkins', 5),
+('GitHub Actions', 5),
+('GitLab CI/CD', 5),
+('Terraform', 5),
+('Ansible', 5);
 
--- Tools & Others
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(45, 'Git', NOW(6), NOW(6)),
-(46, 'GitHub', NOW(6), NOW(6)),
-(47, 'GitLab', NOW(6), NOW(6)),
-(48, 'Jira', NOW(6), NOW(6)),
-(49, 'Figma', NOW(6), NOW(6)),
-(50, 'Postman', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('Git', 6),
+('GitHub', 6),
+('GitLab', 6),
+('Jira', 6),
+('Figma', 6),
+('Postman', 6);
 
--- Message Queue & Cache
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(51, 'Kafka', NOW(6), NOW(6)),
-(52, 'RabbitMQ', NOW(6), NOW(6)),
-(53, 'Memcached', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('Kafka', 7),
+('RabbitMQ', 7),
+('Memcached', 7);
 
--- Testing
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(54, 'JUnit', NOW(6), NOW(6)),
-(55, 'Jest', NOW(6), NOW(6)),
-(56, 'Cypress', NOW(6), NOW(6)),
-(57, 'Selenium', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('JUnit', 8),
+('Jest', 8),
+('Cypress', 8),
+('Selenium', 8);
 
--- AI/ML (추가)
-INSERT INTO skills (id, name, created_at, updated_at) VALUES 
-(58, 'TensorFlow', NOW(6), NOW(6)),
-(59, 'PyTorch', NOW(6), NOW(6)),
-(60, 'scikit-learn', NOW(6), NOW(6)),
-(61, 'Pandas', NOW(6), NOW(6)),
-(62, 'NumPy', NOW(6), NOW(6));
+INSERT INTO skills (name, category_id) VALUES
+('TensorFlow', 9),
+('PyTorch', 9),
+('scikit-learn', 9),
+('Pandas', 9),
+('NumPy', 9);

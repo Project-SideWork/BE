@@ -21,6 +21,11 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS skills (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL UNIQUE,
+    category_id BIGINT,
+    CONSTRAINT fk_skill_category
+      FOREIGN KEY (category_id) REFERENCES skills(id)
+      ON DELETE SET NULL,
+    is_active TINYINT(1) DEFAULT TRUE,
     created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
 
@@ -167,7 +172,7 @@ CREATE TABLE IF NOT EXISTS project_users (
     created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
 
-    UNIQUE KEY uk_project_user (project_id, user_id),
+    UNIQUE KEY uk_project_user_role (project_id, user_id, role),
     INDEX idx_project_id (project_id),
     INDEX idx_user_id (user_id),
     INDEX idx_status (status),

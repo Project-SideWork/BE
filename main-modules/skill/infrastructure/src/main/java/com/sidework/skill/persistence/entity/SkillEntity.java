@@ -21,4 +21,10 @@ public class SkillEntity extends BaseEntity{
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "category_id", nullable = true)
+    private Long categoryId;
+
+    @Column(name = "is_active", nullable = true)
+    private boolean isActive;
 }
