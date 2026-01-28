@@ -22,6 +22,7 @@ public class ProfileSchool
 	private LocalDate endDate;
 
 	public static ProfileSchool create(
+		Long profileId,
 		Long schoolId,
 		SchoolStateType state,
 		String major,
@@ -29,6 +30,7 @@ public class ProfileSchool
 		LocalDate endDt
 		) {
 		return ProfileSchool.builder()
+			.profileId(profileId)
 			.schoolId(schoolId)
 			.state(state)
 			.major(major)
