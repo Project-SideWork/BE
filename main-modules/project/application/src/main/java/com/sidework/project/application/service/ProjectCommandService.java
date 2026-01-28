@@ -45,7 +45,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         projectUserRepository.save(ownerUser);
 
         requiredSkillCommandService.create(savedId, command.requiredStacks());
-        if(!command.requiredStacks().isEmpty()) {
+        if(!command.preferredStacks().isEmpty()) {
             preferredSkillCommandService.create(savedId, command.preferredStacks());
         }
     }
@@ -65,7 +65,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         projectRepository.save(project);
 
         requiredSkillCommandService.update(projectId, command.requiredStacks());
-        if(!command.requiredStacks().isEmpty()) {
+        if(!command.preferredStacks().isEmpty()) {
             preferredSkillCommandService.update(projectId, command.preferredStacks());
         }
     }
