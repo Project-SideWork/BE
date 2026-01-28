@@ -20,6 +20,8 @@ import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectStatus;
+import com.sidework.skill.application.port.out.SkillOutPort;
+import com.sidework.skill.domain.Skill;
 import com.sidework.user.application.port.in.UserQueryUseCase;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
