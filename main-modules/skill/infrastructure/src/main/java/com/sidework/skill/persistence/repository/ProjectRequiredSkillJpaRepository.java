@@ -2,6 +2,7 @@ package com.sidework.skill.persistence.repository;
 
 import com.sidework.skill.persistence.entity.ProjectRequiredSkillEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,4 +16,11 @@ public interface ProjectRequiredSkillJpaRepository extends JpaRepository<Project
             WHERE p.projectId = :projectId
             """)
     List<Long> findAllSkillByProjectId(@Param("projectId") Long projectId);
+
+    @Modifying
+    @Query("""
+            DELETE FROM ProjectRequiredSkillEntity p
+            WHERE p.projectId = :projectId and p.skillId in :ids
+            """)
+    void deleteByProjectIdAndSkillIdIn(@Param("projectId") Long projectId, @Param("ids") List<Long> ids);
 }
