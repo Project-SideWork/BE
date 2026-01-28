@@ -6,7 +6,6 @@ import com.sidework.skill.application.port.out.ProjectRequiredSkillOutPort;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import com.sidework.skill.domain.ProjectRequiredSkill;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +30,10 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
 
     @Override
     public void update(Long projectId, List<Long> skillIds) {
-        Pair<List<ProjectRequiredSkill>, List<ProjectRequiredSkill>> categorized = categorize(projectId, skillIds);
-        System.out.println(skillIds);
-        System.out.println(categorized.getRight().get(0));
-        repo.saveAll(categorized.getLeft());
-        repo.deleteAll(categorized.getRight());
+        RequiredSkillChangeSet resolved = resolveSkillChanges(projectId, skillIds);
+
+        repo.saveAll(resolved.toAdd());
+        repo.deleteAll(resolved.toRemove());
     }
 
     private List<ProjectRequiredSkill> convert(Long projectId, List<Long> skillIds) {
@@ -52,7 +50,7 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
                 ).toList();
     }
 
-    private Pair<List<ProjectRequiredSkill>, List<ProjectRequiredSkill>> categorize(Long projectId, List<Long> skillIds) {
+    private RequiredSkillChangeSet resolveSkillChanges(Long projectId, List<Long> skillIds) {
         // 원래 저장되어 있었던 ProjectPreferredSkill의 Skill ID 목록.
         Set<Long> originalIds = new HashSet<>(
                 repo.findAllSkillIdsByProject(projectId)
@@ -87,6 +85,6 @@ public class ProjectRequiredSkillCommandService implements ProjectRequiredComman
                         .build()
                 )
                 .toList();
-        return Pair.of(toAdd, toRemove);
+        return new RequiredSkillChangeSet(toAdd, toRemove);
     }
 }
