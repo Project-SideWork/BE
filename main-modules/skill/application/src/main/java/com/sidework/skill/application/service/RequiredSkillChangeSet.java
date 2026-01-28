@@ -6,5 +6,5 @@ import java.util.List;
 
 public record RequiredSkillChangeSet(
         List<ProjectRequiredSkill> toAdd,
-        List<ProjectRequiredSkill> toRemove
+        List<Long> toRemoveIds
 ) {}

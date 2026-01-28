@@ -6,6 +6,6 @@ import java.util.List;
 
 public record PreferredSkillChangeSet(
         List<ProjectPreferredSkill> toAdd,
-        List<ProjectPreferredSkill> toRemove
+        List<Long> toRemoveIds
 ) {
 }
