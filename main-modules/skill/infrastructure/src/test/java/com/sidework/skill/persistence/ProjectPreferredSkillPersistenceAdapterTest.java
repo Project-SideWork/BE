@@ -1,6 +1,5 @@
 package com.sidework.skill.persistence;
 
-
 import com.sidework.skill.domain.ProjectPreferredSkill;
 import com.sidework.skill.persistence.adapter.ProjectPreferredSkillPersistenceAdapter;
 import com.sidework.skill.persistence.entity.ProjectPreferredSkillEntity;

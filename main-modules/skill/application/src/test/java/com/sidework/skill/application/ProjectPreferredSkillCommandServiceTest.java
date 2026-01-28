@@ -37,9 +37,7 @@ public class ProjectPreferredSkillCommandServiceTest {
     @Test
     void 정상적인_프로젝트_우대기술_생성_DTO로_프로젝트_생성에_성공한다() {
         List<Long> command = createCommand();
-        when(skillRepo.existsById(1L)).thenReturn(true);
-        when(skillRepo.existsById(2L)).thenReturn(true);
-        when(skillRepo.existsById(3L)).thenReturn(true);
+        when(skillRepo.findActiveSkillsByIdIn(command)).thenReturn(command);
         service.create(1L, command);
 
         verify(repo).saveAll(captor.capture());
@@ -51,12 +49,12 @@ public class ProjectPreferredSkillCommandServiceTest {
     @Test
     void DTO에_DB에_존재하지_않는_ID가_있으면_InvalidCommandException을_던진다() {
         List<Long> command = createCommand();
-        when(skillRepo.existsById(1L)).thenReturn(true);
-        when(skillRepo.existsById(2L)).thenReturn(true);
-        when(skillRepo.existsById(3L)).thenReturn(false);
+        when(skillRepo.findActiveSkillsByIdIn(command)).thenReturn(List.of(1L, 3L));
         assertThrows(
                 InvalidCommandException.class, () -> service.create(1L, command)
         );
+
+        verify(skillRepo).findActiveSkillsByIdIn(command);
     }
 
     @Test
@@ -75,7 +73,7 @@ public class ProjectPreferredSkillCommandServiceTest {
     @Test
     void 프로젝트_수정시_신규기술_추가에_성공한다() {
         List<Long> command = createCommand();
-        when(skillRepo.findIdsByIdIn(List.of(1L, 2L, 3L))).thenReturn(List.of(1L,2L,3L));
+        when(skillRepo.findActiveSkillsByIdIn(List.of(1L, 2L, 3L))).thenReturn(List.of(1L,2L,3L));
         when(repo.findAllSkillIdsByProject(1L)).thenReturn(List.of(1L, 2L));
         service.update(1L, command);
 
@@ -88,7 +86,7 @@ public class ProjectPreferredSkillCommandServiceTest {
     @Test
     void 프로젝트_수정시_요청에_미포함된_기존_기술_삭제에_성공한다() {
         List<Long> command = createDeleteCommand();
-        when(skillRepo.findIdsByIdIn(List.of(1L, 2L))).thenReturn(List.of(1L,2L));
+        when(skillRepo.findActiveSkillsByIdIn(List.of(1L, 2L))).thenReturn(List.of(1L,2L));
         when(repo.findAllSkillIdsByProject(1L)).thenReturn(List.of(1L, 2L, 3L));
         service.update(1L, command);
 
