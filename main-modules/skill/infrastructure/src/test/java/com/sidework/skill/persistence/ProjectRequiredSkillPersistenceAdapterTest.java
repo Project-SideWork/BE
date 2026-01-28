@@ -1,9 +1,7 @@
 package com.sidework.skill.persistence;
 
-import com.sidework.skill.domain.ProjectPreferredSkill;
 import com.sidework.skill.domain.ProjectRequiredSkill;
 import com.sidework.skill.persistence.adapter.ProjectRequiredSkillPersistenceAdapter;
-import com.sidework.skill.persistence.entity.ProjectPreferredSkillEntity;
 import com.sidework.skill.persistence.entity.ProjectRequiredSkillEntity;
 import com.sidework.skill.persistence.mapper.ProjectRequiredSkillMapper;
 import com.sidework.skill.persistence.repository.ProjectRequiredSkillJpaRepository;
