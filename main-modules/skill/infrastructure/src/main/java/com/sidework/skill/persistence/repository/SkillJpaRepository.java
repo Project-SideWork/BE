@@ -21,7 +21,7 @@ public interface SkillJpaRepository extends JpaRepository<SkillEntity, Long> {
     SELECT s.id
     FROM SkillEntity s
     WHERE s.id IN :ids
-      AND s.isActive = true
+      AND s.isActive = true and s.categoryId is not null
     """)
     List<Long> findActiveIdsByIdIn(@Param("ids") List<Long> ids);
 }
