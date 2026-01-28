@@ -12,7 +12,6 @@ dependencies {
     implementation project(':main-modules:skill:skill-application')
 
     implementation libs.spring.boot.starter.jpa
-    implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.starter.web
     implementation libs.mysql.connector
     implementation libs.bundles.jwt

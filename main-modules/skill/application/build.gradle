@@ -9,7 +9,6 @@ tasks.named('jar') {
 dependencies {
     implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.spring.doc
-    implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.starter.transactional
     implementation libs.lombok
     annotationProcessor libs.lombok
