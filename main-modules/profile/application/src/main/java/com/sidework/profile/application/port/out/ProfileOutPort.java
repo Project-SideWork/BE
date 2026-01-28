@@ -25,5 +25,6 @@ public interface ProfileOutPort
 	void deleteAllProfileSchoolsByProfileId(Long profileId);
 	void deleteAllProfileSkillsByProfileId(Long profileId);
 	void deleteAllProjectPortfoliosByProfileId(Long profileId);
+	boolean existsProjectPortfolioByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId);
 
 }

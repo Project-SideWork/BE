@@ -10,5 +10,6 @@ import java.util.List;
 public interface ProjectPortfolioJpaRepository extends JpaRepository<ProjectPortfolioEntity, Long> {
 	List<ProjectPortfolioEntity> findByProfileId(Long profileId);
 	void deleteAllByProfileId(Long profileId);
+	boolean existsByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId);
 }
 

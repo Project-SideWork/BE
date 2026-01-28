@@ -1,6 +1,10 @@
 package com.sidework.profile.application.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,41 +61,79 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 			profileRepository.saveProfileSkills(skills);
 		}
 
-		//TODO: 포폴 <-> 프로필 연결 확인
 		if (command.portfolios() != null) {
-			Long profileId= profile.getId();
+			Long profileId = profile.getId();
 
-			List<ProjectPortfolio> existedPortfolios = profileRepository.getProjectPortfolios(profileId);
+			if (command.portfolios().isEmpty()) {
+				List<ProjectPortfolio> existedPortfolios = profileRepository.getProjectPortfolios(profileId);
+				profileRepository.deleteAllProjectPortfoliosByProfileId(profileId);
 
-			profileRepository.deleteAllProjectPortfoliosByProfileId(profile.getId());
-
-			if (!existedPortfolios.isEmpty()) {
-				portfolioRepository.deletePortfolios(
-					existedPortfolios.stream()
+				if (!existedPortfolios.isEmpty()) {
+					List<Long> portfolioIdsToDelete = existedPortfolios.stream()
 						.map(ProjectPortfolio::getPortfolioId)
-						.toList()
-				);
-			}
-
-			if (!command.portfolios().isEmpty())
-			{
-				List<Long> savedPortfolios= portfolioRepository.savePortfolios(
-					command.portfolios().stream()
-						.map(portfolio ->
-							Portfolio.create(
-								portfolio.type(),
-								portfolio.startDate(),
-								portfolio.endDate(),
-								portfolio.content()
-							)
-						)
-						.toList()
-				);
-
-				List<ProjectPortfolio> projectPortfolios =
-					savedPortfolios.stream()
-						.map(p -> ProjectPortfolio.create(profile.getId(),p))
+						.filter(id -> !profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(id, profileId))
 						.toList();
+
+					if (!portfolioIdsToDelete.isEmpty()) {
+						portfolioRepository.deletePortfolios(portfolioIdsToDelete);
+					}
+				}
+			} else {
+				List<ProjectPortfolio> existedPortfolios = profileRepository.getProjectPortfolios(profileId);
+				List<Long> existingPortfolioIds = existedPortfolios.stream()
+					.map(ProjectPortfolio::getPortfolioId)
+					.toList();
+
+				List<Long> requestedPortfolioIds = command.portfolios().stream()
+					.map(ProfileUpdateCommand.PortfolioUpdateRequest::portfolioId)
+					.filter(Objects::nonNull)
+					.toList();
+
+				Map<Long, Portfolio> existingPortfolioMap = requestedPortfolioIds.isEmpty()
+					? Map.of()
+					: portfolioRepository.findByIdIn(requestedPortfolioIds).stream()
+						.collect(Collectors.toMap(Portfolio::getId, p -> p));
+
+				List<Portfolio> portfoliosToSave = new ArrayList<>();
+				for (ProfileUpdateCommand.PortfolioUpdateRequest req : command.portfolios()) {
+					if (req.portfolioId() != null && existingPortfolioMap.containsKey(req.portfolioId())) {
+						Portfolio existing = existingPortfolioMap.get(req.portfolioId());
+						Portfolio updated = Portfolio.builder()
+							.id(existing.getId())
+							.type(req.type())
+							.startDate(req.startDate())
+							.endDate(req.endDate())
+							.content(req.content())
+							.build();
+						portfoliosToSave.add(updated);
+					} else {
+						portfoliosToSave.add(
+							Portfolio.create(
+								req.type(),
+								req.startDate(),
+								req.endDate(),
+								req.content()
+							)
+						);
+					}
+				}
+
+				profileRepository.deleteAllProjectPortfoliosByProfileId(profileId);
+
+				List<Long> portfolioIdsToDelete = existingPortfolioIds.stream()
+					.filter(id -> !requestedPortfolioIds.contains(id))
+					.filter(id -> !profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(id, profileId))
+					.toList();
+
+				if (!portfolioIdsToDelete.isEmpty()) {
+					portfolioRepository.deletePortfolios(portfolioIdsToDelete);
+				}
+
+				List<Long> savedPortfolioIds = portfolioRepository.savePortfolios(portfoliosToSave);
+
+				List<ProjectPortfolio> projectPortfolios = savedPortfolioIds.stream()
+					.map(id -> ProjectPortfolio.create(profileId, id))
+					.toList();
 
 				profileRepository.saveProjectPortfolios(projectPortfolios);
 			}

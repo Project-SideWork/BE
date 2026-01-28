@@ -158,4 +158,10 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 		if(profileId == null) return;
 		projectPortfolioRepository.deleteAllByProfileId(profileId);
 	}
+
+	@Override
+	public boolean existsProjectPortfolioByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId) {
+		if(portfolioId == null || profileId == null) return false;
+		return projectPortfolioRepository.existsByPortfolioIdAndProfileIdNot(portfolioId, profileId);
+	}
 }
