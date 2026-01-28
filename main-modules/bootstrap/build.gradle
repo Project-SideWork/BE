@@ -20,6 +20,8 @@ dependencies {
     implementation project(':main-modules:user:user-infrastructure')
     implementation project(':main-modules:profile:profile-application')
     implementation project(':main-modules:profile:profile-infrastructure')
+    implementation project(':main-modules:skill:skill-application')
+    implementation project(':main-modules:skill:skill-infrastructure')
     
 
 
