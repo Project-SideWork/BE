@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sidework.profile.application.port.in.ProfileUpdateCommand;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.domain.Profile;
 import com.sidework.profile.domain.ProfileRole;
@@ -88,5 +89,79 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 		return entities.stream()
 			.map(projectPortfolioMapper::toDomain)
 			.collect(Collectors.toList());
+	}
+
+	@Override
+	public void saveProfileRoles(List<ProfileRole> profileRoles) {
+		if (profileRoles == null || profileRoles.isEmpty()) {
+			return;
+		}
+		List<ProfileRoleEntity> entities = profileRoles.stream()
+			.map(profileRoleMapper::toEntity)
+			.collect(Collectors.toList());
+		profileRoleRepository.saveAll(entities);
+	}
+
+	@Override
+	public void saveProfileSchools(List<ProfileSchool> profileSchools) {
+		if (profileSchools == null || profileSchools.isEmpty()) {
+			return;
+		}
+		List<ProfileSchoolEntity> entities = profileSchools.stream()
+			.map(profileSchoolMapper::toEntity)
+			.collect(Collectors.toList());
+		profileSchoolRepository.saveAll(entities);
+	}
+
+	@Override
+	public void saveProfileSkills(List<ProfileSkill> profileSkills) {
+		if (profileSkills == null || profileSkills.isEmpty()) {
+			return;
+		}
+		List<ProfileSkillEntity> entities = profileSkills.stream()
+			.map(profileSkillMapper::toEntity)
+			.collect(Collectors.toList());
+		profileSkillRepository.saveAll(entities);
+	}
+
+	@Override
+	public void saveProjectPortfolios(List<ProjectPortfolio> projectPortfolios) {
+		if (projectPortfolios == null || projectPortfolios.isEmpty()) {
+			return;
+		}
+		List<ProjectPortfolioEntity> entities = projectPortfolios.stream()
+			.map(projectPortfolioMapper::toEntity)
+			.collect(Collectors.toList());
+		projectPortfolioRepository.saveAll(entities);
+	}
+
+	@Override
+	public void deleteAllProfileRolesByProfileId(Long profileId) {
+		if(profileId == null) return;
+		profileRoleRepository.deleteAllByProfileId(profileId);
+	}
+
+	@Override
+	public void deleteAllProfileSchoolsByProfileId(Long profileId) {
+		if(profileId == null) return;
+		profileSchoolRepository.deleteAllByProfileId(profileId);
+	}
+
+	@Override
+	public void deleteAllProfileSkillsByProfileId(Long profileId) {
+		if(profileId == null) return;
+		profileSkillRepository.deleteAllByProfileId(profileId);
+	}
+
+	@Override
+	public void deleteAllProjectPortfoliosByProfileId(Long profileId) {
+		if(profileId == null) return;
+		projectPortfolioRepository.deleteAllByProfileId(profileId);
+	}
+
+	@Override
+	public boolean existsProjectPortfolioByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId) {
+		if(portfolioId == null || profileId == null) return false;
+		return projectPortfolioRepository.existsByPortfolioIdAndProfileIdNot(portfolioId, profileId);
 	}
 }

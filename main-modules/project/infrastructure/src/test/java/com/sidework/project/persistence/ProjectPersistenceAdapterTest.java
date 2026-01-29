@@ -96,8 +96,8 @@ public class ProjectPersistenceAdapterTest {
                 LocalDate.of(2025, 3, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
                 "주 2회 온라인, 월 1회 오프라인", // meetingDetail
-                List.of("Spring Boot", "MySQL"), // requiredStacks
-                List.of("Redis", "Kafka"),       // preferredStacks
+                List.of(1L, 2L, 3L), // requiredStacks
+                List.of(1L, 2L, 3L), // preferredStacks
                 ProjectStatus.RECRUITING          // status
         );
     }
@@ -123,8 +123,8 @@ public class ProjectPersistenceAdapterTest {
                 LocalDate.of(2025, 7, 31),  // endDt
                 MeetingType.ONLINE,         // meetingType
                 "전면 온라인, 필요 시 비동기 협업", // meetingDetail
-                List.of("Spring Boot", "MongoDB", "GraphQL"), // requiredStacks
-                List.of("Redis", "Docker", "AWS"),            // preferredStacks
+                List.of(1L, 2L, 3L), // requiredStacks
+                List.of(1L, 2L, 3L), // preferredStacks
                 ProjectStatus.PREPARING                         // status
         );
     }

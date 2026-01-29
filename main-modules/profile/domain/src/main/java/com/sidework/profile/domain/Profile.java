@@ -14,4 +14,9 @@ public class Profile
 	private Long id;
 	private Long userId;
 
+	public static Profile create(Long userId) {
+		return Profile.builder()
+			.userId(userId)
+			.build();
+	}
 }

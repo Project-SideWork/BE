@@ -187,6 +187,46 @@ class ProfilePersistenceAdapterTest {
 		verify(projectPortfolioRepository).findByProfileId(profileId);
 	}
 
+	@Test
+	void existsProjectPortfolioByPortfolioIdAndProfileIdNot는_다른_프로필이_포트폴리오를_참조하는지_확인한다() {
+		// given
+		Long portfolioId = 1L;
+		Long profileId = 1L;
+		when(projectPortfolioRepository.existsByPortfolioIdAndProfileIdNot(portfolioId, profileId)).thenReturn(true);
+
+		// when
+		boolean exists = adapter.existsProjectPortfolioByPortfolioIdAndProfileIdNot(portfolioId, profileId);
+
+		// then
+		assertTrue(exists);
+		verify(projectPortfolioRepository).existsByPortfolioIdAndProfileIdNot(portfolioId, profileId);
+	}
+
+	@Test
+	void existsProjectPortfolioByPortfolioIdAndProfileIdNot는_다른_프로필이_참조하지_않으면_false를_반환한다() {
+		// given
+		Long portfolioId = 1L;
+		Long profileId = 1L;
+		when(projectPortfolioRepository.existsByPortfolioIdAndProfileIdNot(portfolioId, profileId)).thenReturn(false);
+
+		// when
+		boolean exists = adapter.existsProjectPortfolioByPortfolioIdAndProfileIdNot(portfolioId, profileId);
+
+		// then
+		assertFalse(exists);
+		verify(projectPortfolioRepository).existsByPortfolioIdAndProfileIdNot(portfolioId, profileId);
+	}
+
+	@Test
+	void existsProjectPortfolioByPortfolioIdAndProfileIdNot는_null_입력시_false를_반환한다() {
+		// when
+		boolean exists = adapter.existsProjectPortfolioByPortfolioIdAndProfileIdNot(null, 1L);
+
+		// then
+		assertFalse(exists);
+		verify(projectPortfolioRepository, never()).existsByPortfolioIdAndProfileIdNot(any(), any());
+	}
+
 	private ProfileEntity createProfileEntity(Long profileId, Long userId) {
 		return ProfileEntity.builder()
 			.id(profileId)

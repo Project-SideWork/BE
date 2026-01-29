@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ProfileRoleJpaRepository extends JpaRepository<ProfileRoleEntity, Long> {
 	List<ProfileRoleEntity> findByProfileId(Long profileId);
+	void deleteAllByProfileId(Long profileId);
+
 }

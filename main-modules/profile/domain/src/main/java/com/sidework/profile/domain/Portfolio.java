@@ -18,4 +18,13 @@ public class Portfolio {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private String content;
+
+	public static Portfolio create(PortfolioType type, LocalDate startDate, LocalDate endDate, String content) {
+		return Portfolio.builder()
+			.type(type)
+			.startDate(startDate)
+			.endDate(endDate)
+			.content(content)
+			.build();
+	}
 }

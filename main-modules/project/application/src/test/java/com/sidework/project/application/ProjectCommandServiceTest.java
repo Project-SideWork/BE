@@ -12,6 +12,8 @@ import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.application.port.in.SkillLevel;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.service.ProjectCommandService;
+import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
+import com.sidework.skill.application.port.in.ProjectRequiredCommandUseCase;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectStatus;
@@ -38,6 +40,12 @@ public class ProjectCommandServiceTest {
 
     @Mock
     private ProjectUserOutPort projectUserRepo;
+
+    @Mock
+    private ProjectRequiredCommandUseCase requiredSkillCommandService;
+
+    @Mock
+    private ProjectPreferredSkillCommandUseCase preferredSkillCommandService;
 
     @InjectMocks
     ProjectCommandService service;

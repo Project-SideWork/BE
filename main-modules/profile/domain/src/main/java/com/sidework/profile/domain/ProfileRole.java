@@ -13,4 +13,11 @@ public class ProfileRole {
     private Long id;
     private Long profileId;
     private Long roleId;
+
+	public static ProfileRole create(Long profileId, Long roleId) {
+		return ProfileRole.builder()
+			.profileId(profileId)
+			.roleId(roleId)
+			.build();
+	}
 }
