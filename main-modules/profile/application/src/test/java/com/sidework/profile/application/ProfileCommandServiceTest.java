@@ -307,6 +307,42 @@ class ProfileCommandServiceTest {
 	}
 
 	@Test
+	void Portfolios_업데이트_요청된_포트폴리오_ID가_DB에_없으면_새_포트폴리오로_생성한다() {
+		// given: 요청에는 portfolioId가 있지만 findByIdIn이 빈 리스트 반환 (DB에 해당 ID 없음)
+		Long userId = 1L;
+		Long profileId = 1L;
+		Long requestedPortfolioId = 999L;
+		Profile profile = createProfile(profileId, userId);
+		ProfileUpdateCommand command = createCommandWithExistingPortfolio(requestedPortfolioId);
+
+		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
+		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(new ArrayList<>());
+		when(portfolioRepository.findByIdIn(List.of(requestedPortfolioId))).thenReturn(List.of());
+		when(portfolioRepository.savePortfolios(anyList())).thenReturn(List.of(200L));
+
+		// when
+		service.update(userId, command);
+
+		// then: existingPortfolioMap에 없으므로 새 포트폴리오(Portfolio.create)로 저장된다
+		verify(portfolioRepository).findByIdIn(List.of(requestedPortfolioId));
+		verify(portfolioRepository).savePortfolios(portfolioCaptor.capture());
+		verify(profileRepository).saveProjectPortfolios(projectPortfolioCaptor.capture());
+
+		List<Portfolio> savedPortfolios = portfolioCaptor.getValue();
+		assertEquals(1, savedPortfolios.size());
+		assertNull(savedPortfolios.get(0).getId());
+		assertEquals(PortfolioType.PROJECT, savedPortfolios.get(0).getType());
+		assertEquals(LocalDate.of(2023, 6, 1), savedPortfolios.get(0).getStartDate());
+		assertEquals(LocalDate.of(2023, 8, 31), savedPortfolios.get(0).getEndDate());
+		assertEquals("수정된 내용", savedPortfolios.get(0).getContent());
+
+		List<ProjectPortfolio> savedProjectPortfolios = projectPortfolioCaptor.getValue();
+		assertEquals(1, savedProjectPortfolios.size());
+		assertEquals(profileId, savedProjectPortfolios.get(0).getProfileId());
+		assertEquals(200L, savedProjectPortfolios.get(0).getPortfolioId());
+	}
+
+	@Test
 	void Portfolios_업데이트_기존_포트폴리오_UPDATE와_새_포트폴리오_INSERT를_동시에_처리한다() {
 		// given
 		Long userId = 1L;
