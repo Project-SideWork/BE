@@ -1,6 +1,7 @@
 package com.sidework.project.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.project.application.adapter.ProjectController;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
@@ -11,6 +12,7 @@ import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
+import com.sidework.skill.application.port.out.SkillOutPort;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,6 +52,9 @@ public class ProjectControllerTest {
     @MockitoBean
     private ProjectOutPort repo;
 
+    @MockitoBean
+    private SkillOutPort skillRepo;
+
     @Test
     void 프로젝트_게시글_생성_요청시_성공하면_201을_반환한다() throws Exception {
         ProjectCommand command = createCommand(ProjectStatus.PREPARING);
@@ -76,8 +81,8 @@ public class ProjectControllerTest {
     }
 
     @Test
-    void 프로젝트_게시글_생성_요청시_어느_모집인원이_0이하이면_400을_반환한다() throws Exception {
-        ProjectCommand command = createInvalidCountCommand();
+    void 프로젝트_게시글_생성_요청시_필수_기술_스택이_빈_배열이면_400을_반환한다() throws Exception {
+        ProjectCommand command = createRequiredSkillEmptyCommand();
 
         mockMvc.perform(post("/api/v1/projects")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -85,6 +90,35 @@ public class ProjectControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void 프로젝트_게시글_생성_요청시_필수_기술_스택에_카테고리의_ID가_포함되면_400을_반환한다() throws Exception {
+        ProjectCommand command = createCommand(ProjectStatus.RECRUITING);
+        doThrow(new InvalidCommandException("존재하지 않거나 비활성화된 기술 id: " + 1L))
+                .when(projectCommandUseCase)
+                        .create(command);
+
+        mockMvc.perform(post("/api/v1/projects")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_게시글_생성_요청시_우대_기술_스택에_카테고리의_ID가_포함되면_400을_반환한다() throws Exception {
+        ProjectCommand command = createCommand(ProjectStatus.RECRUITING);
+        doThrow(new InvalidCommandException("존재하지 않거나 비활성화된 기술 id: " + 2L))
+                .when(projectCommandUseCase)
+                .create(command);
+
+        mockMvc.perform(post("/api/v1/projects")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
 
     @Test
     void 프로젝트_게시글_생성_요청시_지원하지_않는_ENUM이_포함되면_400을_반환한다() throws Exception {
@@ -149,6 +183,48 @@ public class ProjectControllerTest {
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_게시글_수정_요청시_필수_기술_스택에_카테고리의_ID가_포함되면_400을_반환한다() throws Exception {
+        ProjectCommand command = createCommand(ProjectStatus.RECRUITING);
+        Long projectId = 1L;
+        doThrow(new InvalidCommandException("존재하지 않거나 비활성화된 기술 id: " + 1L))
+                .when(projectCommandUseCase)
+                .update(projectId, command);
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_게시글_수정_요청시_우대_기술_스택에_카테고리의_ID가_포함되면_400을_반환한다() throws Exception {
+        ProjectCommand command = createCommand(ProjectStatus.RECRUITING);
+        Long projectId = 1L;
+        doThrow(new InvalidCommandException("존재하지 않거나 비활성화된 기술 id: " + 3L))
+                .when(projectCommandUseCase)
+                .update(projectId, command);
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_게시글_수정_요청시_필수_기술_스택이_빈_배열이면_400을_반환한다() throws Exception {
+        ProjectCommand command = createRequiredSkillEmptyCommand();
+        Long projectId = 1L;
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -261,9 +337,36 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 3, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
                 "주 2회 온라인, 월 1회 오프라인", // meetingDetail
-                List.of("Spring Boot", "MySQL"), // requiredStacks
-                List.of("Redis", "Kafka"),       // preferredStacks
+                List.of(1L, 2L), // requiredStacks
+                List.of(3L, 4L),       // preferredStacks
                 status         // status
+        );
+    }
+
+    private ProjectCommand createRequiredSkillEmptyCommand() {
+        return new ProjectCommand(
+                "버스 실시간 위치 서비스",                 // title
+                "WebSocket 기반 실시간 위치 공유 프로젝트", // description
+                ProjectRole  .BACKEND,
+                List.of(
+                        new RecruitPosition(
+                                ProjectRole.BACKEND,
+                                1,
+                                SkillLevel.JUNIOR
+                        ),
+                        new RecruitPosition(
+                                ProjectRole.FRONTEND,
+                                2,
+                                SkillLevel.MID
+                        )
+                ),
+                LocalDate.of(2025, 1, 1),   // startDt
+                LocalDate.of(2025, 3, 31),  // endDt
+                MeetingType.HYBRID,         // meetingType
+                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                List.of(), // requiredStacks
+                List.of(3L, 4L),       // preferredStacks
+                ProjectStatus.RECRUITING         // status
         );
     }
 
@@ -288,8 +391,8 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 12, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
                 "주 2회 온라인, 월 1회 오프라인", // meetingDetail
-                List.of("Spring Boot", "MySQL"), // requiredStacks
-                List.of("Redis", "Kafka"),       // preferredStacks
+                List.of(1L, 2L), // requiredStacks
+                List.of(3L, 4L),       // preferredStacks
                 ProjectStatus.RECRUITING          // status
         );
     }
@@ -315,8 +418,8 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 12, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
                 "주 2회 온라인, 월 1회 오프라인", // meetingDetail
-                List.of("Spring Boot", "MySQL"), // requiredStacks
-                List.of("Redis", "Kafka"),       // preferredStacks
+                List.of(1L, 2L), // requiredStacks
+                List.of(3L, 4L),       // preferredStacks
                 ProjectStatus.RECRUITING          // status
         );
     }
@@ -343,8 +446,8 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 7, 31),  // endDt
                 MeetingType.ONLINE,         // meetingType
                 "전면 온라인, 필요 시 비동기 협업", // meetingDetail
-                List.of("Spring Boot", "MongoDB", "GraphQL"), // requiredStacks
-                List.of("Redis", "Docker", "AWS"),            // preferredStacks
+                List.of(1L, 2L), // requiredStacks
+                List.of(3L, 4L),       // preferredStacks
                 ProjectStatus.PREPARING                         // status
         );
     }

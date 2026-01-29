@@ -1,5 +1,7 @@
 package com.sidework.profile.application.service;
 
+import com.sidework.skill.application.port.out.SkillOutPort;
+import com.sidework.skill.domain.Skill;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,11 +11,9 @@ import com.sidework.profile.application.port.out.PortfolioOutPort;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.application.port.out.RoleOutPort;
 import com.sidework.profile.application.port.out.SchoolOutPort;
-import com.sidework.profile.application.port.out.SkillOutPort;
 import com.sidework.profile.domain.Portfolio;
 import com.sidework.profile.domain.Role;
 import com.sidework.profile.domain.School;
-import com.sidework.profile.domain.Skill;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.domain.Project;
 import com.sidework.user.application.port.in.UserQueryUseCase;

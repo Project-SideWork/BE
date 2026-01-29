@@ -1,4 +1,4 @@
-package com.sidework.profile.domain;
+package com.sidework.skill.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Skill {
-	private Long id;
-	private String name;
+public class ProjectPreferredSkill {
+    private Long id;
+
+    private Long projectId;
+
+    private Long skillId;
 }
