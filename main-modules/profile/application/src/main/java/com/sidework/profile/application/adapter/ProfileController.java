@@ -26,14 +26,12 @@ public class ProfileController {
 	private final ProfileCommandUseCase commandService;
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile()
-	{
+	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(){
 		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getProfileByUserId(1L)));
 	}
 
 	@PutMapping
-	public ResponseEntity<ApiResponse<Void>> updateUserProfile(@RequestBody ProfileUpdateCommand profileUpdateCommand)
-	{
+	public ResponseEntity<ApiResponse<Void>> updateUserProfile(@RequestBody ProfileUpdateCommand profileUpdateCommand){
 		commandService.update(1L, profileUpdateCommand);
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
 	}
