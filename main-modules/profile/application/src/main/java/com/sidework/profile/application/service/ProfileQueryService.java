@@ -50,149 +50,47 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	public UserProfileResponse getProfileByUserId(Long userId) {
 		Profile profile = profileRepository.getProfileByUserId(userId);
 		if (profile == null) {
-			User user = userQueryUseCase.findById(userId);
-			List<Project> projects = projectQueryUseCase.queryByUserId(userId);
-			List<UserProfileResponse.ProjectInfo> projectInfos = projects.stream()
-				.map(project -> new UserProfileResponse.ProjectInfo(
-					project.getId(),
-					project.getTitle(),
-					project.getDescription(),
-					project.getStartDt(),
-					project.getEndDt(),
-					project.getMeetingType(),
-					project.getStatus()
-				))
-				.collect(Collectors.toList());
-
-			return new UserProfileResponse(
-					user.getId(),
-					user.getEmail(),
-					user.getName(),
-					user.getNickname(),
-					user.getAge(),
-					user.getTel(),
-					null,
-					new ArrayList<>(),
-					new ArrayList<>(),
-					new ArrayList<>(),
-					new ArrayList<>(),
-					projectInfos
-			);
+			return buildResponseWhenNoProfile(userId);
 		}
 
 		User user = userQueryUseCase.findById(userId);
+		return new UserProfileResponse(
+			user.getId(),
+			user.getEmail(),
+			user.getName(),
+			user.getNickname(),
+			user.getAge(),
+			user.getTel(),
+			profile.getId(),
+			buildRoleInfos(profile.getId()),
+			buildSchoolInfos(profile.getId()),
+			buildSkillInfos(profile.getId()),
+			buildPortfolioInfos(profile.getId()),
+			buildProjectInfos(userId)
+		);
+	}
 
-		List<ProfileRole> profileRoles = profileRepository.getProfileRoles(profile.getId());
+	private UserProfileResponse buildResponseWhenNoProfile(Long userId) {
+		User user = userQueryUseCase.findById(userId);
+		return new UserProfileResponse(
+			user.getId(),
+			user.getEmail(),
+			user.getName(),
+			user.getNickname(),
+			user.getAge(),
+			user.getTel(),
+			null,
+			new ArrayList<>(),
+			new ArrayList<>(),
+			new ArrayList<>(),
+			new ArrayList<>(),
+			buildProjectInfos(userId)
+		);
+	}
 
-		List<UserProfileResponse.RoleInfo> roles = new ArrayList<>();
-		if(!profileRoles.isEmpty())
-		{
-			List<Long> profileRoleIds = profileRoles.stream()
-				.map(ProfileRole::getRoleId)
-				.collect(Collectors.toList());
-			Map<Long,Role> roleMap = roleRepository.findByIdIn(profileRoleIds).stream()
-				.collect(Collectors.toMap(Role::getId, Function.identity()));
-
-			roles = profileRoles.stream()
-				.map(profileRole -> {
-					Role role = roleMap.get(profileRole.getRoleId());
-					if(role == null) return null;
-					return new UserProfileResponse.RoleInfo(
-						role.getId(),
-						role.getName()
-					);
-				})
-				.filter(roleInfo -> roleInfo != null)
-				.collect(Collectors.toList());
-		}
-
-		List<ProfileSchool> profileSchools = profileRepository.getProfileSchools(profile.getId());
-
-		List<UserProfileResponse.SchoolInfo> schools = new ArrayList<>();
-		if (!profileSchools.isEmpty()) {
-			List<Long> schoolIds = profileSchools.stream()
-				.map(ProfileSchool::getSchoolId)
-				.collect(Collectors.toList());
-			Map<Long, School> schoolMap = schoolRepository.findByIdIn(schoolIds).stream()
-				.collect(Collectors.toMap(School::getId, Function.identity()));
-			
-			schools = profileSchools.stream()
-				.map(profileSchool -> {
-					School school = schoolMap.get(profileSchool.getSchoolId());
-					if (school == null) {
-						return null;
-					}
-					return new UserProfileResponse.SchoolInfo(
-						school.getId(),
-						school.getName(),
-						school.getAddress(),
-						profileSchool.getState(),
-						profileSchool.getMajor(),
-						profileSchool.getStartDate(),
-						profileSchool.getEndDate()
-					);
-				})
-				.filter(schoolInfo -> schoolInfo != null)
-				.collect(Collectors.toList());
-		}
-
-		List<ProfileSkill> profileSkills = profileRepository.getProfileSkills(profile.getId());
-
-		List<UserProfileResponse.SkillInfo> skills = new ArrayList<>();
-		if (!profileSkills.isEmpty()) {
-			List<Long> skillIds = profileSkills.stream()
-				.map(ProfileSkill::getSkillId)
-				.collect(Collectors.toList());
-			Map<Long, Skill> skillMap = skillRepository.findByIdIn(skillIds).stream()
-				.collect(Collectors.toMap(Skill::getId, Function.identity()));
-
-			skills = profileSkills.stream()
-				.map(profileSkill -> {
-					Skill skill = skillMap.get(profileSkill.getSkillId());
-					if (skill == null) {
-						return null;
-					}
-					return new UserProfileResponse.SkillInfo(
-						skill.getId(),
-						skill.getName()
-					);
-				})
-				.filter(skillInfo -> skillInfo != null)
-				.collect(Collectors.toList());
-		}
-
-
-		List<ProjectPortfolio> projectPortfolios = profileRepository.getProjectPortfolios(profile.getId());
-
-		List<UserProfileResponse.PortfolioInfo> portfolios = new ArrayList<>();
-		if (!projectPortfolios.isEmpty()) {
-
-			List<Long> portfolioIds = projectPortfolios.stream()
-				.map(ProjectPortfolio::getPortfolioId)
-				.collect(Collectors.toList());
-			Map<Long, Portfolio> portfolioMap = portfolioRepository.findByIdIn(portfolioIds).stream()
-				.collect(Collectors.toMap(Portfolio::getId, Function.identity()));
-
-			portfolios = projectPortfolios.stream()
-				.map(projectPortfolio -> {
-					Portfolio portfolio = portfolioMap.get(projectPortfolio.getPortfolioId());
-					if (portfolio == null) {
-						return null;
-					}
-					return new UserProfileResponse.PortfolioInfo(
-						portfolio.getId(),
-						portfolio.getType(),
-						portfolio.getStartDate(),
-						portfolio.getEndDate(),
-						portfolio.getContent()
-					);
-				})
-				.filter(portfolioInfo -> portfolioInfo != null)
-				.collect(Collectors.toList());
-		}
-
+	private List<UserProfileResponse.ProjectInfo> buildProjectInfos(Long userId) {
 		List<Project> projects = projectQueryUseCase.queryByUserId(userId);
-		List<UserProfileResponse.ProjectInfo> projectInfos = projects.stream()
+		return projects.stream()
 			.map(project -> new UserProfileResponse.ProjectInfo(
 				project.getId(),
 				project.getTitle(),
@@ -203,21 +101,103 @@ public class ProfileQueryService implements ProfileQueryUseCase
 				project.getStatus()
 			))
 			.collect(Collectors.toList());
-
-		return new UserProfileResponse(
-				user.getId(),
-				user.getEmail(),
-				user.getName(),
-				user.getNickname(),
-				user.getAge(),
-				user.getTel(),
-				profile.getId(),
-				roles,
-				schools,
-				skills,
-				portfolios,
-				projectInfos
-		);
 	}
 
+	private List<UserProfileResponse.RoleInfo> buildRoleInfos(Long profileId) {
+		List<ProfileRole> profileRoles = profileRepository.getProfileRoles(profileId);
+		if (profileRoles.isEmpty()) {
+			return new ArrayList<>();
+		}
+		List<Long> profileRoleIds = profileRoles.stream()
+			.map(ProfileRole::getRoleId)
+			.collect(Collectors.toList());
+		Map<Long, Role> roleMap = roleRepository.findByIdIn(profileRoleIds).stream()
+			.collect(Collectors.toMap(Role::getId, Function.identity()));
+
+		return profileRoles.stream()
+			.map(profileRole -> {
+				Role role = roleMap.get(profileRole.getRoleId());
+				if (role == null) return null;
+				return new UserProfileResponse.RoleInfo(role.getId(), role.getName());
+			})
+			.filter(roleInfo -> roleInfo != null)
+			.collect(Collectors.toList());
+	}
+
+	private List<UserProfileResponse.SchoolInfo> buildSchoolInfos(Long profileId) {
+		List<ProfileSchool> profileSchools = profileRepository.getProfileSchools(profileId);
+		if (profileSchools.isEmpty()) {
+			return new ArrayList<>();
+		}
+		List<Long> schoolIds = profileSchools.stream()
+			.map(ProfileSchool::getSchoolId)
+			.collect(Collectors.toList());
+		Map<Long, School> schoolMap = schoolRepository.findByIdIn(schoolIds).stream()
+			.collect(Collectors.toMap(School::getId, Function.identity()));
+
+		return profileSchools.stream()
+			.map(profileSchool -> {
+				School school = schoolMap.get(profileSchool.getSchoolId());
+				if (school == null) return null;
+				return new UserProfileResponse.SchoolInfo(
+					school.getId(),
+					school.getName(),
+					school.getAddress(),
+					profileSchool.getState(),
+					profileSchool.getMajor(),
+					profileSchool.getStartDate(),
+					profileSchool.getEndDate()
+				);
+			})
+			.filter(schoolInfo -> schoolInfo != null)
+			.collect(Collectors.toList());
+	}
+
+	private List<UserProfileResponse.SkillInfo> buildSkillInfos(Long profileId) {
+		List<ProfileSkill> profileSkills = profileRepository.getProfileSkills(profileId);
+		if (profileSkills.isEmpty()) {
+			return new ArrayList<>();
+		}
+		List<Long> skillIds = profileSkills.stream()
+			.map(ProfileSkill::getSkillId)
+			.collect(Collectors.toList());
+		Map<Long, Skill> skillMap = skillRepository.findByIdIn(skillIds).stream()
+			.collect(Collectors.toMap(Skill::getId, Function.identity()));
+
+		return profileSkills.stream()
+			.map(profileSkill -> {
+				Skill skill = skillMap.get(profileSkill.getSkillId());
+				if (skill == null) return null;
+				return new UserProfileResponse.SkillInfo(skill.getId(), skill.getName());
+			})
+			.filter(skillInfo -> skillInfo != null)
+			.collect(Collectors.toList());
+	}
+
+	private List<UserProfileResponse.PortfolioInfo> buildPortfolioInfos(Long profileId) {
+		List<ProjectPortfolio> projectPortfolios = profileRepository.getProjectPortfolios(profileId);
+		if (projectPortfolios.isEmpty()) {
+			return new ArrayList<>();
+		}
+		List<Long> portfolioIds = projectPortfolios.stream()
+			.map(ProjectPortfolio::getPortfolioId)
+			.collect(Collectors.toList());
+		Map<Long, Portfolio> portfolioMap = portfolioRepository.findByIdIn(portfolioIds).stream()
+			.collect(Collectors.toMap(Portfolio::getId, Function.identity()));
+
+		return projectPortfolios.stream()
+			.map(projectPortfolio -> {
+				Portfolio portfolio = portfolioMap.get(projectPortfolio.getPortfolioId());
+				if (portfolio == null) return null;
+				return new UserProfileResponse.PortfolioInfo(
+					portfolio.getId(),
+					portfolio.getType(),
+					portfolio.getStartDate(),
+					portfolio.getEndDate(),
+					portfolio.getContent()
+				);
+			})
+			.filter(portfolioInfo -> portfolioInfo != null)
+			.collect(Collectors.toList());
+	}
 }
