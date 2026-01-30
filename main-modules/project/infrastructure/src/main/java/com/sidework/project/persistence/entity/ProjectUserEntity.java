@@ -25,6 +25,9 @@ public class ProjectUserEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "profile_id", nullable = false)
+    private Long profileId;
+
     @Enumerated(EnumType.STRING)
     private ApplyStatus status;
 
