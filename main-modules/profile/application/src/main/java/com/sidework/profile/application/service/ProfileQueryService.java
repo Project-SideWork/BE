@@ -70,6 +70,11 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		);
 	}
 
+	@Override
+	public boolean existsByIdAndUserId(Long profileId, Long userId) {
+		return profileRepository.existsByIdAndUserId(profileId, userId);
+	}
+
 	private UserProfileResponse buildResponseWhenNoProfile(Long userId) {
 		User user = userQueryUseCase.findById(userId);
 		return new UserProfileResponse(
@@ -200,4 +205,5 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			.filter(portfolioInfo -> portfolioInfo != null)
 			.collect(Collectors.toList());
 	}
+
 }
