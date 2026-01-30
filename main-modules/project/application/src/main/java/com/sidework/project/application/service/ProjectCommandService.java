@@ -38,8 +38,8 @@ public class ProjectCommandService implements ProjectCommandUseCase {
                 command.startDt(), command.endDt(), command.meetingType());
         Long savedId = projectRepository.save(project);
 
-        ProjectUser projectUser = ProjectUser.create(1L, savedId, ApplyStatus.ACCEPTED, command.myRole());
-        ProjectUser ownerUser = ProjectUser.create(1L, savedId, ApplyStatus.ACCEPTED, ProjectRole.OWNER);
+        ProjectUser projectUser = ProjectUser.create(1L, savedId, null,ApplyStatus.ACCEPTED, command.myRole());
+        ProjectUser ownerUser = ProjectUser.create(1L, savedId, null,ApplyStatus.ACCEPTED, ProjectRole.OWNER);
 
         projectUserRepository.save(projectUser);
         projectUserRepository.save(ownerUser);
