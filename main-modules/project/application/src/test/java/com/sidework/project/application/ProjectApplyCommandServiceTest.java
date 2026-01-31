@@ -9,6 +9,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
 import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
@@ -59,8 +63,8 @@ class ProjectApplyCommandServiceTest {
 			.status(ProjectStatus.RECRUITING)
 			.build();
 
-		when(projectOutPort.existsById(projectId)).thenReturn(true);
 		when(projectOutPort.findById(projectId)).thenReturn(project);
+		when(projectUserOutPort.queryUserRolesByProject(userId, projectId)).thenReturn(Collections.emptyList());
 		doNothing().when(profileValidationOutPort).validateProfileExistsAndOwnedByUser(profileId, userId);
 		doNothing().when(projectUserOutPort).save(any(ProjectUser.class));
 
@@ -82,7 +86,7 @@ class ProjectApplyCommandServiceTest {
 		Long projectId = 999L;
 		ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
-		when(projectOutPort.existsById(projectId)).thenReturn(false);
+		when(projectOutPort.findById(projectId)).thenThrow(new ProjectNotFoundException(projectId));
 
 		assertThrows(
 			ProjectNotFoundException.class,
@@ -101,7 +105,6 @@ class ProjectApplyCommandServiceTest {
 			.status(ProjectStatus.CLOSED)
 			.build();
 
-		when(projectOutPort.existsById(projectId)).thenReturn(true);
 		when(projectOutPort.findById(projectId)).thenReturn(project);
 
 		assertThrows(
@@ -122,13 +125,34 @@ class ProjectApplyCommandServiceTest {
 			.status(ProjectStatus.RECRUITING)
 			.build();
 
-		when(projectOutPort.existsById(projectId)).thenReturn(true);
 		when(projectOutPort.findById(projectId)).thenReturn(project);
 		doThrow(new RuntimeException("프로필 검증 실패"))
 			.when(profileValidationOutPort).validateProfileExistsAndOwnedByUser(profileId, userId);
 
 		assertThrows(
 			RuntimeException.class,
+			() -> projectApplyCommandService.apply(userId, projectId, command)
+		);
+	}
+
+	@Test
+	void 이미_지원한_프로젝트에_같은_role로_재지원시_ProjectAlreadyAppliedException을_던진다() {
+		Long userId = 1L;
+		Long projectId = 1L;
+		Long profileId = 1L;
+		ProjectApplyCommand command = new ProjectApplyCommand(profileId, ProjectRole.BACKEND);
+
+		Project project = Project.builder()
+			.id(projectId)
+			.status(ProjectStatus.RECRUITING)
+			.build();
+
+		when(projectOutPort.findById(projectId)).thenReturn(project);
+		when(projectUserOutPort.queryUserRolesByProject(userId, projectId)).thenReturn(List.of(ProjectRole.BACKEND));
+		doNothing().when(profileValidationOutPort).validateProfileExistsAndOwnedByUser(profileId, userId);
+
+		assertThrows(
+			ProjectAlreadyAppliedException.class,
 			() -> projectApplyCommandService.apply(userId, projectId, command)
 		);
 	}
