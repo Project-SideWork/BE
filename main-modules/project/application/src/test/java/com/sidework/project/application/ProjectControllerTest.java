@@ -5,8 +5,15 @@ import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.project.application.adapter.ProjectController;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
+import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
-import com.sidework.project.application.port.in.*;
+import com.sidework.project.application.port.in.ProjectApplyCommand;
+import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
+import com.sidework.project.application.port.in.ProjectCommand;
+import com.sidework.project.application.port.in.ProjectCommandUseCase;
+import com.sidework.project.application.port.in.ProjectQueryUseCase;
+import com.sidework.project.application.port.in.RecruitPosition;
+import com.sidework.project.application.port.in.SkillLevel;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
@@ -45,6 +52,9 @@ public class ProjectControllerTest {
 
     @MockitoBean
     private ProjectCommandUseCase projectCommandUseCase;
+
+    @MockitoBean
+    private ProjectApplyCommandUseCase projectApplyCommandUseCase;
 
     @MockitoBean
     private ProjectQueryUseCase projectQueryUseCase;
@@ -275,6 +285,68 @@ public class ProjectControllerTest {
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 프로젝트_지원_요청시_성공하면_200을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
+
+        doNothing().when(projectApplyCommandUseCase).apply(1L, projectId, command);
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true));
+    }
+
+    @Test
+    void 프로젝트_지원_요청시_profileId나_role이_null이면_400을_반환한다() throws Exception {
+        Long projectId = 1L;
+        String invalidJson = """
+        {
+          "profileId": null,
+          "role": "BACKEND"
+        }
+        """;
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidJson))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_지원_요청시_프로젝트가_없으면_404를_반환한다() throws Exception {
+        Long projectId = 999L;
+        ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
+
+        doThrow(new ProjectNotFoundException(projectId))
+                .when(projectApplyCommandUseCase).apply(1L, projectId, command);
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 프로젝트_지원_요청시_모집중이_아니면_400을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
+
+        doThrow(new ProjectNotRecruitingException(projectId))
+                .when(projectApplyCommandUseCase).apply(1L, projectId, command);
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
