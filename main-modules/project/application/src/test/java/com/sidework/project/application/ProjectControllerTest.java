@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.project.application.adapter.ProjectController;
+import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
 import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
@@ -340,6 +341,21 @@ public class ProjectControllerTest {
         ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
         doThrow(new ProjectNotRecruitingException(projectId))
+                .when(projectApplyCommandUseCase).apply(1L, projectId, command);
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_지원_요청시_이미_지원한_프로젝트이면_400을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
+
+        doThrow(new ProjectAlreadyAppliedException(projectId))
                 .when(projectApplyCommandUseCase).apply(1L, projectId, command);
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
