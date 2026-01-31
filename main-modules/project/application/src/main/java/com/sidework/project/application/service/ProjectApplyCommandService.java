@@ -5,7 +5,7 @@ import static com.sidework.project.domain.ApplyStatus.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sidework.project.application.exception.ProjectNotFoundException;
+import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
 import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
@@ -13,6 +13,7 @@ import com.sidework.project.application.port.out.ProfileValidationOutPort;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.Project;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.project.domain.ProjectUser;
 
@@ -32,6 +33,7 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 		Long profileId = command.profileId();
 		checkProjectExistsAndIsRecruiting(projectId);
 		profileValidationOutPort.validateProfileExistsAndOwnedByUser(profileId, userId);
+		checkDuplicateApply(userId, projectId, command.role());
 		projectUserRepository.save(
 			ProjectUser.create(
 				userId,
@@ -44,13 +46,15 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 	}
 
 	private void checkProjectExistsAndIsRecruiting(Long projectId) {
-		if (!projectRepository.existsById(projectId)) {
-			throw new ProjectNotFoundException(projectId);
-		}
-		if(!projectRepository.findById(projectId)
-			.getStatus().equals(ProjectStatus.RECRUITING))
-		{
+		Project project = projectRepository.findById(projectId);
+		if (!project.getStatus().equals(ProjectStatus.RECRUITING)) {
 			throw new ProjectNotRecruitingException(projectId);
+		}
+	}
+
+	private void checkDuplicateApply(Long userId, Long projectId, ProjectRole role) {
+		if (projectUserRepository.queryUserRolesByProject(userId, projectId).contains(role)) {
+			throw new ProjectAlreadyAppliedException(projectId);
 		}
 	}
 }
