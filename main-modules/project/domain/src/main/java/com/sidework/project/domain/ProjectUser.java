@@ -17,14 +17,17 @@ public class ProjectUser {
 
     private Long userId;
 
+    private Long profileId;
+
     private ApplyStatus status;
 
     private ProjectRole role;
 
-    public static ProjectUser create(Long userId, Long projectId, ApplyStatus status, ProjectRole role) {
+    public static ProjectUser create(Long userId, Long projectId, Long profileId, ApplyStatus status, ProjectRole role) {
         return ProjectUser.builder()
                 .userId(userId)
                 .projectId(projectId)
+                .profileId(profileId)
                 .status(status)
                 .role(role)
                 .build();

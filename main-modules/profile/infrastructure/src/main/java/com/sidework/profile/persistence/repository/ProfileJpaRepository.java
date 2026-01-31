@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface ProfileJpaRepository extends JpaRepository<ProfileEntity, Long> {
 	Optional<ProfileEntity> findByUserId(Long userId);
 	boolean existsByUserId(Long userId);
+	boolean existsByIdAndUserId(Long profileId, Long userId);
 }

@@ -62,6 +62,7 @@ public class ProjectUserPersistenceAdapterTest {
         return ProjectUser.create(
                 1L,
                 1L,
+                null,
                 ApplyStatus.UNREAD,
                 ProjectRole.BACKEND
         );
@@ -71,6 +72,7 @@ public class ProjectUserPersistenceAdapterTest {
         return ProjectUserEntity.builder()
                 .projectId(1L)
                 .userId(1L)
+                .profileId(null)
                 .status(ApplyStatus.UNREAD)
                 .role(ProjectRole.BACKEND)
                 .build();

@@ -4,4 +4,5 @@ import com.sidework.profile.application.adapter.UserProfileResponse;
 
 public interface ProfileQueryUseCase {
 	UserProfileResponse getProfileByUserId(Long userId);
+	boolean existsByIdAndUserId(Long profileId,Long userId);
 }
