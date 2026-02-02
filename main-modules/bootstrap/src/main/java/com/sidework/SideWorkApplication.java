@@ -10,7 +10,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = {"com.sidework.**.persistence.repository"})
 @EntityScan(basePackages = {"com.sidework.project.persistence.entity", "com.sidework.user.persistence.entity",
-        "com.sidework.profile.persistence.entity", "com.sidework.skill.persistence.entity"})
+        "com.sidework.profile.persistence.entity", "com.sidework.skill.persistence.entity",
+        "com.sidework.notification.persistence.entity"})
 public class SideWorkApplication {
 
 	public static void main(String[] args) {

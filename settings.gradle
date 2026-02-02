@@ -111,3 +111,7 @@ project(':main-modules:profile:infrastructure').name = 'profile-infrastructure'
 project(':main-modules:skill:domain').name = 'skill-domain'
 project(':main-modules:skill:application').name = 'skill-application'
 project(':main-modules:skill:infrastructure').name = 'skill-infrastructure'
+
+project(':main-modules:notification:domain').name = 'notification-domain'
+project(':main-modules:notification:application').name = 'notification-application'
+project(':main-modules:notification:infrastructure').name = 'notification-infrastructure'
