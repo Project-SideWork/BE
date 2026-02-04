@@ -18,7 +18,6 @@ public class Notification {
 	private String title;
 	private String body;
 	private boolean isRead;
-	private LocalDateTime createdAt;
 
 	public static Notification create(Long userId, NotificationType type, String title, String body) {
 		return Notification.builder()
@@ -27,7 +26,6 @@ public class Notification {
 			.title(title)
 			.body(body)
 			.isRead(false)
-			.createdAt(LocalDateTime.now())
 			.build();
 	}
 
