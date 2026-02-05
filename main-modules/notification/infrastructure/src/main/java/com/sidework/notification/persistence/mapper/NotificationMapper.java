@@ -10,5 +10,4 @@ import com.sidework.notification.persistence.entity.NotificationEntity;
 public interface NotificationMapper {
 	Notification toDomain(NotificationEntity entity);
 	NotificationEntity toEntity(Notification notification);
-	void updateEntity(@MappingTarget NotificationEntity entity, Notification notification);
 }
