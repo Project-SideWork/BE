@@ -36,6 +36,9 @@ public class NotificationEntity extends BaseEntity {
 	private String body;
 
 	@Column(name = "is_read", nullable = false)
-	private boolean read;
+	private boolean isRead;
 
+	public void markAsRead() {
+		this.isRead = true;
+	}
 }
