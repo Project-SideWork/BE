@@ -45,7 +45,7 @@ public class NotificationController {
 	}
 
 	@PatchMapping("/{notificationId}/read")
-	public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable Long notificationId) {
+	public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable("notificationId") Long notificationId) {
 		Long userId = 1L;
 		commandService.markAsRead(notificationId, userId);
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
