@@ -35,7 +35,10 @@ public class NotificationPersistenceAdapter implements NotificationOutPort {
 		}
 		NotificationEntity entity =  repository.findById(notification.getId())
 			.orElseThrow(() -> new NotificationNotFoundException(notification.getId()));
-		mapper.updateEntity(entity, notification);
+		if (notification.isRead()) {
+			entity.markAsRead();
+		}
+		repository.save(entity);
 	}
 
 	@Override
