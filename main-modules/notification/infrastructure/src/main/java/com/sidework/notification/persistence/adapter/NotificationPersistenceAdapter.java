@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sidework.notification.application.exception.NotificationNotFoundException;
 import com.sidework.notification.application.port.out.NotificationOutPort;
 import com.sidework.notification.domain.Notification;
 import com.sidework.notification.persistence.entity.NotificationEntity;
@@ -33,8 +32,10 @@ public class NotificationPersistenceAdapter implements NotificationOutPort {
 		if(notification == null) {
 			return;
 		}
-		NotificationEntity entity =  repository.findById(notification.getId())
-			.orElseThrow(() -> new NotificationNotFoundException(notification.getId()));
+		NotificationEntity entity =  repository.findById(notification.getId()).orElse(null);
+		if(entity == null) {
+			return;
+		}
 		if (notification.isRead()) {
 			entity.markAsRead();
 		}
