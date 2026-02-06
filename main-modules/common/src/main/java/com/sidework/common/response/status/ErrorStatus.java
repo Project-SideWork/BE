@@ -46,7 +46,10 @@ public enum ErrorStatus implements BaseStatusCode {
     SKILL_NOT_FOUND(HttpStatus.NOT_FOUND, "SKILL_001", "해당 스킬을 찾을 수 없습니다."),
 
     // PORTFOLIO
-    PORTFOLIO_NOT_FOUND(HttpStatus.NOT_FOUND, "PORTFOLIO_001", "해당 대외활동을 찾을 수 없습니다.");
+    PORTFOLIO_NOT_FOUND(HttpStatus.NOT_FOUND, "PORTFOLIO_001", "해당 대외활동을 찾을 수 없습니다."),
+
+    //NOTIFICATION
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_001", "해당 알림을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
