@@ -45,8 +45,12 @@ public class SseEmitterManager {
 			return emitter;
 		}
 
-		emittersByUser.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(emitter);
-		log.debug("SSE subscribed userId={}, connections={}", userId, emittersByUser.get(userId).size());
+		List<SseEmitter> list = emittersByUser.compute(userId, (k, existing) -> {
+			List<SseEmitter> l = existing != null ? existing : new CopyOnWriteArrayList<>();
+			l.add(emitter);
+			return l;
+		});
+		log.debug("SSE subscribed userId={}, connections={}", userId, list.size());
 		return emitter;
 	}
 
