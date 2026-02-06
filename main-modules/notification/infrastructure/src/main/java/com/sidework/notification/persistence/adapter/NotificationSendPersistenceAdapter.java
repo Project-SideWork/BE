@@ -17,6 +17,9 @@ public class NotificationSendPersistenceAdapter implements NotificationSendOutPo
 
 	@Override
 	public void send(Long userId, Notification notification) {
+		if(notification == null) {
+			return;
+		}
 		NotificationResponse response = NotificationResponse.from(notification);
 		sseEmitterManager.sendToUser(userId, response);
 	}
