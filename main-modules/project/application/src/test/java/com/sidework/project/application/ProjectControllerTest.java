@@ -309,7 +309,7 @@ public class ProjectControllerTest {
         String invalidJson = """
         {
           "profileId": null,
-          "role": "BACKEND"
+          "role": null
         }
         """;
 
