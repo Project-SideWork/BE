@@ -53,6 +53,7 @@ void includeModulesFrom(String... entryPointNames) {
         include(modules as String[])
 
         List<String> moduleGroups = Files.list(entryPoint)
+                .filter { Files.isDirectory(it) }
                 .collect { "${entryPointName}:${it.fileName.toString()}" }
                 .toList()
 
