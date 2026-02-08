@@ -5,11 +5,12 @@ import static com.sidework.project.domain.ApplyStatus.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sidework.project.application.exception.ProfileNotFoundException;
 import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
 import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
-import com.sidework.project.application.port.out.ProfileValidationOutPort;
+import com.sidework.project.application.port.out.ProfileQueryOutPort;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.Project;
@@ -26,13 +27,13 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 
 	private final ProjectOutPort projectRepository;
 	private final ProjectUserOutPort projectUserRepository;
-	private final ProfileValidationOutPort profileValidationOutPort;
+	private final ProfileQueryOutPort profileQueryRepository;
 
 	@Override
 	public void apply(Long userId, Long projectId, ProjectApplyCommand command) {
 		Long profileId = command.profileId();
 		checkProjectExistsAndIsRecruiting(projectId);
-		profileValidationOutPort.validateProfileExistsAndOwnedByUser(profileId, userId);
+		validateProfileExistsAndOwnedByUser(profileId, userId);
 		checkDuplicateApply(userId, projectId, command.role());
 		projectUserRepository.save(
 			ProjectUser.create(
@@ -43,6 +44,12 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 				command.role()
 			)
 		);
+	}
+
+	private void validateProfileExistsAndOwnedByUser(Long profileId, Long userId) {
+		if (!profileQueryRepository.existsByIdAndUserId(profileId, userId)) {
+			throw new ProfileNotFoundException(profileId);
+		}
 	}
 
 	private void checkProjectExistsAndIsRecruiting(Long projectId) {
