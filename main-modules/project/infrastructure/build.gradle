@@ -10,6 +10,7 @@ dependencies {
     implementation project(':main-modules:common')
     implementation project(':main-modules:project:project-domain')
     implementation project(':main-modules:project:project-application')
+    implementation project(':main-modules:profile:profile-infrastructure')
 
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security
