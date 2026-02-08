@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.sidework.common.response.ApiResponse;
+import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationCommand;
 import com.sidework.notification.application.port.in.NotificationCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationQueryUseCase;
@@ -30,6 +31,7 @@ public class NotificationController {
 	private final NotificationCommandUseCase commandService;
 	private final NotificationQueryUseCase queryService;
 	private final SseSubscribeOutPort sseSubscribeOutPort;
+	private final FcmTokenCommandUseCase fcmTokenCommandUseCase;
 
 	//TODO: 로그인 연동
 	@GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -58,4 +60,10 @@ public class NotificationController {
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 
+	@PostMapping("/fcm-token")
+	public ResponseEntity<ApiResponse<Void>> registerFcmToken(@RequestBody FcmTokenRegisterRequest request) {
+		Long userId = 1L;
+		fcmTokenCommandUseCase.registerToken(userId, request.token(), request.pushAgreed());
+		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
+	}
 }
