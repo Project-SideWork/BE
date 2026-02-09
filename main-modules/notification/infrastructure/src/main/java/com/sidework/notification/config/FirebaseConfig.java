@@ -18,20 +18,21 @@ public class FirebaseConfig {
 	// TODO: 배포환경 경로 시크릿에서 주입할 것
 	@Bean
 	public FirebaseMessaging firebaseMessaging() throws IOException {
-		InputStream serviceAccount =
-			new ClassPathResource("firebase.json").getInputStream();
+		try (InputStream serviceAccount =
+			new ClassPathResource("firebase.json").getInputStream()) {
 
-		FirebaseOptions options = FirebaseOptions.builder()
-			.setCredentials(GoogleCredentials.fromStream(serviceAccount))
-			.build();
+			FirebaseOptions options = FirebaseOptions.builder()
+				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+				.build();
 
-		FirebaseApp app;
-		if (FirebaseApp.getApps().isEmpty()) {
-			app = FirebaseApp.initializeApp(options);
-		} else {
-			app = FirebaseApp.getInstance();
+			FirebaseApp app;
+			if (FirebaseApp.getApps().isEmpty()) {
+				app = FirebaseApp.initializeApp(options);
+			} else {
+				app = FirebaseApp.getInstance();
+			}
+
+			return FirebaseMessaging.getInstance(app);
 		}
-
-		return FirebaseMessaging.getInstance(app);
 	}
 }
