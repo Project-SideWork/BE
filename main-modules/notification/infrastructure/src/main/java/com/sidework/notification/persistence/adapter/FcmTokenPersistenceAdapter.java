@@ -44,4 +44,11 @@ public class FcmTokenPersistenceAdapter implements FcmTokenOutPort {
 				}
 			);
 	}
+
+	@Override
+	public List<FcmUserToken> findTokensByUserId(Long userId) {
+		return fcmTokenJpaRepository.findByUserIdAndPushAgreedTrue(userId).stream()
+			.map(fcmTokenMapper::toDomain)
+			.toList();
+	}
 }
