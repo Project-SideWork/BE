@@ -28,3 +28,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+
+jwt:
+  issuer: project.doctalk@gmail.com
+  secret: "ierhtjklfdsbaeiworuhewijlkrblawebruiggpoeqrwponbjladf"
+  access-expiration: 3600
+  refresh-expiration: 8640
