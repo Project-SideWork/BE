@@ -22,6 +22,7 @@ import com.sidework.notification.application.port.in.NotificationQueryUseCase;
 import com.sidework.notification.application.port.in.SseSubscribeUseCase;
 import com.sidework.notification.domain.NotificationType;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -63,7 +64,7 @@ public class NotificationController {
 	}
 
 	@PostMapping("/fcm-token")
-	public ResponseEntity<ApiResponse<Void>> registerFcmToken(@RequestBody FcmTokenRegisterRequest request) {
+	public ResponseEntity<ApiResponse<Void>> registerFcmToken(@RequestBody @Valid FcmTokenRegisterRequest request) {
 		Long userId = 1L;
 		fcmTokenCommandUseCase.registerToken(userId, request.token(), request.pushAgreed());
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());

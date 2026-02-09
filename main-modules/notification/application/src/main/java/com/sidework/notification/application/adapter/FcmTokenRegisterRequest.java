@@ -1,7 +1,9 @@
 package com.sidework.notification.application.adapter;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record FcmTokenRegisterRequest(
-	String token,
+	@NotBlank String token,
 	boolean pushAgreed
 ) {
 }
