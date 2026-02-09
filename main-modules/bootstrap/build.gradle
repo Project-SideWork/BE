@@ -18,13 +18,17 @@ dependencies {
     implementation project(':main-modules:project:project-infrastructure')
     implementation project(':main-modules:user:user-application')
     implementation project(':main-modules:user:user-infrastructure')
+    implementation project(':main-modules:user:user-domain')
     implementation project(':main-modules:profile:profile-application')
     implementation project(':main-modules:profile:profile-infrastructure')
     implementation project(':main-modules:skill:skill-application')
     implementation project(':main-modules:skill:skill-infrastructure')
-    
+    implementation libs.bundles.jwt
 
+    annotationProcessor libs.lombok
+    compileOnly libs.lombok
 
+    implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security
     implementation libs.bundles.bootstrap
