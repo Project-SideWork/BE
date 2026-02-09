@@ -78,6 +78,19 @@
         } else {
           setStatus('토큰 발급에 실패했습니다. VAPID 키를 확인하세요.', true);
         }
+
+        // 포그라운드에서 수신 시 알림 표시 (탭이 열려 있을 때)
+        const { onMessage } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js');
+        onMessage(messaging, (payload) => {
+          const title = payload.notification?.title ?? payload.data?.title ?? '알림';
+          const options = {
+            body: payload.notification?.body ?? payload.data?.body ?? ''
+          };
+          if (Notification.permission === 'granted') {
+            new Notification(title, options);
+          }
+          setStatus('포그라운드 수신: ' + title);
+        });
       } catch (e) {
         console.error(e);
         setStatus('오류: ' + e.message, true);
