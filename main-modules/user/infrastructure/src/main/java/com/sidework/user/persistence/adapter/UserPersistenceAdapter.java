@@ -30,4 +30,11 @@ public class UserPersistenceAdapter implements UserOutPort {
         UserEntity user = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         return mapper.toDomain(user);
     }
+
+    @Override
+    public User findByEmail(String email) {
+        UserEntity user = repo.findByEmail(email);
+        if(user == null) throw new UserNotFoundException(email);
+        return mapper.toDomain(user);
+    }
 }
