@@ -27,6 +27,11 @@ public class FcmPushService implements FcmPushUseCase {
 		}
 		for (FcmToken fcmToken : tokens) {
 			try {
+				String token = fcmToken.getToken();
+				if(token == null || token.isBlank())
+				{
+					continue;
+				}
 				fcmSendRepository.sendToToken(fcmToken.getToken(), title, body);
 			} catch (Exception e) {
 				log.warn("FCM send failed for userId={}, tokenId={}", userId, fcmToken.getId(), e);
