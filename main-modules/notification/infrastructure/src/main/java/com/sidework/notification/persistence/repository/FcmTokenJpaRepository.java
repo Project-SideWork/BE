@@ -32,4 +32,6 @@ public interface FcmTokenJpaRepository extends JpaRepository<FcmTokenEntity, Lon
     )
 """)
 	void deleteOldestTokenByUserId(@Param("userId") Long userId);
+
+	List<FcmTokenEntity> findByUserIdAndPushAgreedTrue(Long userId);
 }

@@ -11,4 +11,6 @@ public interface FcmTokenMapper {
 
 	@Mapping(target = "id", ignore = true)
 	FcmTokenEntity toEntity(FcmUserToken domain);
+
+	FcmUserToken toDomain(FcmTokenEntity entity);
 }
