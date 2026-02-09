@@ -1,4 +1,4 @@
-package com.sidework.security.handler;
+package com.sidework.security.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sidework.common.response.ApiResponse;
