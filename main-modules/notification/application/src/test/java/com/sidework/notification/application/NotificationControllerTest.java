@@ -33,7 +33,7 @@ import com.sidework.notification.application.exception.NotificationNotFoundExcep
 import com.sidework.notification.application.port.in.NotificationCommand;
 import com.sidework.notification.application.port.in.NotificationCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationQueryUseCase;
-import com.sidework.notification.application.port.out.SseSubscribeOutPort;
+import com.sidework.notification.application.port.in.SseSubscribeUseCase;
 import com.sidework.notification.domain.NotificationType;
 
 @WebMvcTest(NotificationController.class)
@@ -55,11 +55,11 @@ class NotificationControllerTest {
 	private NotificationQueryUseCase queryUseCase;
 
 	@MockitoBean
-	private SseSubscribeOutPort sseSubscribeOutPort;
+	private SseSubscribeUseCase sseSubscribeUseCase;
 
 	@Test
 	void SSE_구독_요청_시_200을_반환한다() throws Exception {
-		when(sseSubscribeOutPort.subscribe(anyLong())).thenReturn(new SseEmitter());
+		when(sseSubscribeUseCase.subscribe(anyLong())).thenReturn(new SseEmitter());
 
 		mockMvc.perform(get("/api/v1/notifications/subscribe")
 				.accept(MediaType.TEXT_EVENT_STREAM_VALUE))

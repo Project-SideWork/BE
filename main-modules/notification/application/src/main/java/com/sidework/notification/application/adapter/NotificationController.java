@@ -19,7 +19,7 @@ import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationCommand;
 import com.sidework.notification.application.port.in.NotificationCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationQueryUseCase;
-import com.sidework.notification.application.port.out.SseSubscribeOutPort;
+import com.sidework.notification.application.port.in.SseSubscribeUseCase;
 import com.sidework.notification.domain.NotificationType;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class NotificationController {
 
 	private final NotificationCommandUseCase commandService;
 	private final NotificationQueryUseCase queryService;
-	private final SseSubscribeOutPort sseSubscribeOutPort;
+	private final SseSubscribeUseCase sseSubscribeUseCase;
 	private final FcmTokenCommandUseCase fcmTokenCommandUseCase;
 	private final FcmPushUseCase fcmPushService;
 
@@ -39,7 +39,7 @@ public class NotificationController {
 	@GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter subscribe() {
 		Long userId = 1L;
-		return sseSubscribeOutPort.subscribe(userId);
+		return sseSubscribeUseCase.subscribe(userId);
 	}
 
 	@GetMapping
