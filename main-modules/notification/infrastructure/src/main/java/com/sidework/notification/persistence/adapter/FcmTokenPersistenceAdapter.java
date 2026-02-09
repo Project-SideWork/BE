@@ -38,7 +38,7 @@ public class FcmTokenPersistenceAdapter implements FcmTokenOutPort {
 				() -> {
 					long count = fcmTokenJpaRepository.countByUserIdForUpdate(userId);
 					if (count >= MAX_TOKENS_PER_USER) {
-						fcmTokenJpaRepository.deleteOldestTokenByUserId(userId);
+						deleteOldestTokenByUserId(userId);
 					}
 					fcmTokenJpaRepository.save(fcmTokenMapper.toEntity(fcmToken));
 				}
@@ -50,5 +50,13 @@ public class FcmTokenPersistenceAdapter implements FcmTokenOutPort {
 		return fcmTokenJpaRepository.findByUserIdAndPushAgreedTrue(userId).stream()
 			.map(fcmTokenMapper::toDomain)
 			.toList();
+	}
+
+	@Transactional
+	void deleteOldestTokenByUserId(Long userId) {
+		List<FcmTokenEntity> tokens = fcmTokenJpaRepository.findByUserIdOrderByUpdatedAtAsc(userId);
+		if (!tokens.isEmpty()) {
+			fcmTokenJpaRepository.delete(tokens.get(0));
+		}
 	}
 }
