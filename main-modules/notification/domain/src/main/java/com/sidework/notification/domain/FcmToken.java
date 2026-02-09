@@ -9,15 +9,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FcmUserToken {
+public class FcmToken {
 
 	private Long id;
 	private Long userId;
 	private String token;
 	private boolean pushAgreed;
 
-	public static FcmUserToken create(Long userId, String token, boolean pushAgreed) {
-		return FcmUserToken.builder()
+	public static FcmToken create(Long userId, String token, boolean pushAgreed) {
+		return FcmToken.builder()
 			.userId(userId)
 			.token(token)
 			.pushAgreed(pushAgreed)

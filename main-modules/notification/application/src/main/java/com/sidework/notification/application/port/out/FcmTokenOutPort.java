@@ -2,11 +2,11 @@ package com.sidework.notification.application.port.out;
 
 import java.util.List;
 
-import com.sidework.notification.domain.FcmUserToken;
+import com.sidework.notification.domain.FcmToken;
 
 public interface FcmTokenOutPort {
 
-	void registerToken(FcmUserToken fcmUserToken);
+	void registerToken(FcmToken fcmToken);
 
-	List<FcmUserToken> findTokensByUserId(Long userId);
+	List<FcmToken> findTokensByUserId(Long userId);
 }

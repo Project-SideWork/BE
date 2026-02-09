@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
 import com.sidework.notification.application.port.out.FcmTokenOutPort;
-import com.sidework.notification.domain.FcmUserToken;
+import com.sidework.notification.domain.FcmToken;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +18,7 @@ public class FcmTokenCommandService implements FcmTokenCommandUseCase {
 
 	@Override
 	public void registerToken(Long userId, String token, boolean pushAgreed) {
-		FcmUserToken fcmUserToken = FcmUserToken.create(userId, token, pushAgreed);
-		fcmTokenRepository.registerToken(fcmUserToken);
+		FcmToken fcmToken = FcmToken.create(userId, token, pushAgreed);
+		fcmTokenRepository.registerToken(fcmToken);
 	}
 }

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.sidework.notification.application.port.in.FcmPushUseCase;
 import com.sidework.notification.application.port.out.FcmPushOutPort;
 import com.sidework.notification.application.port.out.FcmTokenOutPort;
-import com.sidework.notification.domain.FcmUserToken;
+import com.sidework.notification.domain.FcmToken;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class FcmPushService implements FcmPushUseCase {
 			log.info("No FCM tokens for userId={}, skip push", userId);
 			return;
 		}
-		for (FcmUserToken fcmToken : tokens) {
+		for (FcmToken fcmToken : tokens) {
 			try {
 				fcmSendRepository.sendToToken(fcmToken.getToken(), title, body);
 			} catch (Exception e) {
