@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -31,5 +32,11 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
     @Override
     public List<Long> queryAllProjectIds(Long userId) {
         return repo.findAllIdsByUserId(userId);
+    }
+
+    @Override
+    public Optional<ProjectUser> findByProjectIdAndUserId(Long projectId, Long userId) {
+        return repo.findFirstByProjectIdAndUserId(projectId, userId)
+            .map(mapper::toDomain);
     }
 }
