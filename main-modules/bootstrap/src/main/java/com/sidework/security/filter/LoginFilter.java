@@ -5,9 +5,7 @@ import com.sidework.security.dto.AuthenticatedUserDetails;
 import com.sidework.security.util.CookieUtil;
 import com.sidework.security.util.JwtUtil;
 import com.sidework.security.dto.LoginCommand;
-import com.sidework.user.application.port.out.UserOutPort;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -74,5 +72,4 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             return;
         }
     }
-
 }
