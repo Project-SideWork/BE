@@ -76,7 +76,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (accessToken == null || accessToken.isBlank()) {
-            log.debug("❌ access 토큰 없음, URI={}", requestUri);
+            log.debug("access 토큰 없음, URI={}", requestUri);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");
             return;
         }
@@ -85,7 +85,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             if (jwtUtil.isExpired(accessToken)) {
-                log.debug("❌ JWT 토큰 만료됨");
+                log.debug("JWT 토큰 만료됨");
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "토큰이 만료되었습니다.");
                 return;
             }
@@ -103,11 +103,11 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (ExpiredJwtException e) {
-            log.debug("❌ JWT 토큰 만료됨");
+            log.debug("JWT 토큰 만료됨");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "토큰이 만료되었습니다.");
             return;
         } catch (Exception e) {
-            log.error("❌ JWT 토큰 검증 실패", e);
+            log.error("JWT 토큰 검증 실패", e);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
             return;
         }
@@ -158,7 +158,7 @@ public class JwtFilter extends OncePerRequestFilter {
             response.getWriter().write("{\"message\": \"액세스 토큰이 재발급되었습니다.\"}");
 
         } catch (Exception e) {
-            log.error("❌ Token 재발급 실패", e);
+            log.error("Token 재발급 실패", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "토큰 재발급에 실패했습니다.");
         }
     }
