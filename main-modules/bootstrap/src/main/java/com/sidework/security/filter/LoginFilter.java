@@ -27,17 +27,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
-    private final UserOutPort userRepository;
 
     public LoginFilter(
             JwtUtil jwtUtil,
             CookieUtil cookieUtil,
-            UserOutPort userRepository,
             AuthenticationManager authenticationManager
     ) {
         this.jwtUtil = jwtUtil;
         this.cookieUtil = cookieUtil;
-        this.userRepository = userRepository;
 
         setAuthenticationManager(authenticationManager);
 
