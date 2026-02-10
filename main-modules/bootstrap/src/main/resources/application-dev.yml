@@ -39,7 +39,7 @@ spring:
 
 jwt:
   issuer: project.doctalk@gmail.com
-  secret: ${JWT_SECRET
+  secret: ${JWT_SECRET}
   access-expiration: 3600
   refresh-expiration: 8640
 
