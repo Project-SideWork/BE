@@ -104,13 +104,4 @@ public class JwtUtil {
             return 0L;
         }
     }
-
-//
-//    public String reIssueToken(String refreshToken){
-//        String token = refreshToken.substring(7);
-//        if (!isExpired(token)){
-//            return createAccess(getEmail(token));
-//        }
-//        throw new GlobalException(ErrorStatus.INVALID_REFRESH);
-//    }
 }
