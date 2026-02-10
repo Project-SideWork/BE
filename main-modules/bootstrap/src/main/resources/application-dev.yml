@@ -2,11 +2,18 @@ spring:
   application:
     name: SideWork
 
+  cache:
+    type: redis
+
   datasource:
     url: jdbc:mysql://localhost:3306/sidework?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: ${LOCAL_MYSQL_PASSWORD}
+
+  data:
+    redis:
+      url: redis://default:${LOCAL_REDIS_PASSWORD}!@localhost:6379
 
   flyway:
     enabled: true
