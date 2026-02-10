@@ -13,7 +13,7 @@ spring:
 
   data:
     redis:
-      url: redis://default:${LOCAL_REDIS_PASSWORD}!@localhost:6379
+      url: redis://default:${LOCAL_REDIS_PASSWORD}@localhost:6379
 
   flyway:
     enabled: true
@@ -30,7 +30,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -39,7 +39,7 @@ spring:
 
 jwt:
   issuer: project.doctalk@gmail.com
-  secret: "ierhtjklfdsbaeiworuhewijlkrblawebruiggpoeqrwponbjladf"
+  secret: ${JWT_SECRET
   access-expiration: 3600
   refresh-expiration: 8640
 
