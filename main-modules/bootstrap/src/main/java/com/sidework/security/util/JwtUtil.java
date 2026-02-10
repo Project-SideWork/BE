@@ -3,27 +3,19 @@ package com.sidework.security.util;
 
 import com.sidework.security.exception.InvalidTokenException;
 import com.sidework.user.application.port.out.UserOutPort;
-import com.sidework.user.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Component
 @Slf4j
@@ -56,7 +48,6 @@ public class JwtUtil {
         try {
             Claims claims = extractClaims(token);
             Date expiration = claims.getExpiration();
-
             return expiration.before(new Date());
 
         } catch (ExpiredJwtException e) {
@@ -96,29 +87,24 @@ public class JwtUtil {
 
     }
 
-//    public Authentication getAuthentication(String token) {
-//        String email = getEmail(token);
-//        if (email == null || email.isEmpty()) {
-//            throw new IllegalArgumentException("JWT token does not contain a valid googleId.");
-//        }
-//
-//        // DB에서 googleId 기반으로 사용자 찾기
-//        Optional<User> userOptional = userRepository.findUserByEmail(email);
-//        if (userOptional.isEmpty()) {
-//            throw new UsernameNotFoundException("User not found with googleId: " + email);
-//        }
-//
-//
-//        User user = userOptional.get();
-//        List<GrantedAuthority> authorities = new ArrayList<>();
-//
-//        // Spring Security User 객체 생성 (googleId를 username으로 사용)
-//        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-//                user.getEmail(), "", authorities
-//        );
-//
-//        return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
-//    }
+    public long getRefreshTokenExpireTime(String refreshToken) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
+
+            Date expiration = claims.getExpiration();
+            if (expiration == null) return 0L;
+
+            Instant exp = expiration.toInstant();
+            return Math.max(Duration.between(Instant.now(), exp).getSeconds(), 0);
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
 //
 //    public String reIssueToken(String refreshToken){
 //        String token = refreshToken.substring(7);
