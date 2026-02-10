@@ -1,8 +1,12 @@
 package com.sidework.notification.config;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -15,24 +19,23 @@ import com.google.firebase.messaging.FirebaseMessaging;
 @Configuration
 public class FirebaseConfig {
 
-	// TODO: 배포환경 경로 시크릿에서 주입할 것
+	@Value("${firebase.credentials-base64}")
+	private String credentialsBase64;
+
 	@Bean
 	public FirebaseMessaging firebaseMessaging() throws IOException {
-		try (InputStream serviceAccount =
-			new ClassPathResource("firebase.json").getInputStream()) {
 
-			FirebaseOptions options = FirebaseOptions.builder()
-				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
-				.build();
+		byte[] decoded = Base64.getDecoder().decode(credentialsBase64);
+		InputStream serviceAccount = new ByteArrayInputStream(decoded);
 
-			FirebaseApp app;
-			if (FirebaseApp.getApps().isEmpty()) {
-				app = FirebaseApp.initializeApp(options);
-			} else {
-				app = FirebaseApp.getInstance();
-			}
+		FirebaseOptions options = FirebaseOptions.builder()
+			.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+			.build();
 
-			return FirebaseMessaging.getInstance(app);
-		}
+		FirebaseApp app = FirebaseApp.getApps().isEmpty()
+			? FirebaseApp.initializeApp(options)
+			: FirebaseApp.getInstance();
+
+		return FirebaseMessaging.getInstance(app);
 	}
 }
