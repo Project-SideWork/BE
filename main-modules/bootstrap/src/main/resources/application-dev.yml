@@ -28,3 +28,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+firebase:
+  credentials-base64: ${FIREBASE_CREDENTIALS_BASE64}

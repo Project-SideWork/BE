@@ -14,12 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.sidework.common.response.ApiResponse;
+import com.sidework.notification.application.port.in.FcmPushUseCase;
+import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationCommand;
 import com.sidework.notification.application.port.in.NotificationCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationQueryUseCase;
-import com.sidework.notification.application.port.out.SseSubscribeOutPort;
+import com.sidework.notification.application.port.in.SseSubscribeUseCase;
 import com.sidework.notification.domain.NotificationType;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,13 +32,15 @@ public class NotificationController {
 
 	private final NotificationCommandUseCase commandService;
 	private final NotificationQueryUseCase queryService;
-	private final SseSubscribeOutPort sseSubscribeOutPort;
+	private final SseSubscribeUseCase sseSubscribeUseCase;
+	private final FcmTokenCommandUseCase fcmTokenCommandUseCase;
+	private final FcmPushUseCase fcmPushService;
 
 	//TODO: 로그인 연동
 	@GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter subscribe() {
 		Long userId = 1L;
-		return sseSubscribeOutPort.subscribe(userId);
+		return sseSubscribeUseCase.subscribe(userId);
 	}
 
 	@GetMapping
@@ -58,4 +63,21 @@ public class NotificationController {
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 
+	@PostMapping("/fcm-token")
+	public ResponseEntity<ApiResponse<Void>> registerFcmToken(@RequestBody @Valid FcmTokenRegisterRequest request) {
+		Long userId = 1L;
+		fcmTokenCommandUseCase.registerToken(userId, request.token(), request.pushAgreed());
+		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
+	}
+
+	@PostMapping("/fcm-test")
+	public ResponseEntity<ApiResponse<Void>> sendFcmTest(@RequestBody(required = false) FcmTestRequest request) {
+		long userId = request != null && request.userId() != null ? request.userId() : 1L;
+		String title = request != null && request.title() != null && !request.title().isBlank()
+			? request.title() : "FCM 테스트";
+		String body = request != null && request.body() != null && !request.body().isBlank()
+			? request.body() : "푸시 알림 테스트 메시지입니다.";
+		fcmPushService.sendToUser(userId, title, body);
+		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
+	}
 }

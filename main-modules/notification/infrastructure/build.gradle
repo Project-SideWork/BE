@@ -25,6 +25,8 @@ dependencies {
 
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.database.h2
+
+    implementation 'com.google.firebase:firebase-admin:9.7.0'
 }
 
 repositories {
