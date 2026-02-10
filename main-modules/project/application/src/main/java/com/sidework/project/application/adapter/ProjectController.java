@@ -44,7 +44,18 @@ public class ProjectController {
     // TODO: UserDetail 변경
     @PostMapping("/{projectId}/apply")
     public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectId") Long projectId, @Validated @RequestBody ProjectApplyCommand command) {
-        applyCommandService.apply(1L,projectId,command);
+        applyCommandService.apply(2L,projectId,command);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
+    @PatchMapping("/{projectId}/approve")
+    public ResponseEntity<ApiResponse<Void>>  approveProject(@PathVariable("projectId") Long projectId, @RequestParam("applicantUserId") Long applicantUserId) {
+        applyCommandService.approve(1L,projectId,applicantUserId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+    @PatchMapping("/{projectId}/reject")
+    public ResponseEntity<ApiResponse<Void>>  rejectProject(@PathVariable("projectId") Long projectId, @RequestParam("applicantUserId") Long applicantUserId) {
+        applyCommandService.reject(1L,projectId,applicantUserId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
     }
 }
