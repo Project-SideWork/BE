@@ -68,10 +68,9 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .securityMatcher("/**")
-                .csrf(AbstractHttpConfigurer::disable)  // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login", "/swagger-ui/**",    // Swagger UI 관련 경로
-                                "/v3/api-docs/**", "/api/v1/users/**", "/api/v1/reissue").permitAll()
-                        .anyRequest().authenticated()  // 모든 요청 허용
+                                "/v3/api-docs/**", "/api/v1/users/email" ,"/api/v1/users", "/api/v1/reissue").permitAll()
+                        .anyRequest().authenticated()
                 ).headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())
                 )
