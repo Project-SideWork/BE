@@ -60,7 +60,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         AuthenticatedUserDetails userDetails = (AuthenticatedUserDetails) authentication.getPrincipal();
         String email = userDetails.getEmail();
         try {
-            response.addHeader("access", jwtUtil.createAccess(email));
             String accessToken = jwtUtil.createAccess(email);
             String refreshToken = jwtUtil.createRefresh(email);
             response.addHeader("access", accessToken);
