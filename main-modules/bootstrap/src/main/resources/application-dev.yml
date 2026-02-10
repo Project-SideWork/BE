@@ -42,3 +42,7 @@ jwt:
   secret: "ierhtjklfdsbaeiworuhewijlkrblawebruiggpoeqrwponbjladf"
   access-expiration: 3600
   refresh-expiration: 8640
+
+
+firebase:
+  credentials-base64: ${FIREBASE_CREDENTIALS_BASE64}

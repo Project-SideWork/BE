@@ -23,6 +23,10 @@ dependencies {
     implementation project(':main-modules:profile:profile-infrastructure')
     implementation project(':main-modules:skill:skill-application')
     implementation project(':main-modules:skill:skill-infrastructure')
+    implementation project(':main-modules:notification:notification-application')
+    implementation project(':main-modules:notification:notification-infrastructure')
+
+
     implementation libs.bundles.jwt
 
     annotationProcessor libs.lombok
