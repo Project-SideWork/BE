@@ -19,7 +19,6 @@ dependencies {
     implementation project(':main-modules:common')
     implementation project(':main-modules:project:project-domain')
     implementation project(':main-modules:skill:skill-application')
-    implementation project(':main-modules:notification:notification-application')
     implementation("org.springframework:spring-context")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
 }
