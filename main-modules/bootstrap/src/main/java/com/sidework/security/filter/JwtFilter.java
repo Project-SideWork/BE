@@ -33,7 +33,6 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/v1/login",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/oauth2/**",
             "/api/v1/signup",
             "/favicon.ico",
             "/error"
@@ -73,7 +72,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         }
 
-        if (accessToken == null || accessToken.isBlank()) {
+        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
             log.debug("access 토큰 없음, URI={}", requestUri);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");
             return;
