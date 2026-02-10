@@ -2,12 +2,18 @@ package com.sidework.project.application.service;
 
 import static com.sidework.project.domain.ApplyStatus.*;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sidework.project.application.exception.ProfileNotFoundException;
+import com.sidework.project.application.exception.ProjectApplicantNotFoundException;
 import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
+import com.sidework.project.application.exception.ProjectApplyAlreadyProcessedException;
 import com.sidework.project.application.exception.ProjectNotRecruitingException;
+import com.sidework.project.application.exception.ProjectOwnerNotFoundException;
+import com.sidework.project.application.exception.ProjectUserNotFoundException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.out.ProfileQueryOutPort;
@@ -46,6 +52,28 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 		);
 	}
 
+	//
+	@Override
+	public void approve(Long userId, Long projectId, Long applicantUserId) {
+		checkProjectExistsAndIsRecruiting(projectId);
+		validateOwnerOrThrow(userId, projectId);
+		ProjectUser applicant = validateApplicantPendingOrThrow(applicantUserId, projectId);
+		applicant.updateStatus(ACCEPTED);
+
+		projectUserRepository.save(applicant);
+
+	}
+
+	@Override
+	public void reject(Long userId, Long projectId, Long applicantUserId) {
+		checkProjectExistsAndIsRecruiting(projectId);
+		validateOwnerOrThrow(userId, projectId);
+		ProjectUser applicant = validateApplicantPendingOrThrow(applicantUserId, projectId);
+		applicant.updateStatus(REJECTED);
+
+		projectUserRepository.save(applicant);
+	}
+
 	private void validateProfileExistsAndOwnedByUser(Long profileId, Long userId) {
 		if (!profileQueryRepository.existsByIdAndUserId(profileId, userId)) {
 			throw new ProfileNotFoundException(profileId);
@@ -64,4 +92,29 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 			throw new ProjectAlreadyAppliedException(projectId);
 		}
 	}
+
+	private void validateOwnerOrThrow(Long userId, Long projectId) {
+		List<ProjectRole> roles = projectUserRepository.queryUserRolesByProject(userId, projectId);
+
+		if (roles.isEmpty()) {
+			throw new ProjectUserNotFoundException(projectId);
+		}
+
+		boolean isOwner = roles.contains(ProjectRole.OWNER);
+
+		if (!isOwner) {
+			throw new ProjectOwnerNotFoundException(projectId);
+		}
+	}
+
+	private ProjectUser validateApplicantPendingOrThrow(Long applicantUserId, Long projectId) {
+		ProjectUser projectUser = projectUserRepository.findByProjectIdAndUserId(projectId, applicantUserId)
+			.orElseThrow(() -> new ProjectApplicantNotFoundException(projectId));
+
+		if (projectUser.getStatus() != UNREAD && projectUser.getStatus() != READ) {
+			throw new ProjectApplyAlreadyProcessedException(projectId, applicantUserId);
+		}
+		return projectUser;
+	}
+
 }
