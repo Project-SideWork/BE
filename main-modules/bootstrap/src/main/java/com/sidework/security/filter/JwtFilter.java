@@ -21,8 +21,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-import static com.sidework.security.util.CookieUtil.getRefreshTokenFromRequest;
-
 
 @Slf4j
 @RequiredArgsConstructor
