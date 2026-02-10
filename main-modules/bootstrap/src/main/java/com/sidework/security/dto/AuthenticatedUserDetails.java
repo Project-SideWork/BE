@@ -1,6 +1,7 @@
 package com.sidework.security.dto;
 
 import com.sidework.common.auth.AuthenticatedUser;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,9 +9,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@Getter
 @RequiredArgsConstructor
-public class AuthenticatedUserDetails implements UserDetails {
-    private final AuthenticatedUser user;
+public class AuthenticatedUserDetails implements AuthenticatedUser, UserDetails {
+    private final Long id;
+    private final String email;
+    private final String name;
     private final String password;
 
     @Override
@@ -25,6 +29,6 @@ public class AuthenticatedUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getName();
+        return name;
     }
 }
