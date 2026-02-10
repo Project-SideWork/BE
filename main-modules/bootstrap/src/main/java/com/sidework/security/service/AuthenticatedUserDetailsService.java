@@ -18,12 +18,13 @@ import org.springframework.stereotype.Service;
 public class AuthenticatedUserDetailsService implements UserDetailsService {
     private final UserOutPort repo;
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = repo.findByEmail(username);
+    public AuthenticatedUserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = repo.findByEmail(email);
         AuthenticatedUser authenticatedUser = new SecurityAuthenticatedUser(
                 user.getId(), user.getEmail(), user.getName()
         );
 
-        return new AuthenticatedUserDetails(authenticatedUser, user.getPassword());
+        return new AuthenticatedUserDetails(authenticatedUser.getId(),
+                authenticatedUser.getEmail(), authenticatedUser.getName(), user.getPassword());
     }
 }
