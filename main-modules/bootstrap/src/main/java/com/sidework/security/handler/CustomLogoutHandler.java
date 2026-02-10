@@ -29,8 +29,8 @@ public class CustomLogoutHandler implements LogoutHandler {
         // 2) Refresh 폐기 (서버 저장소에서 삭제)
         if (refresh != null) {
             tokenBlackListService.addRefreshTokenBlackList(refresh, jwtUtil.getRefreshTokenExpireTime(refresh));
-            expireCookie(response, "refresh", "/", true, true, "None");
-            expireCookie(response, "access", "/", true, true, "None");
+            expireCookie(response, "refresh", "/", true, true, "Strict");
+            expireCookie(response, "access", "/", true, true, "Strict");
         }
 
         // 3) 보안 컨텍스트 정리
