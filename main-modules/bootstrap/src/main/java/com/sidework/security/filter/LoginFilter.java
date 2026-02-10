@@ -68,7 +68,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         log.info("Authentication successful...");
 
         AuthenticatedUserDetails userDetails = (AuthenticatedUserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
+        String email = userDetails.getEmail();
         try {
             response.addHeader("access", jwtUtil.createAccess(email));
         } catch (Exception e) {
