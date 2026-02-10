@@ -61,7 +61,6 @@ public class JwtUtil {
         return Jwts.builder()
                 .claim("category", "access")
                 .claim("email", email)
-                .claim("role", "ROLE_MANAGER")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
                 .signWith(secretKey)
