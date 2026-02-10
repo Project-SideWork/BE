@@ -2,9 +2,10 @@ package com.sidework.security.config;
 
 import com.sidework.security.component.CustomAccessDeniedHandler;
 import com.sidework.security.component.CustomAuthenticationEntryPoint;
-import com.sidework.security.filter.CustomLogoutFilter;
 import com.sidework.security.filter.JwtFilter;
 import com.sidework.security.filter.LoginFilter;
+import com.sidework.security.handler.CustomLogoutHandler;
+import com.sidework.security.service.TokenBlackListService;
 import com.sidework.security.util.CookieUtil;
 import com.sidework.security.util.JwtUtil;
 import com.sidework.user.application.port.out.UserOutPort;
@@ -40,6 +41,8 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final CookieUtil cookieUtil;
     private final UserOutPort userRepository;
+    private final CustomLogoutHandler customLogoutHandler;
+    private final TokenBlackListService tokenBlackListService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -67,15 +70,18 @@ public class SecurityConfig {
                 .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)  // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login", "/swagger-ui/**",    // Swagger UI 관련 경로
-                                "/v3/api-docs/**", "/api/v1/users/**").permitAll()
+                                "/v3/api-docs/**", "/api/v1/users/**", "/api/v1/reissue").permitAll()
                         .anyRequest().authenticated()  // 모든 요청 허용
                 ).headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())
                 )
-                .addFilterBefore(new JwtFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class)
-                // .addFilterAfter(rateLimitFilter, JwtFilter.class)
+                .addFilterBefore(new JwtFilter(jwtUtil, userDetailsService, tokenBlackListService), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(new LoginFilter(jwtUtil, cookieUtil, userRepository, authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil), LogoutFilter.class);
+                .logout(logout -> logout
+                        .logoutUrl("/api/v1/logout")
+                        .addLogoutHandler(customLogoutHandler)
+                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(204))
+                );
 
         http.sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
