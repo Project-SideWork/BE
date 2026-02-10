@@ -32,4 +32,8 @@ public class ProjectUser {
                 .role(role)
                 .build();
     }
+
+    public void updateStatus(ApplyStatus status) {
+        this.status = status;
+    }
 }
