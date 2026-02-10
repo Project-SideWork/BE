@@ -4,9 +4,11 @@ import static com.sidework.project.domain.ApplyStatus.*;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sidework.project.application.event.ProjectApplyDecisionEvent;
 import com.sidework.project.application.exception.ProfileNotFoundException;
 import com.sidework.project.application.exception.ProjectApplicantNotFoundException;
 import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
@@ -34,6 +36,7 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 	private final ProjectOutPort projectRepository;
 	private final ProjectUserOutPort projectUserRepository;
 	private final ProfileQueryOutPort profileQueryRepository;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Override
 	public void apply(Long userId, Long projectId, ProjectApplyCommand command) {
@@ -55,23 +58,31 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 	//
 	@Override
 	public void approve(Long userId, Long projectId, Long applicantUserId) {
-		checkProjectExistsAndIsRecruiting(projectId);
+		Project project = checkProjectExistsAndIsRecruiting(projectId);
 		validateOwnerOrThrow(userId, projectId);
 		ProjectUser applicant = validateApplicantPendingOrThrow(applicantUserId, projectId);
 		applicant.updateStatus(ACCEPTED);
 
 		projectUserRepository.save(applicant);
 
+		eventPublisher.publishEvent(
+			new ProjectApplyDecisionEvent(projectId, applicantUserId, project.getTitle(),applicant.getRole().getValue(),true)
+		);
+
 	}
 
 	@Override
 	public void reject(Long userId, Long projectId, Long applicantUserId) {
-		checkProjectExistsAndIsRecruiting(projectId);
+		Project project = checkProjectExistsAndIsRecruiting(projectId);
 		validateOwnerOrThrow(userId, projectId);
 		ProjectUser applicant = validateApplicantPendingOrThrow(applicantUserId, projectId);
 		applicant.updateStatus(REJECTED);
 
 		projectUserRepository.save(applicant);
+
+		eventPublisher.publishEvent(
+			new ProjectApplyDecisionEvent(projectId, applicantUserId, project.getTitle(),applicant.getRole().getValue(),false)
+		);
 	}
 
 	private void validateProfileExistsAndOwnedByUser(Long profileId, Long userId) {
@@ -80,11 +91,12 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 		}
 	}
 
-	private void checkProjectExistsAndIsRecruiting(Long projectId) {
+	private Project checkProjectExistsAndIsRecruiting(Long projectId) {
 		Project project = projectRepository.findById(projectId);
 		if (!project.getStatus().equals(ProjectStatus.RECRUITING)) {
 			throw new ProjectNotRecruitingException(projectId);
 		}
+		return project;
 	}
 
 	private void checkDuplicateApply(Long userId, Long projectId, ProjectRole role) {
