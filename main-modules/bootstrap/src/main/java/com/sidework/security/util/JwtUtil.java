@@ -21,17 +21,15 @@ import java.util.Date;
 @Slf4j
 public class JwtUtil {
 
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000; // 30분
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000; // 30분
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 60 * 60 * 1000; // 1시
     //객체 키 생성
     private SecretKey secretKey;
-    private final UserOutPort userRepository;
 
     //검증 메서드
 
-    public JwtUtil(@Value("${jwt.secret}") String secret, UserOutPort userRepository) {
+    public JwtUtil(@Value("${jwt.secret}") String secret) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
-        this.userRepository = userRepository;
     }
 
     public String getEmail(String token) {
