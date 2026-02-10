@@ -44,7 +44,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        log.info("Attempting authentication...");
         try {
             String messageBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
             LoginCommand loginRequest = new ObjectMapper().readValue(messageBody, LoginCommand.class);
@@ -59,11 +58,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                            FilterChain chain, Authentication authentication)
-            throws IOException, ServletException {
-        log.info("Authentication successful...");
-
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
         AuthenticatedUserDetails userDetails = (AuthenticatedUserDetails) authentication.getPrincipal();
         String email = userDetails.getEmail();
         try {
