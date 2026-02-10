@@ -8,7 +8,6 @@ import com.sidework.security.handler.CustomLogoutHandler;
 import com.sidework.security.service.TokenBlackListService;
 import com.sidework.security.util.CookieUtil;
 import com.sidework.security.util.JwtUtil;
-import com.sidework.user.application.port.out.UserOutPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -40,7 +38,6 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final CookieUtil cookieUtil;
-    private final UserOutPort userRepository;
     private final CustomLogoutHandler customLogoutHandler;
     private final TokenBlackListService tokenBlackListService;
 
@@ -75,7 +72,7 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin())
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil, userDetailsService, tokenBlackListService), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(new LoginFilter(jwtUtil, cookieUtil, userRepository, authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(jwtUtil, cookieUtil, authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/logout")
                         .addLogoutHandler(customLogoutHandler)
