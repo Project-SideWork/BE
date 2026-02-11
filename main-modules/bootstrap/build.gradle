@@ -18,6 +18,7 @@ dependencies {
     implementation project(':main-modules:project:project-infrastructure')
     implementation project(':main-modules:user:user-application')
     implementation project(':main-modules:user:user-infrastructure')
+    implementation project(':main-modules:user:user-domain')
     implementation project(':main-modules:profile:profile-application')
     implementation project(':main-modules:profile:profile-infrastructure')
     implementation project(':main-modules:skill:skill-application')
@@ -26,8 +27,17 @@ dependencies {
     implementation project(':main-modules:notification:notification-infrastructure')
 
 
+    implementation libs.bundles.jwt
+
+    annotationProcessor libs.lombok
+    compileOnly libs.lombok
+
+    implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.redis
+    implementation libs.spring.boot.spring.doc
+    implementation libs.org.redisson.starter
     implementation libs.bundles.bootstrap
     testImplementation libs.bundles.test
 
