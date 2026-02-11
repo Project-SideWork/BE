@@ -12,4 +12,5 @@ public interface ProjectUserOutPort {
     List<ProjectRole> queryUserRolesByProject(Long userId, Long projectId);
     List<Long> queryAllProjectIds(Long userId);
 	Optional<ProjectUser> findByProjectIdAndUserId(Long projectId, Long userId);
+	Optional<ProjectUser> findByProjectIdAndUserIdAndRole(Long projectId, Long userId, ProjectRole role);
 }

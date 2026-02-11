@@ -17,6 +17,7 @@ import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.exception.ProjectOwnerNotFoundException;
 import com.sidework.project.application.exception.ProjectUserNotFoundException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
+import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.out.ProfileQueryOutPort;
 import com.sidework.project.application.port.out.ProjectOutPort;
@@ -55,33 +56,31 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 		);
 	}
 
-	//
 	@Override
-	public void approve(Long userId, Long projectId, Long applicantUserId) {
+	public void approve(Long userId, Long projectId, ProjectApplyDecisionCommand command) {
 		Project project = checkProjectExistsAndIsRecruiting(projectId);
 		validateOwnerOrThrow(userId, projectId);
-		ProjectUser applicant = validateApplicantPendingOrThrow(applicantUserId, projectId);
+		ProjectUser applicant = validateApplicantPendingOrThrow(command.applicantUserId(), projectId, command.role());
 		applicant.updateStatus(ACCEPTED);
 
 		projectUserRepository.save(applicant);
 
 		eventPublisher.publishEvent(
-			new ProjectApplyDecisionEvent(projectId, applicantUserId, project.getTitle(),applicant.getRole().getValue(),true)
+			new ProjectApplyDecisionEvent(projectId, command.applicantUserId(), project.getTitle(), applicant.getRole().getValue(), true)
 		);
-
 	}
 
 	@Override
-	public void reject(Long userId, Long projectId, Long applicantUserId) {
+	public void reject(Long userId, Long projectId, ProjectApplyDecisionCommand command) {
 		Project project = checkProjectExistsAndIsRecruiting(projectId);
 		validateOwnerOrThrow(userId, projectId);
-		ProjectUser applicant = validateApplicantPendingOrThrow(applicantUserId, projectId);
+		ProjectUser applicant = validateApplicantPendingOrThrow(command.applicantUserId(), projectId, command.role());
 		applicant.updateStatus(REJECTED);
 
 		projectUserRepository.save(applicant);
 
 		eventPublisher.publishEvent(
-			new ProjectApplyDecisionEvent(projectId, applicantUserId, project.getTitle(),applicant.getRole().getValue(),false)
+			new ProjectApplyDecisionEvent(projectId, command.applicantUserId(), project.getTitle(), applicant.getRole().getValue(), false)
 		);
 	}
 
@@ -119,8 +118,8 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 		}
 	}
 
-	private ProjectUser validateApplicantPendingOrThrow(Long applicantUserId, Long projectId) {
-		ProjectUser projectUser = projectUserRepository.findByProjectIdAndUserId(projectId, applicantUserId)
+	private ProjectUser validateApplicantPendingOrThrow(Long applicantUserId, Long projectId, ProjectRole applicantRole) {
+		ProjectUser projectUser = projectUserRepository.findByProjectIdAndUserIdAndRole(projectId, applicantUserId, applicantRole)
 			.orElseThrow(() -> new ProjectApplicantNotFoundException(projectId));
 
 		if (projectUser.getStatus() != UNREAD && projectUser.getStatus() != READ) {
