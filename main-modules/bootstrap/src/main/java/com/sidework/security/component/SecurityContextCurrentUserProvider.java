@@ -14,7 +14,8 @@ public class SecurityContextCurrentUserProvider implements CurrentUserProvider {
         Authentication auth =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth == null || !auth.isAuthenticated()) {
+        if (auth == null || !auth.isAuthenticated()
+                || !(auth.getPrincipal() instanceof AuthenticatedUser)) {
             throw new UnauthenticatedException();
         }
 

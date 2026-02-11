@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'io.spring.dependency-management'
+}
+tasks.named('jar') {
+    enabled = true
+}
+
+dependencies {
+    implementation project(':main-modules:common')
+    implementation project(':main-modules:notification:notification-domain')
+    implementation project(':main-modules:notification:notification-application')
+
+    implementation libs.spring.boot.starter.jpa
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.web
+    implementation libs.mysql.connector
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+    testAnnotationProcessor libs.mapstruct.processor
+
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.database.h2
+
+    implementation 'com.google.firebase:firebase-admin:9.7.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
