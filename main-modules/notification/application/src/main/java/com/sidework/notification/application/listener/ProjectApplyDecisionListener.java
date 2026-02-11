@@ -36,7 +36,7 @@ public class ProjectApplyDecisionListener {
 				toUserId,
 				NotificationType.PROJECT_REJECTED,
 				"프로젝트 지원 결과 안내",
-				String.format("아쉽게도 '%s' 프로젝트에 %s 지원이 거절되었습니다.", event.projectTitle(),event.projectRole())
+				String.format("'%s' 프로젝트에 %s 지원이 거절되었습니다.", event.projectTitle(),event.projectRole())
 			);
 				fcmPushUseCase.sendToUser(toUserId,"프로젝트 지원 결과 안내",
 					String.format("'%s' 프로젝트에 %s 지원이 거절되었습니다.", event.projectTitle(),event.projectRole())
