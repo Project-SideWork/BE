@@ -8,6 +8,7 @@ import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
+import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.*;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
@@ -27,6 +28,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
     private final ProjectRequiredCommandUseCase requiredSkillCommandService;
     private final ProjectOutPort projectRepository;
     private final ProjectUserOutPort projectUserRepository;
+    private final ProjectRecruitPositionOutPort projectRecruitPositionRepository;
 
     @Override
     //TODO: UserDetails 도입 후 하드코딩 제거
@@ -48,6 +50,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         if(!command.preferredStacks().isEmpty()) {
             preferredSkillCommandService.create(savedId, command.preferredStacks());
         }
+        projectRecruitPositionRepository.saveAll(savedId, command.recruitPositions());
     }
 
     @Override
@@ -68,6 +71,8 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         if(!command.preferredStacks().isEmpty()) {
             preferredSkillCommandService.update(projectId, command.preferredStacks());
         }
+        projectRecruitPositionRepository.deleteByProjectId(projectId);
+        projectRecruitPositionRepository.saveAll(projectId, command.recruitPositions());
     }
 
     @Override
@@ -80,6 +85,8 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         project.delete();
 
         projectRepository.save(project);
+
+        projectRecruitPositionRepository.deleteByProjectId(projectId);
     }
 
 
