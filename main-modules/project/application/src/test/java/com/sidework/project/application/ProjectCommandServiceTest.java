@@ -9,7 +9,7 @@ import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.ProjectRole;
-import com.sidework.project.application.port.in.SkillLevel;
+import com.sidework.project.domain.SkillLevel;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.service.ProjectCommandService;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
