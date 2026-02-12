@@ -1,6 +1,8 @@
 package com.sidework.project.application.port.in;
 
 import com.sidework.project.domain.ProjectRole;
+import com.sidework.project.domain.SkillLevel;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
