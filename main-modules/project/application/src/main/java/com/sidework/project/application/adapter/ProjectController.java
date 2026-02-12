@@ -2,6 +2,7 @@ package com.sidework.project.application.adapter;
 
 import com.sidework.common.response.ApiResponse;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
+import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
@@ -44,7 +45,23 @@ public class ProjectController {
     // TODO: UserDetail 변경
     @PostMapping("/{projectId}/apply")
     public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectId") Long projectId, @Validated @RequestBody ProjectApplyCommand command) {
-        applyCommandService.apply(1L,projectId,command);
+        applyCommandService.apply(2L,projectId,command);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
+    @PatchMapping("/{projectId}/approve")
+    public ResponseEntity<ApiResponse<Void>> approveProject(
+            @PathVariable("projectId") Long projectId,
+            @Validated @RequestBody ProjectApplyDecisionCommand command) {
+        applyCommandService.approve(2L, projectId, command);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
+    @PatchMapping("/{projectId}/reject")
+    public ResponseEntity<ApiResponse<Void>> rejectProject(
+            @PathVariable("projectId") Long projectId,
+            @Validated @RequestBody ProjectApplyDecisionCommand command) {
+        applyCommandService.reject(2L, projectId, command);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
     }
 }

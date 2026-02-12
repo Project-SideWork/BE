@@ -30,6 +30,8 @@ import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.notification.application.adapter.NotificationController;
 import com.sidework.notification.application.adapter.NotificationResponse;
 import com.sidework.notification.application.exception.NotificationNotFoundException;
+import com.sidework.notification.application.port.in.FcmPushUseCase;
+import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationCommand;
 import com.sidework.notification.application.port.in.NotificationCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationQueryUseCase;
@@ -56,6 +58,12 @@ class NotificationControllerTest {
 
 	@MockitoBean
 	private SseSubscribeUseCase sseSubscribeUseCase;
+
+	@MockitoBean
+	private FcmTokenCommandUseCase fcmTokenCommandUseCase;
+
+	@MockitoBean
+	private FcmPushUseCase fcmPushUseCase;
 
 	@Test
 	void SSE_구독_요청_시_200을_반환한다() throws Exception {
