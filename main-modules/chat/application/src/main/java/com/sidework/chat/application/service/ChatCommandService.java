@@ -1,7 +1,7 @@
 package com.sidework.chat.application.service;
 
 import com.sidework.chat.application.port.in.ChatCommandUseCase;
-import com.sidework.chat.application.port.in.ChatContent;
+import com.sidework.chat.application.adapter.ChatContent;
 import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
