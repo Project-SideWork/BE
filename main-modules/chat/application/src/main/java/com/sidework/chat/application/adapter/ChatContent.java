@@ -1,4 +1,4 @@
-package com.sidework.chat.application.port.in;
+package com.sidework.chat.application.adapter;
 
 public record ChatContent(
         Long receiverId,
