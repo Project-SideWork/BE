@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @NoArgsConstructor
@@ -19,6 +21,8 @@ public class ChatMessage {
     private String content;
 
     private Boolean isDeleted;
+
+    private LocalDateTime createdAt;
 
     public static ChatMessage create(Long chatRoomId, Long senderId, String content) {
         return ChatMessage.builder()
