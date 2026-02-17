@@ -1,11 +1,13 @@
 package com.sidework.chat.application.service;
 
+import com.sidework.chat.application.adapter.NewChatCommand;
 import com.sidework.chat.application.port.in.ChatCommandUseCase;
-import com.sidework.chat.application.adapter.ChatContent;
+import com.sidework.chat.application.adapter.ExistChatCommand;
 import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
 import com.sidework.common.auth.CurrentUserProvider;
+import com.sidework.common.event.sse.port.out.SseSendOutPort;
 import com.sidework.domain.ChatMessage;
 import com.sidework.domain.ChatRoom;
 import com.sidework.domain.ChatUser;
@@ -21,16 +23,28 @@ public class ChatCommandService implements ChatCommandUseCase {
     private final ChatUserOutPort chatUserRepository;
     private final ChatRoomOutPort chatRoomRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final SseSendOutPort sseSendAdapter;
 
 
     @Override
-    public void processStartNewChat(ChatContent chatContent) {
+    public void processStartNewChat(NewChatCommand chatCommand) {
         Long newChatRoom = createNewChatRoom();
         Long senderId = currentUserProvider.authenticatedUser().getId();
-        Long messageId = createNewChatMessage(newChatRoom, senderId, chatContent.content());
+        Long messageId = createNewChatMessage(newChatRoom, senderId, chatCommand.content());
 
         createNewChatUser(newChatRoom, senderId, messageId);
-        createNewChatUser(newChatRoom, chatContent.receiverId(), null);
+        createNewChatUser(newChatRoom, chatCommand.receiverId(), null);
+
+        sseSendAdapter.sendToUser(chatCommand.receiverId(), chatCommand.content());
+    }
+
+    @Override
+    public void processExistChat(Long chatRoomId, ExistChatCommand chatCommand) {
+        Long senderId = currentUserProvider.authenticatedUser().getId();
+        Long messageId = createNewChatMessage(chatRoomId, senderId, chatCommand.content());
+        chatUserRepository.updateLastReadChat(senderId, chatRoomId, messageId);
+
+        sseSendAdapter.sendToChatRoom(chatRoomId, chatCommand.content());
     }
 
     public Long createNewChatRoom() {
