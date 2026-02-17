@@ -4,4 +4,5 @@ import com.sidework.domain.ChatUser;
 
 public interface ChatUserOutPort {
     void save(ChatUser chatUser);
+    void updateLastReadChat(Long userId, Long chatRoomId, Long chatMessageId);
 }

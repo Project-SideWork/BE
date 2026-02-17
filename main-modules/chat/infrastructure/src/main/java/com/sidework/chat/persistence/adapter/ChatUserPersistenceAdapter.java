@@ -18,4 +18,9 @@ public class ChatUserPersistenceAdapter implements ChatUserOutPort {
         ChatUserEntity entity = mapper.toEntity(chatUser);
         repo.save(entity);
     }
+
+    @Override
+    public void updateLastReadChat(Long userId, Long chatRoomId, Long chatMessageId) {
+        repo.updateLastRead(userId, chatRoomId, chatMessageId);
+    }
 }
