@@ -8,7 +8,7 @@ import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.exception.ProjectUserNotFoundException;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
-import com.sidework.project.application.port.in.RecruitPosition;
+import com.sidework.project.application.adapter.ProjectDetailResponse.RecruitPositionResponse;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
@@ -66,7 +66,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         List<ProjectRecruitPosition> positions = queryProjectRecruitPosition(projectId);
 
         List<ProjectDetailResponse.ProjectMemberResponse> teamMembers = buildTeamMembers(allMembers);
-        List<RecruitPosition> recruitPositions = buildRecruitPositions(positions);
+        List<RecruitPositionResponse> recruitPositions = buildRecruitPositions(positions);
         List<String> requiredStacks = queryRequiredStacks(projectId);
         List<String> preferredStacks = queryPreferredSkills(projectId);
 
@@ -115,11 +115,12 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             .toList();
     }
 
-    private List<RecruitPosition> buildRecruitPositions(List<ProjectRecruitPosition> positions) {
+    private List<RecruitPositionResponse> buildRecruitPositions(List<ProjectRecruitPosition> positions) {
         return positions.stream()
-            .map(pos -> RecruitPosition.of(
+            .map(pos -> RecruitPositionResponse.of(
                 pos.getRole(),
                 pos.getHeadCount(),
+                pos.getCurrentCount() != null ? pos.getCurrentCount() : 0,
                 pos.getLevel()
             ))
             .toList();

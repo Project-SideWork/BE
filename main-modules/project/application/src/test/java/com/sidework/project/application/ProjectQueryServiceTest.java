@@ -122,6 +122,10 @@ class ProjectQueryServiceTest {
         assertEquals(project.getTitle(), result.title());
         assertEquals(2, result.teamMembers().size());
         assertEquals(1, result.recruitPositions().size());
+        assertEquals(ProjectRole.BACKEND, result.recruitPositions().get(0).role());
+        assertEquals(1, result.recruitPositions().get(0).headCount());
+        assertEquals(0, result.recruitPositions().get(0).currentCount());
+        assertEquals(SkillLevel.JUNIOR, result.recruitPositions().get(0).level());
         assertEquals(requiredStacks, result.requiredStacks());
         assertEquals(preferredStacks, result.preferredStacks());
     }

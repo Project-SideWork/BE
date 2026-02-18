@@ -489,7 +489,7 @@ public class ProjectControllerTest {
             MeetingType.HYBRID,
             ProjectStatus.RECRUITING,
             List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED)),
-            List.of(RecruitPosition.of(ProjectRole.BACKEND, 1, SkillLevel.JUNIOR)),
+            List.of(ProjectDetailResponse.RecruitPositionResponse.of(ProjectRole.BACKEND, 1, 0, SkillLevel.JUNIOR)),
             List.of("Java", "Spring"),
             List.of("Redis")
         );
