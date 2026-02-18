@@ -61,6 +61,9 @@ public class ProjectCommandServiceTest {
     @Captor
     ArgumentCaptor<Project> projectArgumentCaptor;
 
+    @Captor
+    ArgumentCaptor<List<com.sidework.project.domain.ProjectRecruitPosition>> recruitPositionsCaptor;
+
     @Test
     void 정상적인_프로젝트_생성_DTO로_프로젝트_생성에_성공한다() {
         ProjectCommand command = createCommand(ProjectStatus.PREPARING);
@@ -81,7 +84,12 @@ public class ProjectCommandServiceTest {
         assertEquals(command.endDt(), saved.getEndDt());
         assertEquals(command.meetingType(), saved.getMeetingType());
         assertEquals(ProjectStatus.PREPARING, saved.getStatus());
-        verify(projectRecruitPositionRepository).saveAll(eq(1L), eq(command.recruitPositions()));
+        verify(projectRecruitPositionRepository).saveAll(eq(1L), recruitPositionsCaptor.capture());
+        List<com.sidework.project.domain.ProjectRecruitPosition> positions = recruitPositionsCaptor.getValue();
+        assertEquals(command.recruitPositions().size(), positions.size());
+        assertEquals(command.recruitPositions().get(0).role(), positions.get(0).getRole());
+        assertEquals(command.recruitPositions().get(0).headCount(), positions.get(0).getHeadCount());
+        assertEquals(command.recruitPositions().get(0).level(), positions.get(0).getLevel());
     }
 
     @Test
@@ -138,7 +146,12 @@ public class ProjectCommandServiceTest {
         assertNotEquals(command.meetingType(), project.getMeetingType());
         assertNotEquals(CANCELED, project.getStatus());
         verify(projectRecruitPositionRepository).deleteByProjectId(projectId);
-        verify(projectRecruitPositionRepository).saveAll(eq(projectId), eq(updateCommand.recruitPositions()));
+        verify(projectRecruitPositionRepository).saveAll(eq(projectId), recruitPositionsCaptor.capture());
+        List<com.sidework.project.domain.ProjectRecruitPosition> positions = recruitPositionsCaptor.getValue();
+        assertEquals(updateCommand.recruitPositions().size(), positions.size());
+        assertEquals(updateCommand.recruitPositions().get(0).role(), positions.get(0).getRole());
+        assertEquals(updateCommand.recruitPositions().get(0).headCount(), positions.get(0).getHeadCount());
+        assertEquals(updateCommand.recruitPositions().get(0).level(), positions.get(0).getLevel());
     }
 
     @Test
