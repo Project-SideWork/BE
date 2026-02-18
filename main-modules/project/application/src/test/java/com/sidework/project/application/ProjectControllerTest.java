@@ -7,7 +7,9 @@ import com.sidework.project.application.adapter.ProjectController;
 import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
 import com.sidework.project.application.exception.ProjectNotRecruitingException;
+import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectNotFoundException;
+import com.sidework.project.application.exception.ProjectUserNotFoundException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
@@ -18,6 +20,7 @@ import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.domain.SkillLevel;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.domain.MeetingType;
+import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
@@ -472,6 +475,57 @@ public class ProjectControllerTest {
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 프로젝트_상세_조회_요청시_성공하면_200과_상세_응답을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectDetailResponse detail = new ProjectDetailResponse(
+            1L,
+            "테스트 프로젝트",
+            "설명",
+            java.time.LocalDate.of(2025, 1, 1),
+            java.time.LocalDate.of(2025, 3, 31),
+            MeetingType.HYBRID,
+            ProjectStatus.RECRUITING,
+            List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED)),
+            List.of(RecruitPosition.of(ProjectRole.BACKEND, 1, SkillLevel.JUNIOR)),
+            List.of("Java", "Spring"),
+            List.of("Redis")
+        );
+        when(projectQueryUseCase.queryProjectDetail(projectId)).thenReturn(detail);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.id").value(1))
+                .andExpect(jsonPath("$.result.title").value("테스트 프로젝트"))
+                .andExpect(jsonPath("$.result.teamMembers").isArray())
+                .andExpect(jsonPath("$.result.requiredStacks").isArray())
+                .andExpect(jsonPath("$.result.preferredStacks").isArray());
+    }
+
+    @Test
+    void 프로젝트_상세_조회_요청시_projectId가_존재하지_않으면_404를_반환한다() throws Exception {
+        Long projectId = 999L;
+        doThrow(new ProjectNotFoundException(projectId))
+                .when(projectQueryUseCase).queryProjectDetail(projectId);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 프로젝트_상세_조회_요청시_멤버가_없으면_403을_반환한다() throws Exception {
+        Long projectId = 1L;
+        doThrow(new ProjectUserNotFoundException(projectId))
+                .when(projectQueryUseCase).queryProjectDetail(projectId);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andDo(print())
+                .andExpect(status().isForbidden());
     }
 
     private ProjectCommand createCommand(ProjectStatus status) {
