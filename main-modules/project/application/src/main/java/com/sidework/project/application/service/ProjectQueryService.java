@@ -2,6 +2,7 @@ package com.sidework.project.application.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectNotFoundException;
@@ -94,11 +95,13 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     private List<String> queryRequiredStacks(Long projectId) {
-		return projectRequiredQueryUseCase.queryNamesByProjectId(projectId);
+		return Optional.ofNullable(projectRequiredQueryUseCase.queryNamesByProjectId(projectId))
+            .orElse(List.of());
     }
 
     private List<String> queryPreferredSkills(Long projectId) {
-        return projectPreferredSkillQueryUseCase.queryNamesByProjectId(projectId);
+        return Optional.ofNullable(projectPreferredSkillQueryUseCase.queryNamesByProjectId(projectId))
+            .orElse(List.of());
     }
 
     private List<ProjectDetailResponse.ProjectMemberResponse> buildTeamMembers(List<ProjectUser> allMembers) {
