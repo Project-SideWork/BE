@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sidework.skill.application.port.in.ProjectRequiredQueryUseCase;
 import com.sidework.skill.application.port.out.ProjectRequiredSkillOutPort;
 import com.sidework.skill.application.port.out.SkillOutPort;
-import com.sidework.skill.domain.ProjectPreferredSkill;
 import com.sidework.skill.domain.ProjectRequiredSkill;
 import com.sidework.skill.domain.Skill;
 
