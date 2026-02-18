@@ -37,6 +37,7 @@ public enum ErrorStatus implements BaseStatusCode {
     PROJECT_APPLICANT_NOT_FOUND(HttpStatus.FORBIDDEN, "PROJECT_007", "해당 프로젝트의 신청자가 아닙니다."),
     PROJECT_USER_NOT_FOUND(HttpStatus.FORBIDDEN, "PROJECT_008", "해당 프로젝트의 유저/소유자가 아닙니다."),
     PROJECT_APPLY_ALREADY_PROCESSED(HttpStatus.CONFLICT, "PROJECT_009", "이미 처리된 지원입니다."),
+    PROJECT_HAS_NO_MEMBERS(HttpStatus.INTERNAL_SERVER_ERROR, "PROJECT_010", "해당 프로젝트에 멤버가 존재하지 않습니다."),
 
     // PROFILE
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROFILE_001", "해당 프로필을 찾을 수 없습니다."),

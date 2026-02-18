@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.sidework.project.application.adapter.ProjectDetailResponse;
+import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
-import com.sidework.project.application.exception.ProjectUserNotFoundException;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.adapter.ProjectDetailResponse.RecruitPositionResponse;
 import com.sidework.project.application.port.out.ProjectOutPort;
@@ -60,7 +60,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
         List<ProjectUser> allMembers = projectUserRepository.findAllByProjectId(projectId);
         if (allMembers == null || allMembers.isEmpty()) {
-            throw new ProjectUserNotFoundException(projectId);
+            throw new ProjectHasNoMembersException(projectId);
         }
 
         List<ProjectRecruitPosition> positions = queryProjectRecruitPosition(projectId);
@@ -120,7 +120,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             .map(pos -> RecruitPositionResponse.of(
                 pos.getRole(),
                 pos.getHeadCount(),
-                pos.getCurrentCount() != null ? pos.getCurrentCount() : 0,
+                pos.getCurrentCount(),
                 pos.getLevel()
             ))
             .toList();

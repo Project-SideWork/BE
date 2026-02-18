@@ -9,7 +9,7 @@ import com.sidework.project.application.exception.ProjectDeleteAuthorityExceptio
 import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectNotFoundException;
-import com.sidework.project.application.exception.ProjectUserNotFoundException;
+import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
@@ -518,14 +518,14 @@ public class ProjectControllerTest {
     }
 
     @Test
-    void 프로젝트_상세_조회_요청시_멤버가_없으면_403을_반환한다() throws Exception {
+    void 프로젝트_상세_조회_요청시_멤버가_없으면_500을_반환한다() throws Exception {
         Long projectId = 1L;
-        doThrow(new ProjectUserNotFoundException(projectId))
+        doThrow(new ProjectHasNoMembersException(projectId))
                 .when(projectQueryUseCase).queryProjectDetail(projectId);
 
         mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isInternalServerError());
     }
 
     private ProjectCommand createCommand(ProjectStatus status) {

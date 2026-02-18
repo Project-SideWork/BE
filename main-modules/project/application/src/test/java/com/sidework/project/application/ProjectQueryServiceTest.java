@@ -1,8 +1,8 @@
 package com.sidework.project.application;
 
 import com.sidework.project.application.adapter.ProjectDetailResponse;
+import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
-import com.sidework.project.application.exception.ProjectUserNotFoundException;
 import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
@@ -139,13 +139,13 @@ class ProjectQueryServiceTest {
     }
 
     @Test
-    void queryProjectDetail_멤버가_없으면_ProjectUserNotFoundException을_던진다() {
+    void queryProjectDetail_멤버가_없으면_ProjectHasNoMembersException을_던진다() {
         Long projectId = 1L;
         Project project = createProject(projectId);
         when(projectRepository.findById(projectId)).thenReturn(project);
         when(projectUserRepository.findAllByProjectId(projectId)).thenReturn(List.of());
 
-        assertThrows(ProjectUserNotFoundException.class, () -> queryService.queryProjectDetail(projectId));
+        assertThrows(ProjectHasNoMembersException.class, () -> queryService.queryProjectDetail(projectId));
     }
 
     @Test
