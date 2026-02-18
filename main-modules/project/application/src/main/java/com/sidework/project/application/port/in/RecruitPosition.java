@@ -16,4 +16,8 @@ public record RecruitPosition(
 
         @NotNull
         SkillLevel level   // 초급 / 중급 / 고급
-) {}
+) {
+	public static RecruitPosition of(ProjectRole role, Integer headCount, SkillLevel level) {
+		return new RecruitPosition(role, headCount, level);
+	}
+}
