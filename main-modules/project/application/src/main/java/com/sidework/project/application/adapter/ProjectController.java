@@ -7,6 +7,7 @@ import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
+import com.sidework.project.domain.Project;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -63,5 +64,10 @@ public class ProjectController {
             @Validated @RequestBody ProjectApplyDecisionCommand command) {
         applyCommandService.reject(2L, projectId, command);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProject(@PathVariable("projectId") Long projectId) {
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(projectId)));
     }
 }
