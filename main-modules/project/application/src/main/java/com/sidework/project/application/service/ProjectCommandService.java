@@ -7,6 +7,7 @@ import com.sidework.project.application.exception.ProjectNotChangeableException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
+import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
@@ -50,7 +51,8 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         if(!command.preferredStacks().isEmpty()) {
             preferredSkillCommandService.create(savedId, command.preferredStacks());
         }
-        projectRecruitPositionRepository.saveAll(savedId, command.recruitPositions());
+        List<ProjectRecruitPosition> recruitPositions = toRecruitPositions(savedId, command.recruitPositions());
+        projectRecruitPositionRepository.saveAll(savedId, recruitPositions);
     }
 
     @Override
@@ -72,7 +74,8 @@ public class ProjectCommandService implements ProjectCommandUseCase {
             preferredSkillCommandService.update(projectId, command.preferredStacks());
         }
         projectRecruitPositionRepository.deleteByProjectId(projectId);
-        projectRecruitPositionRepository.saveAll(projectId, command.recruitPositions());
+        List<ProjectRecruitPosition> recruitPositions = toRecruitPositions(projectId, command.recruitPositions());
+        projectRecruitPositionRepository.saveAll(projectId, recruitPositions);
     }
 
     @Override
@@ -129,5 +132,14 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         if (titleExists) {
             throw new InvalidCommandException("참여 중인 프로젝트 중에 동일한 이름이 있습니다.");
         }
+    }
+
+    private List<ProjectRecruitPosition> toRecruitPositions(Long projectId, List<RecruitPosition> recruitPositions) {
+        if (recruitPositions == null || recruitPositions.isEmpty()) {
+            return List.of();
+        }
+        return recruitPositions.stream()
+            .map(position -> ProjectRecruitPosition.create(projectId, position.role(), position.headCount(), position.level()))
+            .toList();
     }
 }

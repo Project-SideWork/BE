@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.domain.ProjectRecruitPosition;
 import com.sidework.project.persistence.entity.ProjectRecruitPositionEntity;
@@ -21,14 +20,11 @@ public class ProjectRecruitPositionPersistenceAdapter implements ProjectRecruitP
 	private final ProjectRecruitPositionMapper mapper;
 
 	@Override
-	public void saveAll(Long projectId, List<RecruitPosition> positions) {
+	public void saveAll(Long projectId, List<ProjectRecruitPosition> positions) {
 		if (positions == null || positions.isEmpty()) {
 			return;
 		}
-		List<ProjectRecruitPosition> domains = positions.stream()
-			.map(position -> ProjectRecruitPosition.create(projectId, position.role(), position.headCount(), position.level()))
-			.toList();
-		List<ProjectRecruitPositionEntity> entities = domains.stream()
+		List<ProjectRecruitPositionEntity> entities = positions.stream()
 			.map(mapper::toEntity)
 			.toList();
 		repository.saveAll(entities);
