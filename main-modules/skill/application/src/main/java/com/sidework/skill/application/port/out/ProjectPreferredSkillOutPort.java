@@ -1,7 +1,6 @@
 package com.sidework.skill.application.port.out;
 
 import com.sidework.skill.domain.ProjectPreferredSkill;
-import com.sidework.skill.domain.ProjectRequiredSkill;
 
 import java.util.List;
 
