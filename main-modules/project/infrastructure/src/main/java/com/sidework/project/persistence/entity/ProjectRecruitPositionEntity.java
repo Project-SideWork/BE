@@ -35,4 +35,9 @@ public class ProjectRecruitPositionEntity extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private SkillLevel level;
+
+	@Column(name = "current_count", nullable = false)
+	private Integer currentCount;
+
+
 }
