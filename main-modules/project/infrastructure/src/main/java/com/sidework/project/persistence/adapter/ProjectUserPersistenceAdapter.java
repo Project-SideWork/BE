@@ -45,4 +45,10 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
         return repo.findFirstByProjectIdAndUserIdAndRole(projectId, userId, role)
             .map(mapper::toDomain);
     }
+
+    @Override
+    public List<ProjectUser> findAllByProjectId(Long projectId) {
+        List<ProjectUserEntity> entities = repo.findAllByProjectId(projectId);
+        return entities.stream().map(mapper::toDomain).toList();
+    }
 }
