@@ -28,7 +28,7 @@ public class ChatCommandService implements ChatCommandUseCase {
 
     @Override
     public void processStartNewChat(NewChatCommand chatCommand) {
-        Long newChatRoom = createNewChatRoom();
+        Long newChatRoom = createNewChatRoom(chatCommand.content());
         Long senderId = currentUserProvider.authenticatedUser().getId();
         Long messageId = createNewChatMessage(newChatRoom, senderId, chatCommand.content());
 
@@ -47,8 +47,8 @@ public class ChatCommandService implements ChatCommandUseCase {
         sseSendAdapter.sendToChatRoom(chatRoomId, chatCommand.content());
     }
 
-    public Long createNewChatRoom() {
-        ChatRoom chatRoom = ChatRoom.create();
+    public Long createNewChatRoom(String messageContent) {
+        ChatRoom chatRoom = ChatRoom.create(messageContent);
         return chatRoomRepository.save(chatRoom); // 저장된 채팅방의 ID
     }
 
