@@ -49,6 +49,14 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		if (command.roleIds() != null) {
 			updateRoles(profile, command.roleIds());
 		}
+		if (command.selfIntroduction() != null) {
+			updateSelfIntroduction(profile, command.selfIntroduction());
+		}
+	}
+
+	private void updateSelfIntroduction(Profile profile, String selfIntroduction) {
+		profile.updateSelfIntroduction(selfIntroduction);
+		profileRepository.save(profile);
 	}
 
 	private Profile getProfileOrThrow(Long userId) {

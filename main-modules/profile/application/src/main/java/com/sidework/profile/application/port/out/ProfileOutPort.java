@@ -13,6 +13,7 @@ public interface ProfileOutPort
 {
 	boolean existsByUserId(Long userId);
 	Profile getProfileByUserId(Long userId);
+	void save(Profile profile);
 	List<ProfileRole> getProfileRoles(Long profileId);
 	List<ProfileSchool> getProfileSchools(Long profileId);
 	List<ProfileSkill> getProfileSkills(Long profileId);

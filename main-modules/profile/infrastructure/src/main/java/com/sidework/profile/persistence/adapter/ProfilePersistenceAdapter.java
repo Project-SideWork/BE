@@ -60,6 +60,12 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	}
 
 	@Override
+	public void save(Profile profile) {
+		ProfileEntity entity = profileMapper.toEntity(profile);
+		profileRepository.save(entity);
+	}
+
+	@Override
 	public List<ProfileRole> getProfileRoles(Long profileId) {
 		List<ProfileRoleEntity> entities = profileRoleRepository.findByProfileId(profileId);
 		return entities.stream()
