@@ -32,9 +32,11 @@ public class ChatQueryService implements ChatQueryUseCase {
                 chatMessage -> ChatRecord.create(chatMessage.getId(), chatMessage.getContent(), chatMessage.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")))
         ).toList();
 
-        Instant nextCursorCreatedAt = page.nextCursorCreatedAt()
-                        .atZone(ZoneOffset.UTC)
-                        .toInstant();
+
+        Instant nextCursorCreatedAt = page.nextCursorCreatedAt() != null
+                ? page.nextCursorCreatedAt().atZone(ZoneOffset.UTC).toInstant()
+                : null;
+
 
         String nextCursor = CursorUtil.encode(new CursorWrapper(nextCursorCreatedAt, page.nextCursorId()));
 
