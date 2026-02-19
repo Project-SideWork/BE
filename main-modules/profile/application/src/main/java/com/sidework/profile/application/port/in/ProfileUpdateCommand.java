@@ -9,7 +9,7 @@ import com.sidework.profile.domain.SchoolStateType;
 public record ProfileUpdateCommand(
 	List<SchoolUpdateRequest> schools,
 	List<PortfolioUpdateRequest> portfolios,
-	List<Long> skills,
+	List<SkillUpdateRequest> skills,
 	List<Long> roleIds
 ) {
 	public record PortfolioUpdateRequest(
@@ -27,4 +27,10 @@ public record ProfileUpdateCommand(
 		LocalDate endDate
 	)
 	{}
+	public record SkillUpdateRequest(
+		Long skillId,
+		String proficiency
+	)
+	{}
+
 }

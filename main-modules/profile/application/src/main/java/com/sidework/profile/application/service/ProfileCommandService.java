@@ -74,10 +74,10 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		profileRepository.saveProfileSchools(schoolList);
 	}
 
-	private void updateSkills(Profile profile, List<Long> skills) {
+	private void updateSkills(Profile profile, List<ProfileUpdateCommand.SkillUpdateRequest> skills) {
 		profileRepository.deleteAllProfileSkillsByProfileId(profile.getId());
 		List<ProfileSkill> skillList = skills.stream()
-			.map(profileSkill -> ProfileSkill.create(profile.getId(), profileSkill))
+			.map(profileSkill -> ProfileSkill.create(profile.getId(), profileSkill.skillId(),profileSkill.proficiency()))
 			.toList();
 		profileRepository.saveProfileSkills(skillList);
 	}
