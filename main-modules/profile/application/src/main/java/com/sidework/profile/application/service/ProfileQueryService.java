@@ -1,6 +1,9 @@
 package com.sidework.profile.application.service;
 
+import com.sidework.project.application.port.out.ProjectUserOutPort;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.skill.application.port.out.SkillOutPort;
+import com.sidework.skill.application.service.ProjectRequiredSkillQueryService;
 import com.sidework.skill.domain.Skill;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +48,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 
 	private final UserQueryUseCase userQueryUseCase;
 	private final ProjectQueryUseCase projectQueryUseCase;
+	private final ProjectRequiredSkillQueryService requiredSkillUseCase;
+	private final ProjectUserOutPort projectUserOutPort;
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long userId) {
@@ -107,9 +112,21 @@ public class ProfileQueryService implements ProfileQueryUseCase
 				project.getStartDt(),
 				project.getEndDt(),
 				project.getMeetingType(),
-				project.getStatus()
+				project.getStatus(),
+				getProjectSkillnames(project.getId()),
+				getProjectRole(project.getId(),1L)
+
+
 			))
-			.collect(Collectors.toList());
+			.toList();
+	}
+
+	private List<String> getProjectSkillnames(Long projectId) {
+		return requiredSkillUseCase.queryNamesByProjectId(projectId);
+	}
+
+	private List<ProjectRole> getProjectRole(Long projectId,Long userId) {
+		return projectUserOutPort.queryUserRolesByProject(userId, projectId);
 	}
 
 	private List<UserProfileResponse.RoleInfo> buildRoleInfos(Long profileId) {
@@ -209,5 +226,6 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			.filter(portfolioInfo -> portfolioInfo != null)
 			.collect(Collectors.toList());
 	}
+
 
 }

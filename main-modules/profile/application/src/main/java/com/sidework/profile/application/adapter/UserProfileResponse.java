@@ -4,6 +4,7 @@ import com.sidework.profile.domain.PortfolioType;
 import com.sidework.profile.domain.SchoolStateType;
 import com.sidework.profile.domain.SkillProficiencyType;
 import com.sidework.project.domain.MeetingType;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 
 import java.time.LocalDate;
@@ -61,6 +62,8 @@ public record UserProfileResponse(
 		LocalDate startDate,
 		LocalDate endDate,
 		MeetingType meetingType,
-		ProjectStatus status
+		ProjectStatus status,
+		List<String> projectStacks,
+		List<ProjectRole> role
 	) {}
 }
