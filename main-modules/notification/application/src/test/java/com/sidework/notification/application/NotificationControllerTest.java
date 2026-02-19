@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import com.sidework.notification.application.port.in.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,10 +31,7 @@ import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.notification.application.adapter.NotificationController;
 import com.sidework.notification.application.adapter.NotificationResponse;
 import com.sidework.notification.application.exception.NotificationNotFoundException;
-import com.sidework.notification.application.port.in.NotificationCommand;
-import com.sidework.notification.application.port.in.NotificationCommandUseCase;
-import com.sidework.notification.application.port.in.NotificationQueryUseCase;
-import com.sidework.notification.application.port.in.SseSubscribeUseCase;
+import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
 import com.sidework.notification.domain.NotificationType;
 
 @WebMvcTest(NotificationController.class)
@@ -57,9 +55,15 @@ class NotificationControllerTest {
 	@MockitoBean
 	private SseSubscribeUseCase sseSubscribeUseCase;
 
+    @MockitoBean
+    private FcmTokenCommandUseCase fcmTokenCommandUseCase;
+
+    @MockitoBean
+    private FcmPushUseCase fcmPushUseCase;
+
 	@Test
 	void SSE_구독_요청_시_200을_반환한다() throws Exception {
-		when(sseSubscribeUseCase.subscribe(anyLong())).thenReturn(new SseEmitter());
+		when(sseSubscribeUseCase.subscribeUser()).thenReturn(new SseEmitter());
 
 		mockMvc.perform(get("/api/v1/notifications/subscribe")
 				.accept(MediaType.TEXT_EVENT_STREAM_VALUE))
