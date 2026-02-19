@@ -27,21 +27,35 @@ public class ChatMessagePersistenceAdapter implements ChatMessageOutPort {
     }
 
     @Override
-    public ChatMessagePage findByChatRoomIdAndIdGreaterThan(Long chatRoomId, Instant cursorCreatedAt, Long cursorId, int size) {
-        List<ChatMessageEntity> entities = repo.pageBy(chatRoomId, cursorCreatedAt, cursorId, PageRequest.of(0, size + 1));
+    public ChatMessagePage findByChatRoomIdAndIdGreaterThan(
+            Long chatRoomId,
+            Instant cursorCreatedAt,
+            Long cursorId,
+            int size) {
 
-        boolean hasNext = entities.size() == size + 1;
+        List<ChatMessageEntity> entities = repo.pageBy(
+                chatRoomId,
+                cursorCreatedAt,
+                cursorId,
+                PageRequest.of(0, size + 1)
+        );
 
-        List<ChatMessageEntity> items = entities.stream().limit(size).toList();
+        boolean hasNext = entities.size() > size;
 
-        ChatMessageEntity last = items.isEmpty() ? null : items.getLast();
+        List<ChatMessageEntity> items = entities.stream()
+                .limit(size)
+                .toList();
+
+        ChatMessageEntity last = hasNext && !items.isEmpty()
+                ? items.getLast()
+                : null;
 
         return new ChatMessagePage(
                 items.stream().map(mapper::toDomain).toList(),
                 hasNext,
                 last != null
-                ? LocalDateTime.ofInstant(last.getCreatedAt(), ZoneOffset.UTC)
-                : null,
+                        ? LocalDateTime.ofInstant(last.getCreatedAt(), ZoneOffset.UTC)
+                        : null,
                 last != null ? last.getId() : null
         );
     }
