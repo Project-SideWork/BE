@@ -27,6 +27,7 @@ public interface ProfileOutPort
 	void deleteAllProfileSkillsByProfileId(Long profileId);
 	void deleteAllProjectPortfoliosByProfileId(Long profileId);
 	boolean existsProjectPortfolioByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId);
+	List<Long> findPortfolioIdsReferencedByOtherProfiles(Long excludeProfileId, List<Long> portfolioIds);
 	boolean existsByIdAndUserId(Long profileId,Long userId);
 
 }

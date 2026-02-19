@@ -172,6 +172,14 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	}
 
 	@Override
+	public List<Long> findPortfolioIdsReferencedByOtherProfiles(Long excludeProfileId, List<Long> portfolioIds) {
+		if (excludeProfileId == null || portfolioIds == null || portfolioIds.isEmpty()) {
+			return List.of();
+		}
+		return projectPortfolioRepository.findPortfolioIdsReferencedByOtherProfiles(excludeProfileId, portfolioIds);
+	}
+
+	@Override
 	public boolean existsByIdAndUserId(Long profileId, Long userId) {
 		if (profileId == null || userId == null) return false;
 		return profileRepository.existsByIdAndUserId(profileId, userId);

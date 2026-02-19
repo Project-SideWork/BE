@@ -49,22 +49,18 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		if (command.roleIds() != null) {
 			updateRoles(profile, command.roleIds());
 		}
+		boolean profileDirty = false;
 		if (command.selfIntroduction() != null) {
-			updateSelfIntroduction(profile, command.selfIntroduction());
+			profile.updateSelfIntroduction(command.selfIntroduction());
+			profileDirty = true;
 		}
 		if (command.residence() != null) {
-			updateResidence(profile, command.residence());
+			profile.updateResidence(command.residence());
+			profileDirty = true;
 		}
-	}
-
-	private void updateResidence(Profile profile, String residence) {
-		profile.updateResidence(residence);
-		profileRepository.save(profile);
-	}
-
-	private void updateSelfIntroduction(Profile profile, String selfIntroduction) {
-		profile.updateSelfIntroduction(selfIntroduction);
-		profileRepository.save(profile);
+		if (profileDirty) {
+			profileRepository.save(profile);
+		}
 	}
 
 	private Profile getProfileOrThrow(Long userId) {
@@ -111,9 +107,12 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		profileRepository.deleteAllProjectPortfoliosByProfileId(profileId);
 
 		if (!existedPortfolios.isEmpty()) {
-			List<Long> portfolioIdsToDelete = existedPortfolios.stream()
+			List<Long> candidateIds = existedPortfolios.stream()
 				.map(ProjectPortfolio::getPortfolioId)
-				.filter(id -> !profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(id, profileId))
+				.toList();
+			List<Long> referencedByOthers = profileRepository.findPortfolioIdsReferencedByOtherProfiles(profileId, candidateIds);
+			List<Long> portfolioIdsToDelete = candidateIds.stream()
+				.filter(id -> !referencedByOthers.contains(id))
 				.toList();
 
 			if (!portfolioIdsToDelete.isEmpty()) {
@@ -142,9 +141,12 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 
 		profileRepository.deleteAllProjectPortfoliosByProfileId(profileId);
 
-		List<Long> portfolioIdsToDelete = existingPortfolioIds.stream()
+		List<Long> candidateIdsToDelete = existingPortfolioIds.stream()
 			.filter(id -> !requestedPortfolioIds.contains(id))
-			.filter(id -> !profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(id, profileId))
+			.toList();
+		List<Long> referencedByOthers = profileRepository.findPortfolioIdsReferencedByOtherProfiles(profileId, candidateIdsToDelete);
+		List<Long> portfolioIdsToDelete = candidateIdsToDelete.stream()
+			.filter(id -> !referencedByOthers.contains(id))
 			.toList();
 
 		if (!portfolioIdsToDelete.isEmpty()) {
