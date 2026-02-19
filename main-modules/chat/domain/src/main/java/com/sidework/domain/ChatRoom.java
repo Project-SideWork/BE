@@ -18,7 +18,7 @@ public class ChatRoom {
 
     private LocalDateTime lastMessageSentTime;
 
-    public static ChatRoom create() {
-        return new ChatRoom();
+    public static ChatRoom create(String initMessage) {
+        return new ChatRoom(null, initMessage, LocalDateTime.now());
     }
 }
