@@ -52,6 +52,14 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		if (command.selfIntroduction() != null) {
 			updateSelfIntroduction(profile, command.selfIntroduction());
 		}
+		if (command.residence() != null) {
+			updateResidence(profile, command.residence());
+		}
+	}
+
+	private void updateResidence(Profile profile, String residence) {
+		profile.updateResidence(residence);
+		profileRepository.save(profile);
 	}
 
 	private void updateSelfIntroduction(Profile profile, String selfIntroduction) {

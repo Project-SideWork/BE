@@ -25,5 +25,8 @@ public class ProfileEntity extends BaseEntity {
 
 	@Column(name = "self_introduction", columnDefinition = "TEXT")
 	private String selfIntroduction;
+
+	@Column(name = "residence", length = 20)
+	private String residence;
 }
 

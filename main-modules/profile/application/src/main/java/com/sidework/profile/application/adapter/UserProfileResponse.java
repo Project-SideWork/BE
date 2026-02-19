@@ -19,6 +19,7 @@ public record UserProfileResponse(
 	String tel,
 	Long profileId,
 	String selfIntroduction,
+	String residence,
 	List<RoleInfo> roles, //직군 정보
 	List<SchoolInfo> schools, // 학교 장보
 	List<SkillInfo> skills, //기술 스택

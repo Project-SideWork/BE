@@ -14,6 +14,7 @@ public class Profile
 	private Long id;
 	private Long userId;
 	private String selfIntroduction;
+	private String residence;
 
 	public static Profile create(Long userId, String selfIntroduction) {
 		return Profile.builder()
@@ -24,6 +25,10 @@ public class Profile
 
 	public void updateSelfIntroduction(String selfIntroduction) {
 		this.selfIntroduction = selfIntroduction;
+	}
+
+	public void updateResidence(String residence) {
+		this.residence = residence;
 	}
 
 }
