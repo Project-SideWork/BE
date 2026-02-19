@@ -14,9 +14,9 @@ public class ProfileSkill
 	private Long id;
 	private Long profileId;
 	private Long skillId;
-	private String proficiency;
+	private SkillProficiencyType proficiency;
 
-	public static ProfileSkill create(Long profileId, Long skillId, String proficiency) {
+	public static ProfileSkill create(Long profileId, Long skillId, SkillProficiencyType proficiency) {
 		return ProfileSkill.builder()
 			.profileId(profileId)
 			.skillId(skillId)

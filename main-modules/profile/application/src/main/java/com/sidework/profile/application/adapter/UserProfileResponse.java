@@ -2,6 +2,7 @@ package com.sidework.profile.application.adapter;
 
 import com.sidework.profile.domain.PortfolioType;
 import com.sidework.profile.domain.SchoolStateType;
+import com.sidework.profile.domain.SkillProficiencyType;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.ProjectStatus;
 
@@ -40,7 +41,8 @@ public record UserProfileResponse(
 
 	public record SkillInfo(
 		Long skillId,
-		String skillName
+		String skillName,
+		SkillProficiencyType proficiency
 	) {}
 
 	public record PortfolioInfo(

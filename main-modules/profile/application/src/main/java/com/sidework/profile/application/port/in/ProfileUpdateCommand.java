@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sidework.profile.domain.PortfolioType;
 import com.sidework.profile.domain.SchoolStateType;
+import com.sidework.profile.domain.SkillProficiencyType;
 
 public record ProfileUpdateCommand(
 	List<SchoolUpdateRequest> schools,
@@ -29,7 +30,7 @@ public record ProfileUpdateCommand(
 	{}
 	public record SkillUpdateRequest(
 		Long skillId,
-		String proficiency
+		SkillProficiencyType proficiency
 	)
 	{}
 

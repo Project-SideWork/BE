@@ -173,7 +173,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			.map(profileSkill -> {
 				Skill skill = skillMap.get(profileSkill.getSkillId());
 				if (skill == null) return null;
-				return new UserProfileResponse.SkillInfo(skill.getId(), skill.getName());
+				return new UserProfileResponse.SkillInfo(skill.getId(), skill.getName(),profileSkill.getProficiency());
 			})
 			.filter(skillInfo -> skillInfo != null)
 			.collect(Collectors.toList());
