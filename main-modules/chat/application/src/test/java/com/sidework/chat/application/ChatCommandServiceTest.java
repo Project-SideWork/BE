@@ -1,12 +1,11 @@
 package com.sidework.chat.application;
 
+import com.sidework.chat.application.adapter.ExistChatCommand;
 import com.sidework.chat.application.adapter.NewChatCommand;
 import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
 import com.sidework.chat.application.service.ChatCommandService;
-import com.sidework.common.auth.CurrentUserProvider;
-import com.sidework.common.auth.SecurityAuthenticatedUser;
 import com.sidework.common.event.sse.port.out.SseSendOutPort;
 import com.sidework.domain.ChatMessage;
 import com.sidework.domain.ChatRoom;
@@ -33,9 +32,6 @@ public class ChatCommandServiceTest {
 
     @Mock
     private ChatRoomOutPort chatRoomRepository;
-
-    @Mock
-    private CurrentUserProvider currentUserProvider;
 
     @Mock
     private SseSendOutPort sseSendAdapter;
@@ -90,35 +86,25 @@ public class ChatCommandServiceTest {
         assertEquals(1L, saved.getLastReadChatId());
     }
 
-    @Test
-    void processStartNewChat은_사용자의_인증정보가_없으면_NullPointerException을_반환한다() {
-        when(currentUserProvider.authenticatedUser()).thenReturn(null);
-        assertThrows(
-                NullPointerException.class,
-                () -> service.processStartNewChat(new NewChatCommand(1L, "TEST"))
-        );
-    }
-
-    @Test
-    void processStartNewChat은_로직_중_하나라도_실패하면_SSE를_발생시키지_않는다() {
-        when(currentUserProvider.authenticatedUser()).thenReturn(null);
-        assertThrows(
-                NullPointerException.class,
-                () -> service.processStartNewChat(new NewChatCommand(1L, "TEST"))
-        );
-        verify(sseSendAdapter, never()).sendToUser(anyLong(), anyString());
-    }
 
     @Test
     void processStartNewChat은_모든_로직_성공_시_sse_이벤트를_발생시킨다() {
-        when(currentUserProvider.authenticatedUser()).thenReturn(new SecurityAuthenticatedUser(1L,
-                "test1@naver.com", "테스터"));
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(1L);
         when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
         doNothing().when(sseSendAdapter).sendToUser(1L, "테스트");
 
-        service.processStartNewChat(new NewChatCommand(1L, "테스트"));
+        service.processStartNewChat(1L, new NewChatCommand(1L, "테스트"));
 
         verify(sseSendAdapter).sendToUser(1L, "테스트");
+    }
+
+    @Test
+    void processResumeChat은_모든_로직_성공_시_sse_이벤트를_발생시킨다() {
+        when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
+        doNothing().when(chatUserRepository).updateLastReadChat(1L, 1L, 1L);
+
+        service.processResumeChat(1L, 1L, new ExistChatCommand( "테스트"));
+
+        verify(sseSendAdapter).sendToChatRoom(1L, "테스트");
     }
 }
