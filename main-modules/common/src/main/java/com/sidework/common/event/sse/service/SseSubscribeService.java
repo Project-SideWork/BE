@@ -1,6 +1,5 @@
 package com.sidework.common.event.sse.service;
 
-import com.sidework.common.auth.CurrentUserProvider;
 import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
 import com.sidework.common.event.sse.port.out.SseSubscribeOutPort;
 import org.springframework.stereotype.Service;
@@ -14,11 +13,10 @@ import lombok.RequiredArgsConstructor;
 public class SseSubscribeService implements SseSubscribeUseCase {
 
 	private final SseSubscribeOutPort sseSubscribeOutPort;
-    private final CurrentUserProvider currentUserProvider;
 
     @Override
-    public SseEmitter subscribeUser() {
-        return sseSubscribeOutPort.subscribeUser(currentUserProvider.authenticatedUser().getId());
+    public SseEmitter subscribeUser(Long userId) {
+        return sseSubscribeOutPort.subscribeUser(userId);
     }
 
     @Override
