@@ -15,11 +15,14 @@ dependencies {
     annotationProcessor libs.lombok
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.database.h2
+    testImplementation libs.spring.security.test
 
     implementation project(':main-modules:common')
     implementation project(':main-modules:notification:notification-domain')
     implementation("org.springframework:spring-context")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
+
+
 }
 
 repositories {
