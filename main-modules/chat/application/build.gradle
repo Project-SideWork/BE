@@ -20,6 +20,8 @@ dependencies {
     implementation project(':main-modules:chat:chat-domain')
     implementation("org.springframework:spring-context")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
+
+    testImplementation libs.spring.security.test
 }
 
 repositories {
