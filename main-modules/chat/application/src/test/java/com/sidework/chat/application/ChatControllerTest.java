@@ -141,7 +141,6 @@ public class ChatControllerTest {
 
     @Test
     void getMessages를_cursor없이_요청성공시_200을_반환한다() throws Exception {
-        ExistChatCommand command = new ExistChatCommand("테스트");
 
         when(chatQueryService.queryMessagesByChatRoomId(1L, null)).thenReturn(
                 new ChatMessageQueryResult(
