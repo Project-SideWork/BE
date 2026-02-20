@@ -23,7 +23,7 @@ public class ChatQueryService implements ChatQueryUseCase {
     private final ChatMessageOutPort chatMessageRepository;
 
     @Override
-    public ChatMessageQueryResult queryByChatRoomId(Long chatRoomId, String cursor) {
+    public ChatMessageQueryResult queryMessagesByChatRoomId(Long chatRoomId, String cursor) {
         CursorWrapper decoded = CursorUtil.decode(cursor);
         ChatMessagePage page = chatMessageRepository.findByChatRoomIdAndIdGreaterThan(chatRoomId,
                 decoded.cursorCreatedAt(), decoded.cursorId(), 3);

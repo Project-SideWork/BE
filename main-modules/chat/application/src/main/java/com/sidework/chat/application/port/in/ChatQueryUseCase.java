@@ -2,5 +2,5 @@ package com.sidework.chat.application.port.in;
 
 
 public interface ChatQueryUseCase {
-    ChatMessageQueryResult queryByChatRoomId(Long chatRoomId, String cursor);
+    ChatMessageQueryResult queryMessagesByChatRoomId(Long chatRoomId, String cursor);
 }
