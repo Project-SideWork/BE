@@ -1,6 +1,5 @@
-package com.sidework.security.dto;
+package com.sidework.common.auth;
 
-import com.sidework.common.auth.AuthenticatedUser;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,7 +10,7 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public class AuthenticatedUserDetails implements AuthenticatedUser, UserDetails {
+public class AuthenticatedUserDetails implements UserDetails {
     private final Long id;
     private final String email;
     private final String name;
