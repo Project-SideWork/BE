@@ -6,7 +6,6 @@ import com.sidework.chat.application.adapter.ExistChatCommand;
 import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
-import com.sidework.common.auth.CurrentUserProvider;
 import com.sidework.common.event.sse.port.out.SseSendOutPort;
 import com.sidework.domain.ChatMessage;
 import com.sidework.domain.ChatRoom;
@@ -22,14 +21,12 @@ public class ChatCommandService implements ChatCommandUseCase {
     private final ChatMessageOutPort chatMessageRepository;
     private final ChatUserOutPort chatUserRepository;
     private final ChatRoomOutPort chatRoomRepository;
-    private final CurrentUserProvider currentUserProvider;
     private final SseSendOutPort sseSendAdapter;
 
 
     @Override
-    public void processStartNewChat(NewChatCommand chatCommand) {
+    public void processStartNewChat(Long senderId, NewChatCommand chatCommand) {
         Long newChatRoom = createNewChatRoom(chatCommand.content());
-        Long senderId = currentUserProvider.authenticatedUser().getId();
         Long messageId = createNewChatMessage(newChatRoom, senderId, chatCommand.content());
 
         createNewChatUser(newChatRoom, senderId, messageId);
@@ -39,11 +36,11 @@ public class ChatCommandService implements ChatCommandUseCase {
     }
 
     @Override
-    public void processExistChat(Long chatRoomId, ExistChatCommand chatCommand) {
-        Long senderId = currentUserProvider.authenticatedUser().getId();
+    public void processResumeChat(Long chatRoomId, Long senderId,ExistChatCommand chatCommand) {
         Long messageId = createNewChatMessage(chatRoomId, senderId, chatCommand.content());
         chatUserRepository.updateLastReadChat(senderId, chatRoomId, messageId);
 
+        // TODO: 사용자가 채팅방에 없는 경우에는 알림함으로 보내게 할 수 있도록 판단하는 로직 추가 필요.
         sseSendAdapter.sendToChatRoom(chatRoomId, chatCommand.content());
     }
 
