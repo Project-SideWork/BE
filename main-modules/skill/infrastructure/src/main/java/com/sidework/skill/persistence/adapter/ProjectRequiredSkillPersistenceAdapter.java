@@ -37,4 +37,13 @@ public class ProjectRequiredSkillPersistenceAdapter implements ProjectRequiredSk
     public List<Long> findAllSkillIdsByProject(Long projectId) {
         return repo.findAllSkillByProjectId(projectId);
     }
+
+    @Override
+    public List<ProjectRequiredSkill> getProjectRequiredSkills(Long projectId) {
+        List<ProjectRequiredSkillEntity> skills = repo.findAllByProjectId(projectId);
+        return skills.stream()
+            .map(mapper::toDomain)
+            .toList();
+
+    }
 }

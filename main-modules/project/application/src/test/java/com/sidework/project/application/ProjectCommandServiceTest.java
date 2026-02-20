@@ -7,9 +7,10 @@ import com.sidework.project.application.exception.ProjectNotChangeableException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
+import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.ProjectRole;
-import com.sidework.project.application.port.in.SkillLevel;
+import com.sidework.project.domain.SkillLevel;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.service.ProjectCommandService;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
@@ -30,6 +31,10 @@ import java.util.List;
 
 import static com.sidework.project.domain.ProjectStatus.CANCELED;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,19 +52,30 @@ public class ProjectCommandServiceTest {
     @Mock
     private ProjectPreferredSkillCommandUseCase preferredSkillCommandService;
 
+    @Mock
+    private ProjectRecruitPositionOutPort projectRecruitPositionRepository;
+
     @InjectMocks
     ProjectCommandService service;
 
     @Captor
     ArgumentCaptor<Project> projectArgumentCaptor;
 
+    @Captor
+    ArgumentCaptor<List<com.sidework.project.domain.ProjectRecruitPosition>> recruitPositionsCaptor;
+
     @Test
     void 정상적인_프로젝트_생성_DTO로_프로젝트_생성에_성공한다() {
         ProjectCommand command = createCommand(ProjectStatus.PREPARING);
+        when(repo.save(any(Project.class))).thenReturn(1L);
+        when(projectUserRepo.queryAllProjectIds(anyLong())).thenReturn(List.of());
+        doNothing().when(requiredSkillCommandService).create(anyLong(), any());
+        doNothing().when(preferredSkillCommandService).create(anyLong(), any());
+        doNothing().when(projectRecruitPositionRepository).saveAll(anyLong(), any());
+
         service.create(command);
 
         verify(repo).save(projectArgumentCaptor.capture());
-
         Project saved = projectArgumentCaptor.getValue();
 
         assertEquals(command.title(), saved.getTitle());
@@ -68,6 +84,12 @@ public class ProjectCommandServiceTest {
         assertEquals(command.endDt(), saved.getEndDt());
         assertEquals(command.meetingType(), saved.getMeetingType());
         assertEquals(ProjectStatus.PREPARING, saved.getStatus());
+        verify(projectRecruitPositionRepository).saveAll(eq(1L), recruitPositionsCaptor.capture());
+        List<com.sidework.project.domain.ProjectRecruitPosition> positions = recruitPositionsCaptor.getValue();
+        assertEquals(command.recruitPositions().size(), positions.size());
+        assertEquals(command.recruitPositions().get(0).role(), positions.get(0).getRole());
+        assertEquals(command.recruitPositions().get(0).headCount(), positions.get(0).getHeadCount());
+        assertEquals(command.recruitPositions().get(0).level(), positions.get(0).getLevel());
     }
 
     @Test
@@ -109,6 +131,11 @@ public class ProjectCommandServiceTest {
 
         when(repo.existsById(projectId)).thenReturn(true);
         when(repo.findById(projectId)).thenReturn(project);
+        when(projectUserRepo.queryAllProjectIds(anyLong())).thenReturn(List.of());
+        doNothing().when(requiredSkillCommandService).update(anyLong(), any());
+        doNothing().when(preferredSkillCommandService).update(anyLong(), any());
+        doNothing().when(projectRecruitPositionRepository).deleteByProjectId(anyLong());
+        doNothing().when(projectRecruitPositionRepository).saveAll(anyLong(), any());
 
         service.update(projectId, updateCommand);
 
@@ -118,6 +145,13 @@ public class ProjectCommandServiceTest {
         assertNotEquals(command.endDt(), project.getEndDt());
         assertNotEquals(command.meetingType(), project.getMeetingType());
         assertNotEquals(CANCELED, project.getStatus());
+        verify(projectRecruitPositionRepository).deleteByProjectId(projectId);
+        verify(projectRecruitPositionRepository).saveAll(eq(projectId), recruitPositionsCaptor.capture());
+        List<com.sidework.project.domain.ProjectRecruitPosition> positions = recruitPositionsCaptor.getValue();
+        assertEquals(updateCommand.recruitPositions().size(), positions.size());
+        assertEquals(updateCommand.recruitPositions().get(0).role(), positions.get(0).getRole());
+        assertEquals(updateCommand.recruitPositions().get(0).headCount(), positions.get(0).getHeadCount());
+        assertEquals(updateCommand.recruitPositions().get(0).level(), positions.get(0).getLevel());
     }
 
     @Test
@@ -223,6 +257,10 @@ public class ProjectCommandServiceTest {
         when(repo.findById(1L)).thenReturn(project);
         when(projectUserRepo.queryAllProjectIds(userId)).thenReturn(projectIds);
         when(repo.findAllTitles(projectIds)).thenReturn(titles);
+        doNothing().when(requiredSkillCommandService).update(anyLong(), any());
+        doNothing().when(preferredSkillCommandService).update(anyLong(), any());
+        doNothing().when(projectRecruitPositionRepository).deleteByProjectId(anyLong());
+        doNothing().when(projectRecruitPositionRepository).saveAll(anyLong(), any());
 
         service.update(projectId, command);
 

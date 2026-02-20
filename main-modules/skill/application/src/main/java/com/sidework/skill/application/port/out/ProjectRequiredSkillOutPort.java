@@ -9,4 +9,5 @@ public interface ProjectRequiredSkillOutPort {
     void saveAll(List<ProjectRequiredSkill> domains);
     void deleteByProjectIdAndSkillIdIn(Long projectId, List<Long> deleted);
     List<Long> findAllSkillIdsByProject(Long projectId);
+    List<ProjectRequiredSkill> getProjectRequiredSkills(Long projectId);
 }
