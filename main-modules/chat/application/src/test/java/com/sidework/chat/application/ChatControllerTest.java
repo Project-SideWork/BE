@@ -1,0 +1,183 @@
+package com.sidework.chat.application;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sidework.chat.application.adapter.ChatController;
+import com.sidework.chat.application.adapter.ChatRecord;
+import com.sidework.chat.application.adapter.ExistChatCommand;
+import com.sidework.chat.application.adapter.NewChatCommand;
+import com.sidework.chat.application.port.in.ChatCommandUseCase;
+import com.sidework.chat.application.port.in.ChatMessageQueryResult;
+import com.sidework.chat.application.port.in.ChatQueryUseCase;
+import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
+import com.sidework.common.response.exception.ExceptionAdvice;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(ChatController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@ContextConfiguration(classes = ChatTestApplication.class)
+@Import(ExceptionAdvice.class)
+public class ChatControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private ChatCommandUseCase chatCommandService;
+
+    @MockitoBean
+    private ChatQueryUseCase chatQueryService;
+
+    @MockitoBean
+    private SseSubscribeUseCase sseSubscribeUseCase;
+
+    @Test
+    void SSE_구독_성공시_200을_반환한다() throws Exception {
+        SseEmitter emitter = new SseEmitter();
+
+        when(sseSubscribeUseCase.subscribeChat(anyLong()))
+                .thenReturn(emitter);
+
+        mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void SendNewChat_성공시_201을_반환한다() throws Exception {
+        NewChatCommand command = new NewChatCommand(1L, "테스트");
+
+        doNothing().when(chatCommandService).processStartNewChat(command);
+
+
+        mockMvc.perform(post("/api/v1/chats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command))
+                )
+                .andDo(print())
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void SendNewChat_RequestBody에_content값이_누락되면_400을_반환한다() throws Exception {
+        NewChatCommand command = new NewChatCommand(1L, null);
+
+        doNothing().when(chatCommandService).processStartNewChat(command);
+
+
+        mockMvc.perform(post("/api/v1/chats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("채팅 내용은 필수입니다."));
+    }
+
+    @Test
+    void SendNewChat_RequestBody에_receiverId값이_누락되면_400을_반환한다() throws Exception {
+        NewChatCommand command = new NewChatCommand(null, "테스트");
+
+        doNothing().when(chatCommandService).processStartNewChat(command);
+
+
+        mockMvc.perform(post("/api/v1/chats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("수신자 ID는 필수입니다."));
+    }
+
+    @Test
+    void sendNewChatToExistRoom_성공시_201을_반환한다() throws Exception {
+        ExistChatCommand command = new ExistChatCommand("테스트");
+
+        doNothing().when(chatCommandService).processExistChat(1L, command);
+
+
+        mockMvc.perform(post("/api/v1/chats/{chatRoomId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command))
+                )
+                .andDo(print())
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void sendNewChatToExistRoom_RequestBody에_content값이_누락되면_400을_반환한다() throws Exception {
+        ExistChatCommand command = new ExistChatCommand(null);
+
+        mockMvc.perform(post("/api/v1/chats/{chatRoomId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("채팅 내용은 필수입니다."));
+    }
+
+    @Test
+    void getMessages를_cursor없이_요청성공시_200을_반환한다() throws Exception {
+        ExistChatCommand command = new ExistChatCommand("테스트");
+
+        when(chatQueryService.queryMessagesByChatRoomId(1L, null)).thenReturn(
+                new ChatMessageQueryResult(
+                        List.of(new ChatRecord(1L, "테스트", "12:00")),
+                        "testcursor", true
+                )
+        );
+
+
+        mockMvc.perform(get("/api/v1/chats/{chatRoomId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content").exists())
+                .andExpect(jsonPath("$.result.nextCursor").exists())
+                .andExpect(jsonPath("$.result.hasNext").exists());
+    }
+
+    @Test
+    void getMessages를_cursor와_같이_요청성공시_200을_반환한다() throws Exception {
+        when(chatQueryService.queryMessagesByChatRoomId(1L, "inputCursor")).thenReturn(
+                new ChatMessageQueryResult(
+                        List.of(new ChatRecord(1L, "테스트", "12:00")),
+                        "testcursor", true
+                )
+        );
+
+
+        mockMvc.perform(get("/api/v1/chats/{chatRoomId}?cursor=inputCursor", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content").exists())
+                .andExpect(jsonPath("$.result.nextCursor").exists())
+                .andExpect(jsonPath("$.result.hasNext").exists());
+    }
+}
