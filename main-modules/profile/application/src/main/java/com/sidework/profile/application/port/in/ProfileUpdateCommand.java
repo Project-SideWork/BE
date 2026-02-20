@@ -20,7 +20,8 @@ public record ProfileUpdateCommand(
 		PortfolioType type,
 		LocalDate startDate,
 		LocalDate endDate,
-		String content
+		String content,
+		String organizationName
 	) {}
 	public record SchoolUpdateRequest(
 		Long schoolId,

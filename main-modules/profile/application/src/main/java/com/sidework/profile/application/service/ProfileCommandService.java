@@ -184,7 +184,8 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 						req.type(),
 						req.startDate(),
 						req.endDate(),
-						req.content()
+						req.content(),
+						req.organizationName()
 					)
 				);
 			}

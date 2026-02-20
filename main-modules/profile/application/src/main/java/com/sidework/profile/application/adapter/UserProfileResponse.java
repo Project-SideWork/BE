@@ -21,6 +21,7 @@ public record UserProfileResponse(
 	Long profileId,
 	String selfIntroduction,
 	String residence,
+	Integer projectCounts,
 	List<RoleInfo> roles, //직군 정보
 	List<SchoolInfo> schools, // 학교 장보
 	List<SkillInfo> skills, //기술 스택
@@ -53,7 +54,8 @@ public record UserProfileResponse(
 		PortfolioType type,
 		LocalDate startDate,
 		LocalDate endDate,
-		String content
+		String content,
+		String organizationName
 	) {}
 	public record ProjectInfo(
 		Long projectId,
