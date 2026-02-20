@@ -6,6 +6,7 @@ import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
 import com.sidework.chat.application.service.ChatCommandService;
 import com.sidework.common.auth.CurrentUserProvider;
+import com.sidework.common.auth.SecurityAuthenticatedUser;
 import com.sidework.common.event.sse.port.out.SseSendOutPort;
 import com.sidework.domain.ChatMessage;
 import com.sidework.domain.ChatRoom;
@@ -17,12 +18,10 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.AuthenticationException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ChatCommandServiceTest {
@@ -101,13 +100,25 @@ public class ChatCommandServiceTest {
     }
 
     @Test
-    void processStartNewChat은_사용자의_인증정보가_없으면_NullPointerException을_반환한다() {
+    void processStartNewChat은_로직_중_하나라도_실패하면_SSE를_발생시키지_않는다() {
         when(currentUserProvider.authenticatedUser()).thenReturn(null);
         assertThrows(
                 NullPointerException.class,
                 () -> service.processStartNewChat(new NewChatCommand(1L, "TEST"))
         );
-
+        verify(sseSendAdapter, never()).sendToUser(anyLong(), anyString());
     }
 
+    @Test
+    void processStartNewChat은_모든_로직_성공_시_sse_이벤트를_발생시킨다() {
+        when(currentUserProvider.authenticatedUser()).thenReturn(new SecurityAuthenticatedUser(1L,
+                "test1@naver.com", "테스터"));
+        when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(1L);
+        when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
+        doNothing().when(sseSendAdapter).sendToUser(1L, "테스트");
+
+        service.processStartNewChat(new NewChatCommand(1L, "테스트"));
+
+        verify(sseSendAdapter).sendToUser(1L, "테스트");
+    }
 }
