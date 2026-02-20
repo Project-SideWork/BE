@@ -44,29 +44,28 @@ public class NotificationController {
 	}
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<List<NotificationResponse>>> list() {
-		Long userId = 1L;
-		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getByUserId(userId)));
+	public ResponseEntity<ApiResponse<List<NotificationResponse>>> list(@AuthenticationPrincipal AuthenticatedUserDetails user) {
+		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getByUserId(user.getId())));
 	}
 
 	@PatchMapping("/{notificationId}/read")
-	public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable("notificationId") Long notificationId) {
-		Long userId = 1L;
-		commandService.markAsRead(notificationId, userId);
+	public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable("notificationId") Long notificationId,
+                                                        @AuthenticationPrincipal AuthenticatedUserDetails user) {
+		commandService.markAsRead(notificationId, user.getId());
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 
 	@PostMapping("/test")
-	public ResponseEntity<ApiResponse<Void>> sendTest(@RequestBody NotificationCommand request) {
-		Long userId = 1L;
-		commandService.create(userId, NotificationType.PROJECT_APPROVED, request.title(), request.body());
+	public ResponseEntity<ApiResponse<Void>> sendTest(@AuthenticationPrincipal AuthenticatedUserDetails user,
+                                                      @RequestBody NotificationCommand request) {
+		commandService.create(user.getId(), NotificationType.PROJECT_APPROVED, request.title(), request.body());
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 
 	@PostMapping("/fcm-token")
-	public ResponseEntity<ApiResponse<Void>> registerFcmToken(@RequestBody @Valid FcmTokenRegisterRequest request) {
-		Long userId = 1L;
-		fcmTokenCommandUseCase.registerToken(userId, request.token(), request.pushAgreed());
+	public ResponseEntity<ApiResponse<Void>> registerFcmToken(@AuthenticationPrincipal AuthenticatedUserDetails user,
+                                                              @RequestBody @Valid FcmTokenRegisterRequest request) {
+		fcmTokenCommandUseCase.registerToken(user.getId(), request.token(), request.pushAgreed());
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 
