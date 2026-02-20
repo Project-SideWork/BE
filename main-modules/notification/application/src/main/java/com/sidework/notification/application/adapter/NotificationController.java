@@ -2,8 +2,10 @@ package com.sidework.notification.application.adapter;
 
 import java.util.List;
 
+import com.sidework.common.auth.AuthenticatedUserDetails;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,8 +39,8 @@ public class NotificationController {
 	private final FcmPushUseCase fcmPushService;
 
 	@GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public SseEmitter subscribe() {
-		return sseSubscribeUseCase.subscribeUser();
+	public SseEmitter subscribe(@AuthenticationPrincipal AuthenticatedUserDetails user) {
+		return sseSubscribeUseCase.subscribeUser(user.getId());
 	}
 
 	@GetMapping
