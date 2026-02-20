@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -27,14 +28,14 @@ public class ChatController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> sendNewChat(@RequestBody NewChatCommand chatContent) {
+    public ResponseEntity<ApiResponse<Void>> sendNewChat(@Validated @RequestBody NewChatCommand chatContent) {
         chatCommandService.processStartNewChat(chatContent);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
     }
 
     @PostMapping("/{chatRoomId}")
     public ResponseEntity<ApiResponse<Void>> sendNewChatToExistRoom(@PathVariable("chatRoomId") Long chatRoomId,
-                                                                    @RequestBody ExistChatCommand chatContent) {
+                                                                    @Validated @RequestBody ExistChatCommand chatContent) {
         chatCommandService.processExistChat(chatRoomId, chatContent);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
     }
@@ -42,7 +43,7 @@ public class ChatController {
     @GetMapping("/{chatRoomId}")
     public ResponseEntity<ApiResponse<CursorResponse<ChatRecord>>> getMessages(@PathVariable("chatRoomId") Long chatRoomId,
                                                                                @RequestParam(required = false, value = "cursor") String cursor) {
-        ChatMessageQueryResult queryRes = chatQueryService.queryByChatRoomId(chatRoomId, cursor);
+        ChatMessageQueryResult queryRes = chatQueryService.queryMessagesByChatRoomId(chatRoomId, cursor);
         CursorResponse<ChatRecord> res = new CursorResponse<>(queryRes.items(), queryRes.nextCursor(), queryRes.hasNext());
         return ResponseEntity.ok().body(ApiResponse.onSuccess(res));
     }
