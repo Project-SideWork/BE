@@ -3,7 +3,6 @@ package com.sidework.project.application;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
-import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
@@ -75,8 +74,7 @@ class ProjectQueryServiceTest {
         Project project2 = createProject(2L);
 
         when(projectUserRepository.queryAllProjectIds(userId)).thenReturn(projectIds);
-        when(projectRepository.findById(1L)).thenReturn(project1);
-        when(projectRepository.findById(2L)).thenReturn(project2);
+        when(projectRepository.findByIdIn(projectIds)).thenReturn(List.of(project1, project2));
 
         List<Project> result = queryService.queryByUserId(userId);
 

@@ -136,11 +136,14 @@ class ProfileControllerTest {
 					PortfolioType.INTERN,
 					LocalDate.of(2023, 6, 1),
 					LocalDate.of(2023, 8, 31),
-					"네이버 백엔드 인턴십"
+					"네이버 백엔드 인턴십",
+					null
 				)
 			),
-			List.of(1L, 2L),
-			List.of(1L, 3L)
+			List.of(new ProfileUpdateCommand.SkillUpdateRequest(1L, null)),
+			List.of(1L, 3L),
+			null,
+			null
 		);
 	}
 
@@ -153,6 +156,9 @@ class ProfileControllerTest {
 			25,
 			"010-1234-5678",
 			1L,
+			null,
+			null,
+			0,
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
@@ -170,6 +176,9 @@ class ProfileControllerTest {
 			25,
 			"010-1234-5678",
 			null,
+			null,
+			null,
+			0,
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
