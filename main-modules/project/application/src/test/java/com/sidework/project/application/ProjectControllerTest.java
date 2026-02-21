@@ -7,16 +7,20 @@ import com.sidework.project.application.adapter.ProjectController;
 import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
 import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
 import com.sidework.project.application.exception.ProjectNotRecruitingException;
+import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectNotFoundException;
+import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
+import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.port.in.RecruitPosition;
-import com.sidework.project.application.port.in.SkillLevel;
+import com.sidework.project.domain.SkillLevel;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.domain.MeetingType;
+import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
@@ -34,7 +38,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -326,7 +335,7 @@ public class ProjectControllerTest {
         ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
         doThrow(new ProjectNotFoundException(projectId))
-                .when(projectApplyCommandUseCase).apply(1L, projectId, command);
+                .when(projectApplyCommandUseCase).apply(eq(2L), eq(projectId), any(ProjectApplyCommand.class));
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -341,7 +350,7 @@ public class ProjectControllerTest {
         ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
         doThrow(new ProjectNotRecruitingException(projectId))
-                .when(projectApplyCommandUseCase).apply(1L, projectId, command);
+                .when(projectApplyCommandUseCase).apply(eq(2L), eq(projectId), any(ProjectApplyCommand.class));
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -356,11 +365,75 @@ public class ProjectControllerTest {
         ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
         doThrow(new ProjectAlreadyAppliedException(projectId))
-                .when(projectApplyCommandUseCase).apply(1L, projectId, command);
+                .when(projectApplyCommandUseCase).apply(eq(2L), eq(projectId), any(ProjectApplyCommand.class));
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_승인_요청시_바디로_전달하면_200을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectApplyDecisionCommand command = new ProjectApplyDecisionCommand(2L, ProjectRole.BACKEND);
+
+        doNothing().when(projectApplyCommandUseCase).approve(anyLong(), eq(projectId), any(ProjectApplyDecisionCommand.class));
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}/approve", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true));
+    }
+
+    @Test
+    void 프로젝트_승인_요청시_applicantUserId나_role이_null이면_400을_반환한다() throws Exception {
+        Long projectId = 1L;
+        String invalidJson = """
+        {
+          "applicantUserId": null,
+          "role": null
+        }
+        """;
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}/approve", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_거절_요청시_바디로_전달하면_200을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectApplyDecisionCommand command = new ProjectApplyDecisionCommand(3L, ProjectRole.FRONTEND);
+
+        doNothing().when(projectApplyCommandUseCase).reject(anyLong(), eq(projectId), any(ProjectApplyDecisionCommand.class));
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}/reject", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true));
+    }
+
+    @Test
+    void 프로젝트_거절_요청시_applicantUserId나_role이_null이면_400을_반환한다() throws Exception {
+        Long projectId = 1L;
+        String invalidJson = """
+        {
+          "applicantUserId": null,
+          "role": null
+        }
+        """;
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}/reject", projectId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -402,6 +475,57 @@ public class ProjectControllerTest {
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 프로젝트_상세_조회_요청시_성공하면_200과_상세_응답을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectDetailResponse detail = new ProjectDetailResponse(
+            1L,
+            "테스트 프로젝트",
+            "설명",
+            java.time.LocalDate.of(2025, 1, 1),
+            java.time.LocalDate.of(2025, 3, 31),
+            MeetingType.HYBRID,
+            ProjectStatus.RECRUITING,
+            List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED)),
+            List.of(ProjectDetailResponse.RecruitPositionResponse.of(ProjectRole.BACKEND, 1, 0, SkillLevel.JUNIOR)),
+            List.of("Java", "Spring"),
+            List.of("Redis")
+        );
+        when(projectQueryUseCase.queryProjectDetail(projectId)).thenReturn(detail);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.id").value(1))
+                .andExpect(jsonPath("$.result.title").value("테스트 프로젝트"))
+                .andExpect(jsonPath("$.result.teamMembers").isArray())
+                .andExpect(jsonPath("$.result.requiredStacks").isArray())
+                .andExpect(jsonPath("$.result.preferredStacks").isArray());
+    }
+
+    @Test
+    void 프로젝트_상세_조회_요청시_projectId가_존재하지_않으면_404를_반환한다() throws Exception {
+        Long projectId = 999L;
+        doThrow(new ProjectNotFoundException(projectId))
+                .when(projectQueryUseCase).queryProjectDetail(projectId);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 프로젝트_상세_조회_요청시_멤버가_없으면_500을_반환한다() throws Exception {
+        Long projectId = 1L;
+        doThrow(new ProjectHasNoMembersException(projectId))
+                .when(projectQueryUseCase).queryProjectDetail(projectId);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andDo(print())
+                .andExpect(status().isInternalServerError());
     }
 
     private ProjectCommand createCommand(ProjectStatus status) {

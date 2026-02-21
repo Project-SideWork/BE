@@ -3,7 +3,7 @@ package com.sidework.project.persistence;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.domain.ProjectRole;
-import com.sidework.project.application.port.in.SkillLevel;
+import com.sidework.project.domain.SkillLevel;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectStatus;

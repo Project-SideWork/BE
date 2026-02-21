@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntity, Long> {
@@ -26,4 +27,10 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
             """
     )
     List<ProjectRole> findAllRolesByUserAndProject(@Param("userId") Long userId, @Param("projectId") Long projectId);
+
+    Optional<ProjectUserEntity> findFirstByProjectIdAndUserId(Long projectId, Long userId);
+
+    Optional<ProjectUserEntity> findFirstByProjectIdAndUserIdAndRole(Long projectId, Long userId, ProjectRole role);
+
+    List<ProjectUserEntity> findAllByProjectId(Long projectId);
 }

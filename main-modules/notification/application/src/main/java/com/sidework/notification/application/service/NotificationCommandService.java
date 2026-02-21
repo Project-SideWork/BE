@@ -3,6 +3,7 @@ package com.sidework.notification.application.service;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sidework.notification.application.adapter.NotificationResponse;
@@ -26,6 +27,7 @@ public class NotificationCommandService implements NotificationCommandUseCase {
 	private final NotificationSendOutPort notificationSendRepository;
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void create(Long userId, NotificationType type, String title, String body) {
 		Notification notification = Notification.create(
 			userId,

@@ -33,6 +33,11 @@ public enum ErrorStatus implements BaseStatusCode {
     PROJECT_CANNOT_DELETE(HttpStatus.FORBIDDEN, "PROJECT_003", "해당 프로젝트를 삭제할 권한이 없습니다."),
     PROJECT_NOT_RECRUITING(HttpStatus.BAD_REQUEST, "PROJECT_004", "현재 모집 중인 프로젝트가 아닙니다."),
     PROJECT_ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "PROJECT_005", "이미 지원한 프로젝트입니다."),
+    PROJECT_OWNER_NOT_FOUND(HttpStatus.FORBIDDEN, "PROJECT_006", "해당 프로젝트의 소유자가 아닙니다."),
+    PROJECT_APPLICANT_NOT_FOUND(HttpStatus.FORBIDDEN, "PROJECT_007", "해당 프로젝트의 신청자가 아닙니다."),
+    PROJECT_USER_NOT_FOUND(HttpStatus.FORBIDDEN, "PROJECT_008", "해당 프로젝트의 유저/소유자가 아닙니다."),
+    PROJECT_APPLY_ALREADY_PROCESSED(HttpStatus.CONFLICT, "PROJECT_009", "이미 처리된 지원입니다."),
+    PROJECT_HAS_NO_MEMBERS(HttpStatus.INTERNAL_SERVER_ERROR, "PROJECT_010", "해당 프로젝트에 멤버가 존재하지 않습니다."),
 
     // PROFILE
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROFILE_001", "해당 프로필을 찾을 수 없습니다."),

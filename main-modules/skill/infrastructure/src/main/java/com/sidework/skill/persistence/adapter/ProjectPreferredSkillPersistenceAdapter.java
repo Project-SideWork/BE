@@ -37,4 +37,13 @@ public class ProjectPreferredSkillPersistenceAdapter implements ProjectPreferred
     public List<Long> findAllSkillIdsByProject(Long projectId) {
        return repo.findAllSkillByProjectId(projectId);
     }
+
+    @Override
+    public List<ProjectPreferredSkill> getProjectPreferredSkills(Long projectId) {
+        List<ProjectPreferredSkillEntity> skills = repo.findAllByProjectId(projectId);
+        return skills.stream()
+            .map(mapper::toDomain)
+            .toList();
+
+    }
 }

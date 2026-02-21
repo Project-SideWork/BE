@@ -23,4 +23,6 @@ public interface ProjectRequiredSkillJpaRepository extends JpaRepository<Project
             WHERE p.projectId = :projectId and p.skillId in :ids
             """)
     void deleteByProjectIdAndSkillIdIn(@Param("projectId") Long projectId, @Param("ids") List<Long> ids);
+
+    List<ProjectRequiredSkillEntity> findAllByProjectId(Long projectId);
 }
