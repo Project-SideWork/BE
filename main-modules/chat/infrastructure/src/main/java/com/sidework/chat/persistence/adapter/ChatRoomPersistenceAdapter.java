@@ -19,4 +19,9 @@ public class ChatRoomPersistenceAdapter implements ChatRoomOutPort {
         ChatRoomEntity entity = mapper.toEntity(chatRoom);
         return mapper.toDomain(repo.save(entity)).getId();
     }
+
+    @Override
+    public boolean existsById(Long chatRoomId) {
+        return repo.existsById(chatRoomId);
+    }
 }

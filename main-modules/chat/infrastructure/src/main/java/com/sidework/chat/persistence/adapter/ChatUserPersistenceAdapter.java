@@ -23,4 +23,9 @@ public class ChatUserPersistenceAdapter implements ChatUserOutPort {
     public void updateLastReadChat(Long userId, Long chatRoomId, Long chatMessageId) {
         repo.updateLastRead(userId, chatRoomId, chatMessageId);
     }
+
+    @Override
+    public boolean existsByUserAndRoom(Long userId, Long chatRoomId) {
+        return repo.existsByUserAndChatRoom(userId, chatRoomId);
+    }
 }

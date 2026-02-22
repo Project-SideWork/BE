@@ -21,4 +21,12 @@ public interface ChatUserJpaRepository extends JpaRepository<ChatUserEntity, Lon
                         @Param("chatRoomId") Long chatRoomId,
                         @Param("chatMessageId") Long chatMessageId);
 
+
+    @Query("""
+               SELECT count(cu) > 0 FROM ChatUserEntity cu
+               WHERE cu.userId = :userId and cu.chatRoomId = :chatRoomId
+            """)
+    boolean existsByUserAndChatRoom(@Param("userId") Long userId,
+                                    @Param("chatRoomId") Long chatRoomId);
+
 }

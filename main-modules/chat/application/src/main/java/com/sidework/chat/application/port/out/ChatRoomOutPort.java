@@ -4,4 +4,5 @@ import com.sidework.domain.ChatRoom;
 
 public interface ChatRoomOutPort {
     Long save(ChatRoom chatRoom);
+    boolean existsById(Long chatRoomId);
 }
