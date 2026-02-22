@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS notifications (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    body TEXT NULL,
+    is_read TINYINT(1) NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+
+    INDEX idx_user_id (user_id),
+    INDEX idx_user_id_is_read (user_id, is_read),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
