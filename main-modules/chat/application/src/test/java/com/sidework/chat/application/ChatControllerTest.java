@@ -10,6 +10,8 @@ import com.sidework.chat.application.port.in.ChatMessageQueryResult;
 import com.sidework.chat.application.port.in.ChatQueryUseCase;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
+import com.sidework.common.exception.ForbiddenAccessException;
+import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +57,7 @@ public class ChatControllerTest {
     void SSE_구독_성공시_200을_반환한다() throws Exception {
         SseEmitter emitter = new SseEmitter();
 
-        when(sseSubscribeUseCase.subscribeChat(anyLong()))
+        when(sseSubscribeUseCase.subscribeChat(anyLong(),anyLong()))
                 .thenReturn(emitter);
 
         mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)
@@ -74,13 +76,49 @@ public class ChatControllerTest {
     void SSE_구독_시_인증정보가_없으면_401을_반환한다() throws Exception {
         SseEmitter emitter = new SseEmitter();
 
-        when(sseSubscribeUseCase.subscribeChat(anyLong()))
+        when(sseSubscribeUseCase.subscribeChat(anyLong(),anyLong()))
                 .thenReturn(emitter);
 
         mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+    }
+    @Test
+    void SSE_구독_시_존재하지_않는_채팅방의_ID로_구독_시도하면_400을_반환한다() throws Exception {
+        doThrow(new InvalidCommandException(1L + "은 존재하지 않는 채팅방 ID 입니다."))
+                .when(chatQueryService)
+                .checkSubscribeValidation(anyLong(), anyLong());
+
+        mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)
+                        .with(user(new AuthenticatedUserDetails(
+                                1L,
+                                "test@mail.com",
+                                "테스터",
+                                "pw"
+                        )))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void SSE_구독_시_내가_속하지_않은_채팅방의_ID로_구독_시도하면_403을_반환한다() throws Exception {
+        doThrow(new ForbiddenAccessException())
+                .when(chatQueryService)
+                .checkSubscribeValidation(anyLong(), anyLong());
+
+        mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)
+                        .with(user(new AuthenticatedUserDetails(
+                                1L,
+                                "test@mail.com",
+                                "테스터",
+                                "pw"
+                        )))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+
     }
 
     @Test
@@ -197,12 +235,6 @@ public class ChatControllerTest {
 
 
         mockMvc.perform(post("/api/v1/chats/{chatRoomId}", 1L)
-                        .with(user(new AuthenticatedUserDetails(
-                                1L,
-                                "test@mail.com",
-                                "테스터",
-                                "pw"
-                        )))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command))

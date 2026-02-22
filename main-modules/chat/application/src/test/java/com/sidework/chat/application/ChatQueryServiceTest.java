@@ -3,7 +3,11 @@ package com.sidework.chat.application;
 import com.sidework.chat.application.port.in.ChatMessageQueryResult;
 import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatMessagePage;
+import com.sidework.chat.application.port.out.ChatRoomOutPort;
+import com.sidework.chat.application.port.out.ChatUserOutPort;
 import com.sidework.chat.application.service.ChatQueryService;
+import com.sidework.common.exception.ForbiddenAccessException;
+import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.util.CursorUtil;
 import com.sidework.common.util.CursorWrapper;
 import com.sidework.domain.ChatMessage;
@@ -19,12 +23,19 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ChatQueryServiceTest {
     @Mock
     private ChatMessageOutPort chatMessageRepository;
+
+    @Mock
+    private ChatRoomOutPort chatRoomRepository;
+
+    @Mock
+    private ChatUserOutPort chatUserRepository;
 
     @InjectMocks
     private ChatQueryService service;
@@ -72,6 +83,45 @@ public class ChatQueryServiceTest {
         assertEquals(1, result.items().size());
         assertFalse(result.hasNext());
         assertNull(result.nextCursor());
+    }
+
+    @Test
+    void checkSubscribeValidation은_존재하지_않는_chatRoomId를_받으면_InvalidCommandException을_던진다() {
+        Long chatRoomId = 1L;
+
+        when(chatRoomRepository.existsById(chatRoomId)).thenReturn(false);
+
+        assertThrows(
+                InvalidCommandException.class,
+                () -> service.checkSubscribeValidation(1L, chatRoomId)
+        );
+    }
+
+    @Test
+    void checkSubscribeValidation은_existsByUserAndRoom가_거짓이면_ForbiddenAccessException을_던진다() {
+        Long chatRoomId = 1L;
+        Long userId = 1L;
+
+        when(chatRoomRepository.existsById(chatRoomId)).thenReturn(true);
+        when(chatUserRepository.existsByUserAndRoom(userId, chatRoomId)).thenReturn(false);
+
+        assertThrows(
+                ForbiddenAccessException.class,
+                () -> service.checkSubscribeValidation(userId, chatRoomId)
+        );
+    }
+
+    @Test
+    void checkSubscribeValidation은_existsById와_existsByUserAndRoom가_모두_참이면_예외를_던지지_않는다() {
+        Long chatRoomId = 1L;
+        Long userId = 1L;
+
+        when(chatRoomRepository.existsById(chatRoomId)).thenReturn(true);
+        when(chatUserRepository.existsByUserAndRoom(userId, chatRoomId)).thenReturn(true);
+
+        assertDoesNotThrow(() ->
+                service.checkSubscribeValidation(userId, chatRoomId)
+        );
     }
 
     private ChatMessagePage createPage() {
