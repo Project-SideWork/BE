@@ -2,8 +2,10 @@ package com.sidework.notification.application.adapter;
 
 import java.util.List;
 
+import com.sidework.common.auth.AuthenticatedUserDetails;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +21,7 @@ import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationCommand;
 import com.sidework.notification.application.port.in.NotificationCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationQueryUseCase;
-import com.sidework.notification.application.port.in.SseSubscribeUseCase;
+import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
 import com.sidework.notification.domain.NotificationType;
 
 import jakarta.validation.Valid;
@@ -36,37 +38,34 @@ public class NotificationController {
 	private final FcmTokenCommandUseCase fcmTokenCommandUseCase;
 	private final FcmPushUseCase fcmPushService;
 
-	//TODO: 로그인 연동
 	@GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public SseEmitter subscribe() {
-		Long userId = 1L;
-		return sseSubscribeUseCase.subscribe(userId);
+	public SseEmitter subscribe(@AuthenticationPrincipal AuthenticatedUserDetails user) {
+		return sseSubscribeUseCase.subscribeUser(user.getId());
 	}
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<List<NotificationResponse>>> list() {
-		Long userId = 1L;
-		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getByUserId(userId)));
+	public ResponseEntity<ApiResponse<List<NotificationResponse>>> list(@AuthenticationPrincipal AuthenticatedUserDetails user) {
+		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getByUserId(user.getId())));
 	}
 
 	@PatchMapping("/{notificationId}/read")
-	public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable("notificationId") Long notificationId) {
-		Long userId = 1L;
-		commandService.markAsRead(notificationId, userId);
+	public ResponseEntity<ApiResponse<Void>> markAsRead(@PathVariable("notificationId") Long notificationId,
+                                                        @AuthenticationPrincipal AuthenticatedUserDetails user) {
+		commandService.markAsRead(notificationId, user.getId());
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 
 	@PostMapping("/test")
-	public ResponseEntity<ApiResponse<Void>> sendTest(@RequestBody NotificationCommand request) {
-		Long userId = 1L;
-		commandService.create(userId, NotificationType.PROJECT_APPROVED, request.title(), request.body());
+	public ResponseEntity<ApiResponse<Void>> sendTest(@AuthenticationPrincipal AuthenticatedUserDetails user,
+                                                      @RequestBody NotificationCommand request) {
+		commandService.create(user.getId(), NotificationType.PROJECT_APPROVED, request.title(), request.body());
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 
 	@PostMapping("/fcm-token")
-	public ResponseEntity<ApiResponse<Void>> registerFcmToken(@RequestBody @Valid FcmTokenRegisterRequest request) {
-		Long userId = 1L;
-		fcmTokenCommandUseCase.registerToken(userId, request.token(), request.pushAgreed());
+	public ResponseEntity<ApiResponse<Void>> registerFcmToken(@AuthenticationPrincipal AuthenticatedUserDetails user,
+                                                              @RequestBody @Valid FcmTokenRegisterRequest request) {
+		fcmTokenCommandUseCase.registerToken(user.getId(), request.token(), request.pushAgreed());
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 

@@ -10,12 +10,21 @@ dependencies {
     implementation libs.spring.boot.starter.logging
     implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.starter.validation
+    implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.starter.jpa
 
     compileOnly libs.lombok
     annotationProcessor libs.lombok
 
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
+    implementation("org.springframework:spring-context")
+
+    testImplementation libs.bundles.test
+
+    testImplementation(libs.spring.boot.starter.test) {
+        exclude group: 'org.mockito', module: 'mockito-core'
+    }
+    testImplementation libs.spring.mockk
 }
 
 repositories {

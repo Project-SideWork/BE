@@ -1,7 +1,7 @@
 package com.sidework.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sidework.security.dto.AuthenticatedUserDetails;
+import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.security.util.CookieUtil;
 import com.sidework.security.util.JwtUtil;
 import com.sidework.security.dto.LoginCommand;

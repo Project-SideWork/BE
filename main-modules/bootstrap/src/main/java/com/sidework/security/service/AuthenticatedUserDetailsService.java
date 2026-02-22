@@ -1,6 +1,6 @@
 package com.sidework.security.service;
 
-import com.sidework.security.dto.AuthenticatedUserDetails;
+import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import lombok.RequiredArgsConstructor;

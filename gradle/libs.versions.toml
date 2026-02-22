@@ -39,7 +39,7 @@ spring-boot-starter-redis = { module = "org.springframework.boot:spring-boot-sta
 spring-boot-starter-kafka = { module = "org.springframework.kafka:spring-kafka" }
 spring-boot-starter-transactional = { module = "org.springframework:spring-tx", version.ref = "transactional" }
 spring-boot-spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
-
+spring-security-test = { module = "org.springframework.security:spring-security-test" }
 
 spring-context = { module = "org.springframework:spring-context" }
 spring-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }

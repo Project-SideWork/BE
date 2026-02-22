@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,6 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import com.sidework.common.auth.AuthenticatedUserDetails;
+import com.sidework.notification.application.port.in.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,16 +34,10 @@ import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.notification.application.adapter.NotificationController;
 import com.sidework.notification.application.adapter.NotificationResponse;
 import com.sidework.notification.application.exception.NotificationNotFoundException;
-import com.sidework.notification.application.port.in.FcmPushUseCase;
-import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
-import com.sidework.notification.application.port.in.NotificationCommand;
-import com.sidework.notification.application.port.in.NotificationCommandUseCase;
-import com.sidework.notification.application.port.in.NotificationQueryUseCase;
-import com.sidework.notification.application.port.in.SseSubscribeUseCase;
+import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
 import com.sidework.notification.domain.NotificationType;
 
 @WebMvcTest(NotificationController.class)
-@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = NotificationTestApplication.class)
 @Import(ExceptionAdvice.class)
 class NotificationControllerTest {
@@ -59,17 +57,25 @@ class NotificationControllerTest {
 	@MockitoBean
 	private SseSubscribeUseCase sseSubscribeUseCase;
 
-	@MockitoBean
-	private FcmTokenCommandUseCase fcmTokenCommandUseCase;
+    @MockitoBean
+    private FcmTokenCommandUseCase fcmTokenCommandUseCase;
 
-	@MockitoBean
-	private FcmPushUseCase fcmPushUseCase;
+    @MockitoBean
+    private FcmPushUseCase fcmPushUseCase;
+
+    private AuthenticatedUserDetails authenticatedUserDetails = new AuthenticatedUserDetails(
+            1L,
+            "test@mail.com",
+            "테스터",
+            "pw"
+    );
 
 	@Test
 	void SSE_구독_요청_시_200을_반환한다() throws Exception {
-		when(sseSubscribeUseCase.subscribe(anyLong())).thenReturn(new SseEmitter());
+		when(sseSubscribeUseCase.subscribeUser(1L)).thenReturn(new SseEmitter());
 
 		mockMvc.perform(get("/api/v1/notifications/subscribe")
+                        .with(user(authenticatedUserDetails))
 				.accept(MediaType.TEXT_EVENT_STREAM_VALUE))
 			.andDo(print())
 			.andExpect(status().isOk());
@@ -82,7 +88,9 @@ class NotificationControllerTest {
 		);
 		when(queryUseCase.getByUserId(anyLong())).thenReturn(list);
 
-		mockMvc.perform(get("/api/v1/notifications"))
+		mockMvc.perform(get("/api/v1/notifications")
+                        .with(user(authenticatedUserDetails))
+                )
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.isSuccess").value(true))
@@ -97,7 +105,10 @@ class NotificationControllerTest {
 		Long notificationId = 1L;
 		doNothing().when(commandUseCase).markAsRead(eq(notificationId), anyLong());
 
-		mockMvc.perform(patch("/api/v1/notifications/{notificationId}/read", notificationId))
+		mockMvc.perform(patch("/api/v1/notifications/{notificationId}/read", notificationId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
+                )
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.isSuccess").value(true));
@@ -109,7 +120,10 @@ class NotificationControllerTest {
 		doThrow(new NotificationNotFoundException(notificationId))
 			.when(commandUseCase).markAsRead(eq(notificationId), anyLong());
 
-		mockMvc.perform(patch("/api/v1/notifications/{notificationId}/read", notificationId))
+		mockMvc.perform(patch("/api/v1/notifications/{notificationId}/read", notificationId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
+                )
 			.andDo(print())
 			.andExpect(status().isNotFound());
 	}
@@ -120,6 +134,8 @@ class NotificationControllerTest {
 		doNothing().when(commandUseCase).create(anyLong(), eq(NotificationType.PROJECT_APPROVED), eq("테스트 제목"), eq("테스트 내용"));
 
 		mockMvc.perform(post("/api/v1/notifications/test")
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(command)))
 			.andDo(print())

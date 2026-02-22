@@ -66,7 +66,8 @@ public class SecurityConfig {
                 )
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login", "/swagger-ui/**",    // Swagger UI 관련 경로
-                                "/v3/api-docs/**", "/api/v1/users/email" ,"/api/v1/users", "/api/v1/reissue").permitAll()
+                                "/v3/api-docs/**", "/api/v1/users/email" ,"/api/v1/users", "/api/v1/reissue",
+                                "/firebase-messaging-sw.js", "/fcm-test.html").permitAll()
                         .anyRequest().authenticated()
                 ).headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())
