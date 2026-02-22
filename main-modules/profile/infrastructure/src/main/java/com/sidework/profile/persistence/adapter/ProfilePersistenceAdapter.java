@@ -60,6 +60,12 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	}
 
 	@Override
+	public void save(Profile profile) {
+		ProfileEntity entity = profileMapper.toEntity(profile);
+		profileRepository.save(entity);
+	}
+
+	@Override
 	public List<ProfileRole> getProfileRoles(Long profileId) {
 		List<ProfileRoleEntity> entities = profileRoleRepository.findByProfileId(profileId);
 		return entities.stream()
@@ -163,6 +169,14 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	public boolean existsProjectPortfolioByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId) {
 		if(portfolioId == null || profileId == null) return false;
 		return projectPortfolioRepository.existsByPortfolioIdAndProfileIdNot(portfolioId, profileId);
+	}
+
+	@Override
+	public List<Long> findPortfolioIdsReferencedByOtherProfiles(Long excludeProfileId, List<Long> portfolioIds) {
+		if (excludeProfileId == null || portfolioIds == null || portfolioIds.isEmpty()) {
+			return List.of();
+		}
+		return projectPortfolioRepository.findPortfolioIdsReferencedByOtherProfiles(excludeProfileId, portfolioIds);
 	}
 
 	@Override

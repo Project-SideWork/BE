@@ -9,5 +9,6 @@ public interface ProjectOutPort {
     boolean existsById(Long projectId);
     Long save(Project project);
     Project findById(Long id);
+    List<Project> findByIdIn(List<Long> ids);
     List<ProjectTitleDto> findAllTitles(List<Long> projectIds);
 }

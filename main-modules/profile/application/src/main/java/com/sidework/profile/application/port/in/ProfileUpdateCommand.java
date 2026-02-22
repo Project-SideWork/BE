@@ -5,19 +5,23 @@ import java.util.List;
 
 import com.sidework.profile.domain.PortfolioType;
 import com.sidework.profile.domain.SchoolStateType;
+import com.sidework.profile.domain.SkillProficiencyType;
 
 public record ProfileUpdateCommand(
 	List<SchoolUpdateRequest> schools,
 	List<PortfolioUpdateRequest> portfolios,
-	List<Long> skills,
-	List<Long> roleIds
+	List<SkillUpdateRequest> skills,
+	List<Long> roleIds,
+	String selfIntroduction,
+	String residence
 ) {
 	public record PortfolioUpdateRequest(
 		Long portfolioId,
 		PortfolioType type,
 		LocalDate startDate,
 		LocalDate endDate,
-		String content
+		String content,
+		String organizationName
 	) {}
 	public record SchoolUpdateRequest(
 		Long schoolId,
@@ -27,4 +31,10 @@ public record ProfileUpdateCommand(
 		LocalDate endDate
 	)
 	{}
+	public record SkillUpdateRequest(
+		Long skillId,
+		SkillProficiencyType proficiency
+	)
+	{}
+
 }

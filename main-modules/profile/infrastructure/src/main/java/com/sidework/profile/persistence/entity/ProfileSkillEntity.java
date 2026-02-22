@@ -1,6 +1,7 @@
 package com.sidework.profile.persistence.entity;
 
 import com.sidework.common.entity.BaseEntity;
+import com.sidework.profile.domain.SkillProficiencyType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,5 +26,9 @@ public class ProfileSkillEntity extends BaseEntity {
 
 	@Column(name = "skill_id", nullable = false)
 	private Long skillId;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "proficiency", length = 30)
+	private SkillProficiencyType proficiency;
 }
 

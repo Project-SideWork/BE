@@ -46,9 +46,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         if (projectIds == null || projectIds.isEmpty()) {
             return List.of();
         }
-        return projectIds.stream()
-            .map(projectRepository::findById)
-            .toList();
+        return projectRepository.findByIdIn(projectIds);
     }
 
     @Override

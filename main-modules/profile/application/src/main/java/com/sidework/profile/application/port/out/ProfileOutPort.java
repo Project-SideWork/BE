@@ -13,6 +13,7 @@ public interface ProfileOutPort
 {
 	boolean existsByUserId(Long userId);
 	Profile getProfileByUserId(Long userId);
+	void save(Profile profile);
 	List<ProfileRole> getProfileRoles(Long profileId);
 	List<ProfileSchool> getProfileSchools(Long profileId);
 	List<ProfileSkill> getProfileSkills(Long profileId);
@@ -26,6 +27,7 @@ public interface ProfileOutPort
 	void deleteAllProfileSkillsByProfileId(Long profileId);
 	void deleteAllProjectPortfoliosByProfileId(Long profileId);
 	boolean existsProjectPortfolioByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId);
+	List<Long> findPortfolioIdsReferencedByOtherProfiles(Long excludeProfileId, List<Long> portfolioIds);
 	boolean existsByIdAndUserId(Long profileId,Long userId);
 
 }

@@ -35,5 +35,9 @@ public class PortfolioEntity extends BaseEntity {
 
 	@Column(name = "content", nullable = false, columnDefinition = "TEXT")
 	private String content;
+
+	@Column(name = "organization_name", nullable = false, length = 30)
+	private String organizationName;
+
 }
 

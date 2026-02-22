@@ -1,6 +1,10 @@
 package com.sidework.profile.application.service;
 
+import com.sidework.project.application.port.out.ProjectUserOutPort;
+import com.sidework.project.domain.ProjectRole;
+import com.sidework.project.domain.ProjectStatus;
 import com.sidework.skill.application.port.out.SkillOutPort;
+import com.sidework.skill.application.service.ProjectRequiredSkillQueryService;
 import com.sidework.skill.domain.Skill;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,15 +49,22 @@ public class ProfileQueryService implements ProfileQueryUseCase
 
 	private final UserQueryUseCase userQueryUseCase;
 	private final ProjectQueryUseCase projectQueryUseCase;
+	private final ProjectRequiredSkillQueryService requiredSkillUseCase;
+	private final ProjectUserOutPort projectUserOutPort;
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long userId) {
-		Profile profile = profileRepository.getProfileByUserId(userId);
-		if (profile == null) {
-			return buildResponseWhenNoProfile(userId);
-		}
 
 		User user = userQueryUseCase.findById(userId);
+
+		List<Project> projects = projectQueryUseCase.queryByUserId(userId);
+		int projectCounts = countCompletedProjects(projects);
+
+		Profile profile = profileRepository.getProfileByUserId(userId);
+		if (profile == null) {
+			return buildResponseWhenNoProfile(user, projects, projectCounts);
+		}
+
 		return new UserProfileResponse(
 			user.getId(),
 			user.getEmail(),
@@ -62,11 +73,14 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			user.getAge(),
 			user.getTel(),
 			profile.getId(),
+			profile.getSelfIntroduction(),
+			profile.getResidence(),
+			projectCounts,
 			buildRoleInfos(profile.getId()),
 			buildSchoolInfos(profile.getId()),
 			buildSkillInfos(profile.getId()),
 			buildPortfolioInfos(profile.getId()),
-			buildProjectInfos(userId)
+			buildProjectInfos(projects,userId)
 		);
 	}
 
@@ -75,8 +89,11 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		return profileRepository.existsByIdAndUserId(profileId, userId);
 	}
 
-	private UserProfileResponse buildResponseWhenNoProfile(Long userId) {
-		User user = userQueryUseCase.findById(userId);
+	private UserProfileResponse buildResponseWhenNoProfile(
+		User user,
+		List<Project> projects,
+		int projectCounts
+	) {
 		return new UserProfileResponse(
 			user.getId(),
 			user.getEmail(),
@@ -85,16 +102,23 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			user.getAge(),
 			user.getTel(),
 			null,
+			null,
+			null,
+			projectCounts,
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
-			buildProjectInfos(userId)
+			buildProjectInfos(projects, user.getId())
 		);
 	}
+	private int countCompletedProjects(List<Project> projects) {
+		return (int) projects.stream()
+			.filter(p -> p.getStatus() == ProjectStatus.FINISHED)
+			.count();
+	}
 
-	private List<UserProfileResponse.ProjectInfo> buildProjectInfos(Long userId) {
-		List<Project> projects = projectQueryUseCase.queryByUserId(userId);
+	private List<UserProfileResponse.ProjectInfo> buildProjectInfos(List<Project> projects, Long userId) {
 		return projects.stream()
 			.map(project -> new UserProfileResponse.ProjectInfo(
 				project.getId(),
@@ -103,9 +127,21 @@ public class ProfileQueryService implements ProfileQueryUseCase
 				project.getStartDt(),
 				project.getEndDt(),
 				project.getMeetingType(),
-				project.getStatus()
+				project.getStatus(),
+				getProjectSkillnames(project.getId()),
+				getProjectRole(project.getId(),userId)
+
+
 			))
-			.collect(Collectors.toList());
+			.toList();
+	}
+
+	private List<String> getProjectSkillnames(Long projectId) {
+		return requiredSkillUseCase.queryNamesByProjectId(projectId);
+	}
+
+	private List<ProjectRole> getProjectRole(Long projectId,Long userId) {
+		return projectUserOutPort.queryUserRolesByProject(userId, projectId);
 	}
 
 	private List<UserProfileResponse.RoleInfo> buildRoleInfos(Long profileId) {
@@ -173,7 +209,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			.map(profileSkill -> {
 				Skill skill = skillMap.get(profileSkill.getSkillId());
 				if (skill == null) return null;
-				return new UserProfileResponse.SkillInfo(skill.getId(), skill.getName());
+				return new UserProfileResponse.SkillInfo(skill.getId(), skill.getName(),profileSkill.getProficiency());
 			})
 			.filter(skillInfo -> skillInfo != null)
 			.collect(Collectors.toList());
@@ -199,11 +235,13 @@ public class ProfileQueryService implements ProfileQueryUseCase
 					portfolio.getType(),
 					portfolio.getStartDate(),
 					portfolio.getEndDate(),
-					portfolio.getContent()
+					portfolio.getContent(),
+					portfolio.getOrganizationName()
 				);
 			})
 			.filter(portfolioInfo -> portfolioInfo != null)
 			.collect(Collectors.toList());
 	}
+
 
 }

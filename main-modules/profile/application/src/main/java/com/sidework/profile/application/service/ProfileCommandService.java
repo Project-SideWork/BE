@@ -49,6 +49,18 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		if (command.roleIds() != null) {
 			updateRoles(profile, command.roleIds());
 		}
+		boolean profileDirty = false;
+		if (command.selfIntroduction() != null) {
+			profile.updateSelfIntroduction(command.selfIntroduction());
+			profileDirty = true;
+		}
+		if (command.residence() != null) {
+			profile.updateResidence(command.residence());
+			profileDirty = true;
+		}
+		if (profileDirty) {
+			profileRepository.save(profile);
+		}
 	}
 
 	private Profile getProfileOrThrow(Long userId) {
@@ -74,10 +86,10 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		profileRepository.saveProfileSchools(schoolList);
 	}
 
-	private void updateSkills(Profile profile, List<Long> skills) {
+	private void updateSkills(Profile profile, List<ProfileUpdateCommand.SkillUpdateRequest> skills) {
 		profileRepository.deleteAllProfileSkillsByProfileId(profile.getId());
 		List<ProfileSkill> skillList = skills.stream()
-			.map(profileSkill -> ProfileSkill.create(profile.getId(), profileSkill))
+			.map(profileSkill -> ProfileSkill.create(profile.getId(), profileSkill.skillId(),profileSkill.proficiency()))
 			.toList();
 		profileRepository.saveProfileSkills(skillList);
 	}
@@ -95,9 +107,12 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		profileRepository.deleteAllProjectPortfoliosByProfileId(profileId);
 
 		if (!existedPortfolios.isEmpty()) {
-			List<Long> portfolioIdsToDelete = existedPortfolios.stream()
+			List<Long> candidateIds = existedPortfolios.stream()
 				.map(ProjectPortfolio::getPortfolioId)
-				.filter(id -> !profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(id, profileId))
+				.toList();
+			List<Long> referencedByOthers = profileRepository.findPortfolioIdsReferencedByOtherProfiles(profileId, candidateIds);
+			List<Long> portfolioIdsToDelete = candidateIds.stream()
+				.filter(id -> !referencedByOthers.contains(id))
 				.toList();
 
 			if (!portfolioIdsToDelete.isEmpty()) {
@@ -126,9 +141,12 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 
 		profileRepository.deleteAllProjectPortfoliosByProfileId(profileId);
 
-		List<Long> portfolioIdsToDelete = existingPortfolioIds.stream()
+		List<Long> candidateIdsToDelete = existingPortfolioIds.stream()
 			.filter(id -> !requestedPortfolioIds.contains(id))
-			.filter(id -> !profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(id, profileId))
+			.toList();
+		List<Long> referencedByOthers = profileRepository.findPortfolioIdsReferencedByOtherProfiles(profileId, candidateIdsToDelete);
+		List<Long> portfolioIdsToDelete = candidateIdsToDelete.stream()
+			.filter(id -> !referencedByOthers.contains(id))
 			.toList();
 
 		if (!portfolioIdsToDelete.isEmpty()) {
@@ -166,7 +184,8 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 						req.type(),
 						req.startDate(),
 						req.endDate(),
-						req.content()
+						req.content(),
+						req.organizationName()
 					)
 				);
 			}

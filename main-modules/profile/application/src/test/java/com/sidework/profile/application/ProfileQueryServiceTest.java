@@ -16,10 +16,13 @@ import com.sidework.profile.domain.ProjectPortfolio;
 import com.sidework.profile.domain.Role;
 import com.sidework.profile.domain.School;
 import com.sidework.profile.domain.SchoolStateType;
+import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
+import com.sidework.skill.application.service.ProjectRequiredSkillQueryService;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import com.sidework.skill.domain.Skill;
 import com.sidework.user.application.port.in.UserQueryUseCase;
@@ -36,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +66,12 @@ class ProfileQueryServiceTest {
 	@Mock
 	private ProjectQueryUseCase projectQueryUseCase;
 
+	@Mock
+	private ProjectRequiredSkillQueryService requiredSkillUseCase;
+
+	@Mock
+	private ProjectUserOutPort projectUserOutPort;
+
 	@InjectMocks
 	private ProfileQueryService service;
 
@@ -83,6 +93,7 @@ class ProfileQueryServiceTest {
 		assertEquals(user.getEmail(), response.email());
 		assertEquals(user.getName(), response.name());
 		assertNull(response.profileId());
+		assertEquals(0, response.projectCounts());
 		assertTrue(response.roles().isEmpty());
 		assertTrue(response.schools().isEmpty());
 		assertTrue(response.skills().isEmpty());
@@ -126,6 +137,10 @@ class ProfileQueryServiceTest {
 		when(skillRepository.findByIdIn(anyList())).thenReturn(skills);
 		when(portfolioRepository.findByIdIn(anyList())).thenReturn(portfolios);
 		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
+		when(projectUserOutPort.queryUserRolesByProject(userId, 1L)).thenReturn(List.of(ProjectRole.BACKEND));
+		when(projectUserOutPort.queryUserRolesByProject(userId, 2L)).thenReturn(List.of(ProjectRole.FRONTEND));
+		when(requiredSkillUseCase.queryNamesByProjectId(1L)).thenReturn(List.of("Java", "Spring"));
+		when(requiredSkillUseCase.queryNamesByProjectId(2L)).thenReturn(List.of("React"));
 
 		// when
 		UserProfileResponse response = service.getProfileByUserId(userId);
@@ -134,6 +149,7 @@ class ProfileQueryServiceTest {
 		assertNotNull(response);
 		assertEquals(userId, response.userId());
 		assertEquals(profileId, response.profileId());
+		assertEquals(0, response.projectCounts());
 		assertEquals(2, response.roles().size());
 		assertEquals(1, response.schools().size());
 		assertEquals(3, response.skills().size());
@@ -188,6 +204,10 @@ class ProfileQueryServiceTest {
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(null);
 		when(userQueryUseCase.findById(userId)).thenReturn(user);
 		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
+		when(projectUserOutPort.queryUserRolesByProject(userId, 1L)).thenReturn(List.of());
+		when(projectUserOutPort.queryUserRolesByProject(userId, 2L)).thenReturn(List.of());
+		when(requiredSkillUseCase.queryNamesByProjectId(1L)).thenReturn(List.of());
+		when(requiredSkillUseCase.queryNamesByProjectId(2L)).thenReturn(List.of());
 
 		// when
 		UserProfileResponse response = service.getProfileByUserId(userId);
@@ -196,6 +216,7 @@ class ProfileQueryServiceTest {
 		assertNotNull(response);
 		assertEquals(userId, response.userId());
 		assertNull(response.profileId());
+		assertEquals(0, response.projectCounts());
 		assertEquals(2, response.projects().size());
 		assertEquals("협업 플랫폼 개발", response.projects().get(0).title());
 		assertEquals(MeetingType.HYBRID, response.projects().get(0).meetingType());

@@ -168,8 +168,7 @@ class ProfileCommandServiceTest {
 
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
 		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(existingPortfolios);
-		when(profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(10L, profileId)).thenReturn(false);
-		when(profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(20L, profileId)).thenReturn(false);
+		when(profileRepository.findPortfolioIdsReferencedByOtherProfiles(profileId, List.of(10L, 20L))).thenReturn(List.of());
 
 		// when
 		service.update(userId, command);
@@ -177,6 +176,7 @@ class ProfileCommandServiceTest {
 		// then
 		verify(profileRepository).getProjectPortfolios(profileId);
 		verify(profileRepository).deleteAllProjectPortfoliosByProfileId(profileId);
+		verify(profileRepository).findPortfolioIdsReferencedByOtherProfiles(profileId, List.of(10L, 20L));
 		verify(portfolioRepository).deletePortfolios(portfolioIdsCaptor.capture());
 		verify(portfolioRepository, never()).savePortfolios(anyList());
 		verify(profileRepository, never()).saveProjectPortfolios(anyList());
@@ -269,14 +269,14 @@ class ProfileCommandServiceTest {
 
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
 		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(existingPortfolios);
-		when(profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(existingPortfolioId, profileId)).thenReturn(false);
+		when(profileRepository.findPortfolioIdsReferencedByOtherProfiles(profileId, List.of(existingPortfolioId))).thenReturn(List.of());
 		when(portfolioRepository.savePortfolios(anyList())).thenReturn(List.of(200L));
 
 		// when
 		service.update(userId, command);
 
 		// then
-		verify(profileRepository).existsProjectPortfolioByPortfolioIdAndProfileIdNot(existingPortfolioId, profileId);
+		verify(profileRepository).findPortfolioIdsReferencedByOtherProfiles(profileId, List.of(existingPortfolioId));
 		verify(portfolioRepository).deletePortfolios(List.of(existingPortfolioId));
 	}
 
@@ -295,14 +295,14 @@ class ProfileCommandServiceTest {
 
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
 		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(existingPortfolios);
-		when(profileRepository.existsProjectPortfolioByPortfolioIdAndProfileIdNot(existingPortfolioId, profileId)).thenReturn(true);
+		when(profileRepository.findPortfolioIdsReferencedByOtherProfiles(profileId, List.of(existingPortfolioId))).thenReturn(List.of(existingPortfolioId));
 		when(portfolioRepository.savePortfolios(anyList())).thenReturn(List.of(200L));
 
 		// when
 		service.update(userId, command);
 
 		// then
-		verify(profileRepository).existsProjectPortfolioByPortfolioIdAndProfileIdNot(existingPortfolioId, profileId);
+		verify(profileRepository).findPortfolioIdsReferencedByOtherProfiles(profileId, List.of(existingPortfolioId));
 		verify(portfolioRepository, never()).deletePortfolios(anyList());
 	}
 
@@ -416,7 +416,9 @@ class ProfileCommandServiceTest {
 			null, // schools
 			null, // portfolios
 			null, // skills
-			null  // roleIds
+			null, // roleIds
+			null, // selfIntroduction
+			null  // residence
 		);
 
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
@@ -447,7 +449,9 @@ class ProfileCommandServiceTest {
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
-			new ArrayList<>()
+			new ArrayList<>(),
+			null,
+			null
 		);
 	}
 
@@ -464,6 +468,8 @@ class ProfileCommandServiceTest {
 			),
 			null,
 			null,
+			null,
+			null,
 			null
 		);
 	}
@@ -472,7 +478,12 @@ class ProfileCommandServiceTest {
 		return new ProfileUpdateCommand(
 			null,
 			null,
-			List.of(1L, 2L),
+			List.of(
+				new ProfileUpdateCommand.SkillUpdateRequest(1L, null),
+				new ProfileUpdateCommand.SkillUpdateRequest(2L, null)
+			),
+			null,
+			null,
 			null
 		);
 	}
@@ -482,7 +493,9 @@ class ProfileCommandServiceTest {
 			null,
 			null,
 			null,
-			List.of(1L, 3L)
+			List.of(1L, 3L),
+			null,
+			null
 		);
 	}
 
@@ -490,6 +503,8 @@ class ProfileCommandServiceTest {
 		return new ProfileUpdateCommand(
 			null,
 			new ArrayList<>(),
+			null,
+			null,
 			null,
 			null
 		);
@@ -504,9 +519,12 @@ class ProfileCommandServiceTest {
 					PortfolioType.PROJECT,
 					LocalDate.of(2023, 6, 1),
 					LocalDate.of(2023, 8, 31),
-					"수정된 내용"
+					"수정된 내용",
+					null
 				)
 			),
+			null,
+			null,
 			null,
 			null
 		);
@@ -521,9 +539,12 @@ class ProfileCommandServiceTest {
 					PortfolioType.INTERN,
 					LocalDate.of(2023, 6, 1),
 					LocalDate.of(2023, 8, 31),
-					"네이버 백엔드 인턴십"
+					"네이버 백엔드 인턴십",
+					null
 				)
 			),
+			null,
+			null,
 			null,
 			null
 		);
@@ -538,16 +559,20 @@ class ProfileCommandServiceTest {
 					PortfolioType.PROJECT,
 					LocalDate.of(2023, 6, 1),
 					LocalDate.of(2023, 8, 31),
-					"수정된 내용"
+					"수정된 내용",
+					null
 				),
 				new ProfileUpdateCommand.PortfolioUpdateRequest(
 					null,
 					PortfolioType.INTERN,
 					LocalDate.of(2023, 9, 1),
 					LocalDate.of(2024, 1, 31),
-					"새로운 인턴십"
+					"새로운 인턴십",
+					null
 				)
 			),
+			null,
+			null,
 			null,
 			null
 		);
@@ -570,11 +595,17 @@ class ProfileCommandServiceTest {
 					PortfolioType.INTERN,
 					LocalDate.of(2023, 6, 1),
 					LocalDate.of(2023, 8, 31),
-					"네이버 백엔드 인턴십"
+					"네이버 백엔드 인턴십",
+					null
 				)
 			),
-			List.of(1L, 2L),
-			List.of(1L, 3L)
+			List.of(
+				new ProfileUpdateCommand.SkillUpdateRequest(1L, null),
+				new ProfileUpdateCommand.SkillUpdateRequest(2L, null)
+			),
+			List.of(1L, 3L),
+			null,
+			null
 		);
 	}
 }

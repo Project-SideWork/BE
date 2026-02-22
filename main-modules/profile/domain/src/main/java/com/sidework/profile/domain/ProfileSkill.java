@@ -14,11 +14,13 @@ public class ProfileSkill
 	private Long id;
 	private Long profileId;
 	private Long skillId;
+	private SkillProficiencyType proficiency;
 
-	public static ProfileSkill create(Long profileId, Long skillId) {
+	public static ProfileSkill create(Long profileId, Long skillId, SkillProficiencyType proficiency) {
 		return ProfileSkill.builder()
 			.profileId(profileId)
 			.skillId(skillId)
+			.proficiency(proficiency)
 			.build();
 	}
 }
