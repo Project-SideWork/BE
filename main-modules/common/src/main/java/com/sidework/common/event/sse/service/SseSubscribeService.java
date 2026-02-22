@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class SseSubscribeService implements SseSubscribeUseCase {
-
 	private final SseSubscribeOutPort sseSubscribeOutPort;
 
     @Override
@@ -20,7 +19,7 @@ public class SseSubscribeService implements SseSubscribeUseCase {
     }
 
     @Override
-    public SseEmitter subscribeChat(Long chatRoomId) {
+    public SseEmitter subscribeChat(Long userId, Long chatRoomId) {
         return sseSubscribeOutPort.subscribeChatRoom(chatRoomId);
     }
 }
