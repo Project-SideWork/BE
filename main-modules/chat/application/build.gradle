@@ -11,6 +11,8 @@ dependencies {
     implementation libs.spring.boot.spring.doc
     implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.starter.transactional
+    implementation libs.spring.boot.starter.validation
+
     implementation libs.lombok
     annotationProcessor libs.lombok
     testImplementation libs.spring.boot.starter.test
@@ -19,7 +21,6 @@ dependencies {
     implementation project(':main-modules:common')
     implementation project(':main-modules:chat:chat-domain')
     implementation("org.springframework:spring-context")
-    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
 
     testImplementation libs.spring.security.test
 }
