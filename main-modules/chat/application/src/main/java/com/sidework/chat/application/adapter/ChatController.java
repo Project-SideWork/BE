@@ -24,11 +24,12 @@ public class ChatController {
     private final ChatQueryUseCase chatQueryService;
     private final SseSubscribeUseCase sseSubscribeUseCase;
 
-    @GetMapping(value = "/subscribe/{chatRoomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping("/subscribe/{chatRoomId}")
     public SseEmitter subscribe(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("chatRoomId") Long chatRoomId) {
-        return sseSubscribeUseCase.subscribeChat(chatRoomId);
+        chatQueryService.checkSubscribeValidation(user.getId(), chatRoomId);
+        return sseSubscribeUseCase.subscribeChat(user.getId(), chatRoomId);
     }
 
     @PostMapping
