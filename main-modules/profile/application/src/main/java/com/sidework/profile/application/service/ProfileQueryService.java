@@ -1,6 +1,5 @@
 package com.sidework.profile.application.service;
 
-import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.skill.application.port.out.SkillOutPort;
@@ -50,7 +49,6 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	private final UserQueryUseCase userQueryUseCase;
 	private final ProjectQueryUseCase projectQueryUseCase;
 	private final ProjectRequiredSkillQueryService requiredSkillUseCase;
-	private final ProjectUserOutPort projectUserOutPort;
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long userId) {
@@ -64,6 +62,10 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		if (profile == null) {
 			return buildResponseWhenNoProfile(user, projects, projectCounts);
 		}
+
+		List<Long> projectIds = projects.stream().map(Project::getId).toList();
+		Map<Long, List<String>> skillNamesByProjectId = requiredSkillUseCase.queryNamesByProjectIds(projectIds);
+		Map<Long, List<ProjectRole>> rolesByProjectId = projectQueryUseCase.queryUserRolesByProjects(userId, projectIds);
 
 		return new UserProfileResponse(
 			user.getId(),
@@ -80,7 +82,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			buildSchoolInfos(profile.getId()),
 			buildSkillInfos(profile.getId()),
 			buildPortfolioInfos(profile.getId()),
-			buildProjectInfos(projects,userId)
+			buildProjectInfos(projects, skillNamesByProjectId, rolesByProjectId)
 		);
 	}
 
@@ -94,6 +96,10 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		List<Project> projects,
 		int projectCounts
 	) {
+		List<Long> projectIds = projects.stream().map(Project::getId).toList();
+		Map<Long, List<String>> skillNamesByProjectId = requiredSkillUseCase.queryNamesByProjectIds(projectIds);
+		Map<Long, List<ProjectRole>> rolesByProjectId = projectQueryUseCase.queryUserRolesByProjects(user.getId(), projectIds);
+
 		return new UserProfileResponse(
 			user.getId(),
 			user.getEmail(),
@@ -109,7 +115,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
-			buildProjectInfos(projects, user.getId())
+			buildProjectInfos(projects, skillNamesByProjectId, rolesByProjectId)
 		);
 	}
 	private int countCompletedProjects(List<Project> projects) {
@@ -118,7 +124,11 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			.count();
 	}
 
-	private List<UserProfileResponse.ProjectInfo> buildProjectInfos(List<Project> projects, Long userId) {
+	private List<UserProfileResponse.ProjectInfo> buildProjectInfos(
+		List<Project> projects,
+		Map<Long, List<String>> skillNamesByProjectId,
+		Map<Long, List<ProjectRole>> rolesByProjectId
+	) {
 		return projects.stream()
 			.map(project -> new UserProfileResponse.ProjectInfo(
 				project.getId(),
@@ -128,20 +138,10 @@ public class ProfileQueryService implements ProfileQueryUseCase
 				project.getEndDt(),
 				project.getMeetingType(),
 				project.getStatus(),
-				getProjectSkillnames(project.getId()),
-				getProjectRole(project.getId(),userId)
-
-
+				skillNamesByProjectId.getOrDefault(project.getId(), List.of()),
+				rolesByProjectId.getOrDefault(project.getId(), List.of())
 			))
 			.toList();
-	}
-
-	private List<String> getProjectSkillnames(Long projectId) {
-		return requiredSkillUseCase.queryNamesByProjectId(projectId);
-	}
-
-	private List<ProjectRole> getProjectRole(Long projectId,Long userId) {
-		return projectUserOutPort.queryUserRolesByProject(userId, projectId);
 	}
 
 	private List<UserProfileResponse.RoleInfo> buildRoleInfos(Long profileId) {
