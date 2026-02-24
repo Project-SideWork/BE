@@ -2,6 +2,7 @@ package com.sidework.project.application.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.sidework.project.application.adapter.ProjectDetailResponse;
@@ -14,6 +15,7 @@ import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRecruitPosition;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillQueryUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredQueryUseCase;
@@ -90,6 +92,11 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             return List.of();
         }
         return positions;
+    }
+
+    @Override
+    public Map<Long, List<ProjectRole>> queryUserRolesByProjects(Long userId, List<Long> projectIds) {
+        return projectUserRepository.queryUserRolesByProjects(userId, projectIds);
     }
 
     private List<String> queryRequiredStacks(Long projectId) {

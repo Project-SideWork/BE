@@ -33,4 +33,6 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
     Optional<ProjectUserEntity> findFirstByProjectIdAndUserIdAndRole(Long projectId, Long userId, ProjectRole role);
 
     List<ProjectUserEntity> findAllByProjectId(Long projectId);
+
+    List<ProjectUserEntity> findByUserIdAndProjectIdIn(Long userId, List<Long> projectIds);
 }
