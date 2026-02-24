@@ -52,4 +52,31 @@ public class ProjectRequiredSkillQueryService implements ProjectRequiredQueryUse
 			.filter(Objects::nonNull)
 			.toList();
 	}
+
+	@Override
+	public Map<Long, List<String>> queryNamesByProjectIds(List<Long> projectIds) {
+		if (projectIds == null || projectIds.isEmpty()) {
+			return Map.of();
+		}
+		List<ProjectRequiredSkill> skills = projectRequiredSkillRepository.getProjectRequiredSkillsByProjectIds(projectIds);
+		if (skills.isEmpty()) {
+			return projectIds.stream().collect(Collectors.toMap(id -> id, id -> List.of()));
+		}
+		List<Long> skillIds = skills.stream()
+			.map(ProjectRequiredSkill::getSkillId)
+			.distinct()
+			.toList();
+		List<Skill> skillList = skillOutPort.findByIdIn(skillIds);
+		Map<Long, String> idToName = skillList.stream()
+			.collect(Collectors.toMap(Skill::getId, Skill::getName));
+
+		return skills.stream()
+			.collect(Collectors.groupingBy(
+				ProjectRequiredSkill::getProjectId,
+				Collectors.mapping(
+					skill -> idToName.get(skill.getSkillId()),
+					Collectors.filtering(Objects::nonNull, Collectors.toList())
+				)
+			));
+	}
 }

@@ -10,4 +10,5 @@ public interface ProjectRequiredSkillOutPort {
     void deleteByProjectIdAndSkillIdIn(Long projectId, List<Long> deleted);
     List<Long> findAllSkillIdsByProject(Long projectId);
     List<ProjectRequiredSkill> getProjectRequiredSkills(Long projectId);
+    List<ProjectRequiredSkill> getProjectRequiredSkillsByProjectIds(List<Long> projectIds);
 }
