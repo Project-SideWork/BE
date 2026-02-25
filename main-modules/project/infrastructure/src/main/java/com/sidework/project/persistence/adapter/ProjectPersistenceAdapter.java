@@ -8,6 +8,9 @@ import com.sidework.project.persistence.entity.ProjectEntity;
 import com.sidework.project.persistence.mapper.ProjectMapper;
 import com.sidework.project.persistence.repository.ProjectJpaRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -50,5 +53,11 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
             return List.of();
         }
         return repo.findProjectionsByIds(projectIds);
+    }
+
+    @Override
+    public Page<Project> findPage(Pageable pageable) {
+        Page<ProjectEntity> entities = repo.findAll(pageable);
+        return entities.map(mapper::toDomain);
     }
 }

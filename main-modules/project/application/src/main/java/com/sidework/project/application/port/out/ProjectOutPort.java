@@ -5,10 +5,14 @@ import com.sidework.project.domain.Project;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface ProjectOutPort {
     boolean existsById(Long projectId);
     Long save(Project project);
     Project findById(Long id);
     List<Project> findByIdIn(List<Long> ids);
     List<ProjectTitleDto> findAllTitles(List<Long> projectIds);
+    Page<Project> findPage(Pageable pageable);
 }
