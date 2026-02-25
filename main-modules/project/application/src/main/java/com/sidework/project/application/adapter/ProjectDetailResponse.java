@@ -33,7 +33,6 @@ public record ProjectDetailResponse(
 		}
 	}
 
-	/** 상세 조회 응답 전용. currentCount(현재 모집 인원) 포함. */
 	public record RecruitPositionResponse(
 		ProjectRole role,
 		Integer headCount,
