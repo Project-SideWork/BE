@@ -22,7 +22,7 @@ public interface ChatMessageJpaRepository extends JpaRepository<ChatMessageEntit
                  or cm.createdAt < :cursorCreatedAt
                  or (cm.createdAt = :cursorCreatedAt and cm.id < :cursorId)
               )
-            order by cm.createdAt desc
+            order by cm.createdAt desc, cm.id desc
             """
     )
     List<ChatMessageEntity> pageBy(@Param("chatRoomId") Long chatRoomId,
