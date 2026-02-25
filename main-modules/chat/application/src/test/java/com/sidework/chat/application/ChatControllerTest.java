@@ -88,7 +88,7 @@ public class ChatControllerTest {
     void SSE_구독_시_존재하지_않는_채팅방의_ID로_구독_시도하면_400을_반환한다() throws Exception {
         doThrow(new InvalidCommandException(1L + "은 존재하지 않는 채팅방 ID 입니다."))
                 .when(chatQueryService)
-                .checkSubscribeValidation(anyLong(), anyLong());
+                .checkChatUserValidation(anyLong(), anyLong());
 
         mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)
                         .with(user(new AuthenticatedUserDetails(
@@ -106,7 +106,7 @@ public class ChatControllerTest {
     void SSE_구독_시_내가_속하지_않은_채팅방의_ID로_구독_시도하면_403을_반환한다() throws Exception {
         doThrow(new ForbiddenAccessException())
                 .when(chatQueryService)
-                .checkSubscribeValidation(anyLong(), anyLong());
+                .checkChatUserValidation(anyLong(), anyLong());
 
         mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)
                         .with(user(new AuthenticatedUserDetails(

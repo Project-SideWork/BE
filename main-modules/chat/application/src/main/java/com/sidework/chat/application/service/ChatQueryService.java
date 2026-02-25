@@ -54,7 +54,7 @@ public class ChatQueryService implements ChatQueryUseCase {
     }
 
     @Override
-    public void checkSubscribeValidation(Long userId, Long chatRoomId) {
+    public void checkChatUserValidation(Long userId, Long chatRoomId) {
         if(!chatRoomRepository.existsById(chatRoomId)) {
             throw new InvalidCommandException(chatRoomId + "은 존재하지 않는 채팅방 ID 입니다.");
         }
