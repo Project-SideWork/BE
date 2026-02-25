@@ -1,7 +1,7 @@
 package com.sidework.chat.application;
 
-import com.sidework.chat.application.adapter.ExistChatCommand;
-import com.sidework.chat.application.adapter.NewChatCommand;
+import com.sidework.chat.application.port.in.ExistChatCommand;
+import com.sidework.chat.application.port.in.NewChatCommand;
 import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
