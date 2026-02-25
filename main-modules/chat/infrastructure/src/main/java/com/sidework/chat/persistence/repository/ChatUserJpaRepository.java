@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChatUserJpaRepository extends JpaRepository<ChatUserEntity, Long> {
 
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
             UPDATE ChatUserEntity cu
             SET cu.lastReadChatId = :chatMessageId
