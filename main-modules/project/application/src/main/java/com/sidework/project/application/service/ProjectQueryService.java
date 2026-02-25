@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
+import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
@@ -21,6 +23,9 @@ import com.sidework.skill.application.port.in.ProjectPreferredSkillQueryUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredQueryUseCase;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,6 +102,14 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     @Override
     public Map<Long, List<ProjectRole>> queryUserRolesByProjects(Long userId, List<Long> projectIds) {
         return projectUserRepository.queryUserRolesByProjects(userId, projectIds);
+    }
+
+    @Override
+    public PageResponse<List<ProjectListResponse>> queryProjectList(Pageable pageable) {
+        Page<Project> page = projectRepository.findPage(pageable);
+        List<Project>  projects = page.getContent();
+        return null;
+
     }
 
     private List<String> queryRequiredStacks(Long projectId) {
