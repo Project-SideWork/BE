@@ -16,7 +16,6 @@ import com.sidework.profile.domain.ProjectPortfolio;
 import com.sidework.profile.domain.Role;
 import com.sidework.profile.domain.School;
 import com.sidework.profile.domain.SchoolStateType;
-import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
@@ -37,9 +36,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,9 +69,6 @@ class ProfileQueryServiceTest {
 
 	@Mock
 	private ProjectRequiredSkillQueryService requiredSkillUseCase;
-
-	@Mock
-	private ProjectUserOutPort projectUserOutPort;
 
 	@InjectMocks
 	private ProfileQueryService service;
@@ -137,10 +135,10 @@ class ProfileQueryServiceTest {
 		when(skillRepository.findByIdIn(anyList())).thenReturn(skills);
 		when(portfolioRepository.findByIdIn(anyList())).thenReturn(portfolios);
 		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
-		when(projectUserOutPort.queryUserRolesByProject(userId, 1L)).thenReturn(List.of(ProjectRole.BACKEND));
-		when(projectUserOutPort.queryUserRolesByProject(userId, 2L)).thenReturn(List.of(ProjectRole.FRONTEND));
-		when(requiredSkillUseCase.queryNamesByProjectId(1L)).thenReturn(List.of("Java", "Spring"));
-		when(requiredSkillUseCase.queryNamesByProjectId(2L)).thenReturn(List.of("React"));
+		when(projectQueryUseCase.queryUserRolesByProjects(userId, List.of(1L, 2L)))
+			.thenReturn(Map.of(1L, List.of(ProjectRole.BACKEND), 2L, List.of(ProjectRole.FRONTEND)));
+		when(requiredSkillUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
+			.thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
 
 		// when
 		UserProfileResponse response = service.getProfileByUserId(userId);
@@ -163,6 +161,8 @@ class ProfileQueryServiceTest {
 		verify(profileRepository).getProfileSkills(profileId);
 		verify(profileRepository).getProjectPortfolios(profileId);
 		verify(projectQueryUseCase).queryByUserId(userId);
+		verify(requiredSkillUseCase).queryNamesByProjectIds(anyList());
+		verify(projectQueryUseCase).queryUserRolesByProjects(anyLong(), anyList());
 	}
 
 	@Test
@@ -204,10 +204,10 @@ class ProfileQueryServiceTest {
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(null);
 		when(userQueryUseCase.findById(userId)).thenReturn(user);
 		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
-		when(projectUserOutPort.queryUserRolesByProject(userId, 1L)).thenReturn(List.of());
-		when(projectUserOutPort.queryUserRolesByProject(userId, 2L)).thenReturn(List.of());
-		when(requiredSkillUseCase.queryNamesByProjectId(1L)).thenReturn(List.of());
-		when(requiredSkillUseCase.queryNamesByProjectId(2L)).thenReturn(List.of());
+		when(projectQueryUseCase.queryUserRolesByProjects(userId, List.of(1L, 2L)))
+			.thenReturn(Map.of(1L, List.of(), 2L, List.of()));
+		when(requiredSkillUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
+			.thenReturn(Map.of(1L, List.of(), 2L, List.of()));
 
 		// when
 		UserProfileResponse response = service.getProfileByUserId(userId);
@@ -223,6 +223,8 @@ class ProfileQueryServiceTest {
 		assertEquals(ProjectStatus.RECRUITING, response.projects().get(0).status());
 
 		verify(projectQueryUseCase).queryByUserId(userId);
+		verify(requiredSkillUseCase).queryNamesByProjectIds(anyList());
+		verify(projectQueryUseCase).queryUserRolesByProjects(anyLong(), anyList());
 	}
 
 	@Test

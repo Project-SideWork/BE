@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +29,19 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
     @Override
     public List<ProjectRole> queryUserRolesByProject(Long userId, Long projectId) {
          return repo.findAllRolesByUserAndProject(userId, projectId);
+    }
+
+    @Override
+    public Map<Long, List<ProjectRole>> queryUserRolesByProjects(Long userId, List<Long> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) {
+            return Map.of();
+        }
+        List<ProjectUserEntity> entities = repo.findByUserIdAndProjectIdIn(userId, projectIds);
+        return entities.stream()
+            .collect(Collectors.groupingBy(
+                ProjectUserEntity::getProjectId,
+                Collectors.mapping(ProjectUserEntity::getRole, Collectors.toList())
+            ));
     }
 
     @Override
