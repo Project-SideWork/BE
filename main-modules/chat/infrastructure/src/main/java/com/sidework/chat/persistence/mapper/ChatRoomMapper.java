@@ -23,10 +23,10 @@ public interface ChatRoomMapper {
                 .toInstant();
     }
 
-    default LocalDate map(Instant value) {
+    default LocalDateTime map(Instant value) {
         if (value == null) return null;
         return value
                 .atZone(PROJECT_ZONE)
-                .toLocalDate();
+                .toLocalDateTime();
     }
 }
