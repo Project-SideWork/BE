@@ -28,7 +28,7 @@ public class ChatController {
     public SseEmitter subscribe(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("chatRoomId") Long chatRoomId) {
-        chatQueryService.checkSubscribeValidation(user.getId(), chatRoomId);
+        chatQueryService.checkChatUserValidation(user.getId(), chatRoomId);
         return sseSubscribeUseCase.subscribeChat(user.getId(), chatRoomId);
     }
 
@@ -54,6 +54,7 @@ public class ChatController {
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("chatRoomId") Long chatRoomId,
             @RequestParam(required = false, value = "cursor") String cursor) {
+        chatQueryService.checkChatUserValidation(user.getId(), chatRoomId);
         ChatMessageQueryResult queryRes = chatQueryService.queryMessagesByChatRoomId(chatRoomId, cursor);
         CursorResponse<ChatRecord> res = new CursorResponse<>(queryRes.items(), queryRes.nextCursor(), queryRes.hasNext());
         return ResponseEntity.ok().body(ApiResponse.onSuccess(res));
