@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @Mapper(componentModel = "spring")
@@ -15,17 +16,17 @@ public interface ChatMessageMapper {
     ChatMessage toDomain(ChatMessageEntity entity);
     ChatMessageEntity toEntity(ChatMessage domain);
 
-    default Instant map(LocalDate value) {
-        if (value == null) return null;
-        return value
-                .atStartOfDay(PROJECT_ZONE)
-                .toInstant();
-    }
-
-    default LocalDate map(Instant value) {
+    default Instant map(LocalDateTime value) {
         if (value == null) return null;
         return value
                 .atZone(PROJECT_ZONE)
-                .toLocalDate();
+                .toInstant();
+    }
+
+    default LocalDateTime map(Instant value) {
+        if (value == null) return null;
+        return value
+                .atZone(PROJECT_ZONE)
+                .toLocalDateTime();
     }
 }
