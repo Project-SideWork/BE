@@ -1,6 +1,7 @@
 package com.sidework.project.application.service;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillQueryUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredQueryUseCase;
+import com.sidework.user.application.port.in.UserQueryUseCase;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,6 +41,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
     private final ProjectPreferredSkillQueryUseCase projectPreferredSkillQueryUseCase;
     private final ProjectRequiredQueryUseCase projectRequiredQueryUseCase;
+    private final UserQueryUseCase userQueryUseCase;
 
 
 
@@ -107,9 +110,97 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     @Override
     public PageResponse<List<ProjectListResponse>> queryProjectList(Pageable pageable) {
         Page<Project> page = projectRepository.findPage(pageable);
-        List<Project>  projects = page.getContent();
-        return null;
+        List<Project> projects = page.getContent();
+        if (projects.isEmpty()) {
+            return PageResponse.of(
+                List.of(),
+                page.getNumber(),
+                page.getSize(),
+                0,
+                0);
+        }
+        List<Long> projectIds = projects.stream()
+            .map(Project::getId)
+            .toList();
 
+        ListBatchData batch = loadListBatchData(projectIds);
+        List<ProjectListResponse> contents = buildListResponses(projects, batch);
+
+        return PageResponse.of(
+            contents,
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages());
+    }
+
+    private ListBatchData loadListBatchData(List<Long> projectIds) {
+        Map<Long, List<ProjectRecruitPosition>> positionsMap = projectRepository.getProjectRecruitPositionsByProjectIds(projectIds);
+
+        Map<Long, List<String>> requiredStacksMap = projectRequiredQueryUseCase.queryNamesByProjectIds(projectIds);
+
+        Map<Long, ProjectUser> ownerByProject = projectUserRepository.findOwnerUserIdByProjectIds(projectIds);
+
+        List<Long> ownerUserIds = ownerByProject.values()
+            .stream()
+            .map(ProjectUser::getUserId)
+            .distinct()
+            .toList();
+
+        Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(ownerUserIds);
+        return new ListBatchData(
+            positionsMap,
+            requiredStacksMap,
+            ownerByProject,
+            userIdToName);
+    }
+
+    private List<ProjectListResponse> buildListResponses(List<Project> projects, ListBatchData batch) {
+        return projects.stream()
+            .map(project -> toProjectListResponse(
+                project,
+                batch.positionsMap.getOrDefault(project.getId(), List.of()),
+                batch.requiredStacksMap.getOrDefault(project.getId(), List.of()),
+                resolveCreatorName(project.getId(), batch)))
+            .toList();
+    }
+
+    private String resolveCreatorName(Long projectId, ListBatchData batch) {
+        ProjectUser owner = batch.ownerByProject.get(projectId);
+        return owner != null ? batch.userIdToName.get(owner.getUserId()) : null;
+    }
+
+    private record ListBatchData(
+        Map<Long, List<ProjectRecruitPosition>> positionsMap,
+        Map<Long, List<String>> requiredStacksMap,
+        Map<Long, ProjectUser> ownerByProject,
+        Map<Long, String> userIdToName
+    ) {}
+
+    private ProjectListResponse toProjectListResponse(Project project, List<ProjectRecruitPosition> positions, List<String> requiredStacks, String creatorName) {
+        Integer remainingDays = Optional.ofNullable(project.getEndDt())
+            .map(end -> (int) ChronoUnit.DAYS.between(LocalDate.now(), end))
+            .orElse(null);
+
+        int durationMonths = 0;
+        if (project.getStartDt() != null && project.getEndDt() != null) {
+            durationMonths = Math.max(0,
+                (int) ChronoUnit.MONTHS.between(project.getStartDt(), project.getEndDt())
+            );
+        }
+
+        List<RecruitPositionResponse> recruitPositions = buildRecruitPositions(positions);
+        return ProjectListResponse.of(
+                project.getId(),
+                project.getTitle(),
+                project.getDescription(),
+                project.getStatus(),
+                remainingDays,
+                false,
+                recruitPositions,
+                requiredStacks != null ? requiredStacks : List.of(),
+                creatorName != null ? creatorName : "",
+                durationMonths);
     }
 
     private List<String> queryRequiredStacks(Long projectId) {
