@@ -83,6 +83,8 @@ public class ChatControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+
+        verify(sseSubscribeUseCase, never()).subscribeChat(anyLong());
     }
     @Test
     void SSE_구독_시_존재하지_않는_채팅방의_ID로_구독_시도하면_400을_반환한다() throws Exception {
@@ -147,9 +149,6 @@ public class ChatControllerTest {
     void sendNewChatToCreateRoom_요청시_인증정보가_없으면_401을_반환한다() throws Exception {
         NewChatCommand command = new NewChatCommand(1L, "테스트");
 
-        doNothing().when(chatCommandService).processStartNewChat(1L, command);
-
-
         mockMvc.perform(post("/api/v1/chats")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -157,6 +156,9 @@ public class ChatControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+
+        verify(chatCommandService, never())
+                .processStartNewChat(anyLong(), any(NewChatCommand.class));
     }
 
     @Test
@@ -255,8 +257,6 @@ public class ChatControllerTest {
     void sendNewChatToExistRoom_요청시_인증정보가_없으면_401을_반환한다() throws Exception {
         ExistChatCommand command = new ExistChatCommand("테스트");
 
-        doNothing().when(chatCommandService).processResumeChat(1L, 1L, command);
-
 
         mockMvc.perform(post("/api/v1/chats/{chatRoomId}", 1L)
                         .with(csrf())
@@ -265,6 +265,10 @@ public class ChatControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+
+
+        verify(chatCommandService, never())
+                .processResumeChat(anyLong(), anyLong(), any(ExistChatCommand.class));
     }
 
     @Test
@@ -344,13 +348,6 @@ public class ChatControllerTest {
 
     @Test
     void getMessages를_인증정보_없이_요청시_401을_반환한다() throws Exception {
-        when(chatQueryService.queryMessagesByChatRoomId(1L, "inputCursor")).thenReturn(
-                new ChatMessageQueryResult(
-                        List.of(new ChatRecord(1L, "테스트", "12:00")),
-                        "testcursor", true
-                )
-        );
-
 
         mockMvc.perform(get("/api/v1/chats/{chatRoomId}?cursor=inputCursor", 1L)
                         .with(csrf())
@@ -358,5 +355,8 @@ public class ChatControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+
+        verify(chatQueryService, never())
+                .queryMessagesByChatRoomId(1L, "testCursor");
     }
 }
