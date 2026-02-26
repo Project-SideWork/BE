@@ -30,8 +30,6 @@ public class ChatQueryService implements ChatQueryUseCase {
     private final ChatRoomOutPort chatRoomRepository;
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final ZoneId SERVICE_ZONE = ZoneId.of("Asia/Seoul");
-
 
 
     @Override
@@ -42,7 +40,7 @@ public class ChatQueryService implements ChatQueryUseCase {
                 decoded.cursorCreatedAt(), decoded.cursorId(), 3);
 
         List<ChatRecord> records = page.items().stream().map(
-                chatMessage -> ChatRecord.create(chatMessage.getId(), chatMessage.getContent(), chatMessage.getCreatedAt().atZone(ZoneOffset.UTC).withZoneSameInstant(SERVICE_ZONE).format(TIME_FORMATTER))
+                chatMessage -> ChatRecord.create(chatMessage.getId(), chatMessage.getContent(), chatMessage.getCreatedAt().format(TIME_FORMATTER))
         ).toList();
 
 
