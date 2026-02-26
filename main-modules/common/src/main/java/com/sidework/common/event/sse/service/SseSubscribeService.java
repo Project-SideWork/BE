@@ -19,7 +19,7 @@ public class SseSubscribeService implements SseSubscribeUseCase {
     }
 
     @Override
-    public SseEmitter subscribeChat(Long userId, Long chatRoomId) {
+    public SseEmitter subscribeChat(Long chatRoomId) {
         return sseSubscribeOutPort.subscribeChatRoom(chatRoomId);
     }
 }

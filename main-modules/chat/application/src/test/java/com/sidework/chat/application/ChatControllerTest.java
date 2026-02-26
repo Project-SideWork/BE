@@ -57,7 +57,7 @@ public class ChatControllerTest {
     void SSE_구독_성공시_200을_반환한다() throws Exception {
         SseEmitter emitter = new SseEmitter();
 
-        when(sseSubscribeUseCase.subscribeChat(anyLong(),anyLong()))
+        when(sseSubscribeUseCase.subscribeChat(anyLong()))
                 .thenReturn(emitter);
 
         mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)
@@ -76,7 +76,7 @@ public class ChatControllerTest {
     void SSE_구독_시_인증정보가_없으면_401을_반환한다() throws Exception {
         SseEmitter emitter = new SseEmitter();
 
-        when(sseSubscribeUseCase.subscribeChat(anyLong(),anyLong()))
+        when(sseSubscribeUseCase.subscribeChat(anyLong()))
                 .thenReturn(emitter);
 
         mockMvc.perform(get("/api/v1/chats/subscribe/{chatRoomId}", 1L)

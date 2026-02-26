@@ -4,5 +4,5 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public interface SseSubscribeUseCase {
 	SseEmitter subscribeUser(Long userId);
-	SseEmitter subscribeChat(Long userId, Long chatRoomId);
+	SseEmitter subscribeChat(Long chatRoomId);
 }

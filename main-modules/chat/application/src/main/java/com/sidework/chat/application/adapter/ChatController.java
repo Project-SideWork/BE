@@ -26,7 +26,7 @@ public class ChatController {
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("chatRoomId") Long chatRoomId) {
         chatQueryService.checkChatUserValidation(user.getId(), chatRoomId);
-        return sseSubscribeUseCase.subscribeChat(user.getId(), chatRoomId);
+        return sseSubscribeUseCase.subscribeChat(chatRoomId);
     }
 
     @PostMapping
