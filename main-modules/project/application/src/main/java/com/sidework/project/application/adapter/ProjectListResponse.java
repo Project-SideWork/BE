@@ -9,34 +9,28 @@ public record ProjectListResponse(
         String title,
         String description,
         ProjectStatus status,
-        Integer remainingDays,
         boolean liked,
         List<ProjectDetailResponse.RecruitPositionResponse> recruitPositions,
         List<String> requiredStacks,
-        String creatorName,
-        int durationMonths
+        String creatorName
 ) {
     public static ProjectListResponse of(
             Long projectId,
             String title,
             String description,
             ProjectStatus status,
-            Integer remainingDays,
             boolean liked,
             List<ProjectDetailResponse.RecruitPositionResponse> recruitPositions,
             List<String> requiredStacks,
-            String creatorName,
-            int durationMonths) {
+            String creatorName) {
         return new ProjectListResponse(
                 projectId,
                 title,
                 description,
                 status,
-                remainingDays,
                 liked,
                 recruitPositions,
                 requiredStacks,
-                creatorName,
-                durationMonths);
+                creatorName);
     }
 }

@@ -1,5 +1,7 @@
 package com.sidework.project.application.service;
 
+import static com.sidework.project.domain.ProjectStatus.*;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -178,16 +180,21 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     ) {}
 
     private ProjectListResponse toProjectListResponse(Project project, List<ProjectRecruitPosition> positions, List<String> requiredStacks, String creatorName) {
-        Integer remainingDays = Optional.ofNullable(project.getEndDt())
-            .map(end -> (int) ChronoUnit.DAYS.between(LocalDate.now(), end))
-            .orElse(null);
-
-        int durationMonths = 0;
-        if (project.getStartDt() != null && project.getEndDt() != null) {
-            durationMonths = Math.max(0,
-                (int) ChronoUnit.MONTHS.between(project.getStartDt(), project.getEndDt())
-            );
-        }
+        // Integer remainingDays=null;
+        // if(!project.getStatus().equals(RECRUITING))
+        // {
+        //     remainingDays = Optional.ofNullable(project.getEndDt())
+        //         .map(end -> (int) ChronoUnit.DAYS.between(LocalDate.now(), end))
+        //         .orElse(null);
+        // }
+        //
+        //
+        // int durationMonths = 0;
+        // if (project.getStartDt() != null && project.getEndDt() != null) {
+        //     durationMonths = Math.max(0,
+        //         (int) ChronoUnit.MONTHS.between(project.getStartDt(), project.getEndDt())
+        //     );
+        // }
 
         List<RecruitPositionResponse> recruitPositions = buildRecruitPositions(positions);
         return ProjectListResponse.of(
@@ -195,12 +202,10 @@ public class ProjectQueryService implements ProjectQueryUseCase {
                 project.getTitle(),
                 project.getDescription(),
                 project.getStatus(),
-                remainingDays,
                 false,
                 recruitPositions,
                 requiredStacks != null ? requiredStacks : List.of(),
-                creatorName != null ? creatorName : "",
-                durationMonths);
+                creatorName != null ? creatorName : "");
     }
 
     private List<String> queryRequiredStacks(Long projectId) {
