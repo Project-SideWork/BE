@@ -1,6 +1,8 @@
 package com.sidework.notification.persistence.adapter;
 
+import com.sidework.common.event.sse.component.SseEmitterManager;
 import com.sidework.common.event.sse.component.UserSseEmitter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sidework.notification.application.adapter.NotificationResponse;
@@ -13,14 +15,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NotificationSendPersistenceAdapter implements NotificationSendOutPort {
 
-	private final UserSseEmitter sseEmitterManager;
+    private final UserSseEmitter userSseEmitter;
 
 	@Override
 	public void send(Long userId, Notification notification) {
-		if(notification == null) {
+		if(userId == null || notification == null) {
 			return;
 		}
 		NotificationResponse response = NotificationResponse.from(notification);
-		sseEmitterManager.sendTo(userId, response);
+        userSseEmitter.sendTo(userId, response);
 	}
 }
