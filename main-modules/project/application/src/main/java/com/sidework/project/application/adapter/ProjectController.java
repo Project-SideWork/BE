@@ -1,19 +1,24 @@
 package com.sidework.project.application.adapter;
 
 import com.sidework.common.response.ApiResponse;
+import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
-import com.sidework.project.domain.Project;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -69,5 +74,11 @@ public class ProjectController {
     @GetMapping("/{projectId}")
     public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProject(@PathVariable("projectId") Long projectId) {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(projectId)));
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
+        @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectList(pageable)));
     }
 }
