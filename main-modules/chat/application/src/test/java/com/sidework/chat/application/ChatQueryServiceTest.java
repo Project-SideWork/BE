@@ -60,6 +60,7 @@ public class ChatQueryServiceTest {
 
         assertEquals(1, result.items().size());
         assertTrue(result.hasNext());
+        assertNotNull(result.nextCursor());
     }
 
     @Test
@@ -93,7 +94,7 @@ public class ChatQueryServiceTest {
 
         assertThrows(
                 InvalidCommandException.class,
-                () -> service.checkSubscribeValidation(1L, chatRoomId)
+                () -> service.checkChatUserValidation(1L, chatRoomId)
         );
     }
 
@@ -107,7 +108,7 @@ public class ChatQueryServiceTest {
 
         assertThrows(
                 ForbiddenAccessException.class,
-                () -> service.checkSubscribeValidation(userId, chatRoomId)
+                () -> service.checkChatUserValidation(userId, chatRoomId)
         );
     }
 
@@ -120,7 +121,7 @@ public class ChatQueryServiceTest {
         when(chatUserRepository.existsByUserAndRoom(userId, chatRoomId)).thenReturn(true);
 
         assertDoesNotThrow(() ->
-                service.checkSubscribeValidation(userId, chatRoomId)
+                service.checkChatUserValidation(userId, chatRoomId)
         );
     }
 
