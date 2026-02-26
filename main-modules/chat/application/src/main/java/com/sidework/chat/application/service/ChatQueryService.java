@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -28,14 +29,20 @@ public class ChatQueryService implements ChatQueryUseCase {
     private final ChatMessageOutPort chatMessageRepository;
     private final ChatRoomOutPort chatRoomRepository;
 
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final ZoneId SERVICE_ZONE = ZoneId.of("Asia/Seoul");
+
+
+
     @Override
     public ChatMessageQueryResult queryMessagesByChatRoomId(Long chatRoomId, String cursor) {
+
         CursorWrapper decoded = CursorUtil.decode(cursor);
         ChatMessagePage page = chatMessageRepository.findByChatRoomIdAndIdGreaterThan(chatRoomId,
                 decoded.cursorCreatedAt(), decoded.cursorId(), 3);
 
         List<ChatRecord> records = page.items().stream().map(
-                chatMessage -> ChatRecord.create(chatMessage.getId(), chatMessage.getContent(), chatMessage.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")))
+                chatMessage -> ChatRecord.create(chatMessage.getId(), chatMessage.getContent(), chatMessage.getCreatedAt().atZone(ZoneOffset.UTC).withZoneSameInstant(SERVICE_ZONE).format(TIME_FORMATTER))
         ).toList();
 
 

@@ -23,7 +23,6 @@ public class ChatCommandService implements ChatCommandUseCase {
     private final ChatRoomOutPort chatRoomRepository;
     private final SseSendOutPort sseSendAdapter;
 
-
     @Override
     public void processStartNewChat(Long senderId, NewChatCommand chatCommand) {
         Long newChatRoom = createNewChatRoom(chatCommand.content());
