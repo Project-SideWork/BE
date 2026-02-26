@@ -357,6 +357,6 @@ public class ChatControllerTest {
                 .andExpect(status().isUnauthorized());
 
         verify(chatQueryService, never())
-                .queryMessagesByChatRoomId(1L, "testCursor");
+                .queryMessagesByChatRoomId(anyLong(), anyString());
     }
 }
