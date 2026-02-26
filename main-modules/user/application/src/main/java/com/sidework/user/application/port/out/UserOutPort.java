@@ -1,5 +1,7 @@
 package com.sidework.user.application.port.out;
 
+import java.util.List;
+
 import com.sidework.user.domain.User;
 
 public interface UserOutPort {
@@ -7,4 +9,5 @@ public interface UserOutPort {
     boolean existsByEmail(String email);
     User findById(Long id);
     User findByEmail(String email);
+    List<User> findAllByUserIdIn(List<Long> ids);
 }
