@@ -116,8 +116,8 @@ public class ProjectQueryService implements ProjectQueryUseCase {
                 List.of(),
                 page.getNumber(),
                 page.getSize(),
-                0,
-                0);
+                page.getTotalElements(),
+                page.getTotalPages());
         }
         List<Long> projectIds = projects.stream()
             .map(Project::getId)
