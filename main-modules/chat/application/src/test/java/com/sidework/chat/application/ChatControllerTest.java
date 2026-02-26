@@ -205,6 +205,30 @@ public class ChatControllerTest {
                 .andExpect(jsonPath("$.message").value("수신자 ID는 필수입니다."));
     }
 
+
+    @Test
+    void sendNewChatToCreateRoom_RequestBody에_receiverId값이_양수가_아니면_400을_반환한다() throws Exception {
+        NewChatCommand command = new NewChatCommand((long) -1, "테스트");
+
+        doNothing().when(chatCommandService).processStartNewChat(1L, command);
+
+
+        mockMvc.perform(post("/api/v1/chats")
+                        .with(user(new AuthenticatedUserDetails(
+                                1L,
+                                "test@mail.com",
+                                "테스터",
+                                "pw"
+                        )))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("수신자 ID는 양수입니다."));
+    }
+
     @Test
     void sendNewChatToExistRoom_성공시_201을_반환한다() throws Exception {
         ExistChatCommand command = new ExistChatCommand("테스트");
