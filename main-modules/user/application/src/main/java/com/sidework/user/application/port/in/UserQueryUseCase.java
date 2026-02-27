@@ -10,4 +10,5 @@ public interface UserQueryUseCase {
     User findById(Long id);
     List<User> findByIdIn(List<Long> ids);
     Map<Long, String> findNamesByUserIds(List<Long> userIds);
+    void validateExists(Long id);
 }
