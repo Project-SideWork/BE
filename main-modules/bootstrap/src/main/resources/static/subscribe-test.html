@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>SSE 통합 테스트</title>
+</head>
+<body>
+
+<h2>SSE 2개 동시 연결 테스트</h2>
+
+<button onclick="startConnections()">연결 시작</button>
+
+<pre id="result"></pre>
+
+<script>
+    const token = "eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2VzcyIsImVtYWlsIjoiZ2xpdHQxMTIxQG5hdmVyLmNvbSIsImlhdCI6MTc3MTYzMDk3MCwiZXhwIjoxNzcxNjMyNzcwfQ.ZaR4gqAOkjWNogogjX2m4tA6ThHijy5sBYtkOwwLgqQ";
+    const chatRoomId = 1;
+    const myEmail = "glitt1121@naver.com";
+
+    function log(msg) {
+        document.getElementById("result").textContent += "\n" + msg;
+    }
+
+    // 🔥 공통 SSE 연결 함수
+    async function connectSSE(url, name, handler) {
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Accept": "text/event-stream"
+            }
+        });
+
+        if (!response.ok) {
+            log(name + " 연결 실패: " + response.status);
+            return;
+        }
+
+        log(name + " 연결 성공");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+
+        let buffer = "";
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                log(name + " 연결 종료");
+                break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const parts = buffer.split("\n\n");
+            buffer = parts.pop();
+
+            for (let part of parts) {
+                handler(part);
+            }
+        }
+    }
+
+    // 🔥 채팅 이벤트 처리
+    function handleChatEvent(raw) {
+        const lines = raw.split("\n");
+        let data = "";
+
+        for (let line of lines) {
+            if (line.startsWith("data:")) {
+                data += line.replace("data:", "").trim();
+            }
+        }
+
+        if (!data) return;
+
+        try {
+            const parsed = JSON.parse(data);
+
+            log("💬 채팅: " + parsed.message);
+
+        } catch (e) {
+            log("채팅 파싱 실패: " + data);
+        }
+    }
+
+    // 🔥 사용자 알림 이벤트 처리
+    function handleUserEvent(raw) {
+        const lines = raw.split("\n");
+        let data = "";
+
+        for (let line of lines) {
+            if (line.startsWith("data:")) {
+                data += line.replace("data:", "").trim();
+            }
+        }
+
+        if (!data) return;
+
+        try {
+            const parsed = JSON.parse(data);
+
+            log("🔔 사용자 알림: " + parsed.message);
+
+        } catch (e) {
+            log("알림 파싱 실패: " + data);
+        }
+    }
+
+    // 🔥 두 개 다 연결
+    function startConnections() {
+
+        connectSSE(
+            "http://localhost:8080/api/v1/notifications/subscribe",
+            "USER SSE",
+            handleUserEvent
+        );
+
+        connectSSE(
+            "http://localhost:8080/api/v1/chats/subscribe/" + chatRoomId,
+            "CHAT SSE",
+            handleChatEvent
+        );
+    }
+
+</script>
+
+</body>
+</html>

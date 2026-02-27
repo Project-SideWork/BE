@@ -35,6 +35,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/v3/api-docs/**",
             "/api/v1/signup",
             "/favicon.ico",
+            "/fcm-test.html",
+            "/firebase-messaging-sw.js",
             "/error"
     );
 
