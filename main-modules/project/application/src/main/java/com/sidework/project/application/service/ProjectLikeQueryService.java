@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ProjrctLikeQueryService implements ProjectLikeQueryUseCase {
+public class ProjectLikeQueryService implements ProjectLikeQueryUseCase {
 
 	private final ProjectLikeOutPort projectLikeOutPort;
 
