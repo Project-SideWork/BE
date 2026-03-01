@@ -1,9 +1,5 @@
 package com.sidework.project.application.service;
 
-import static com.sidework.project.domain.ProjectStatus.*;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +9,7 @@ import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
+import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.adapter.ProjectDetailResponse.RecruitPositionResponse;
 import com.sidework.project.application.port.out.ProjectOutPort;
@@ -44,6 +41,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     private final ProjectPreferredSkillQueryUseCase projectPreferredSkillQueryUseCase;
     private final ProjectRequiredQueryUseCase projectRequiredQueryUseCase;
     private final UserQueryUseCase userQueryUseCase;
+    private final ProjectLikeQueryUseCase projectLikeQueryUseCase;
 
 
 
@@ -110,7 +108,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     @Override
-    public PageResponse<List<ProjectListResponse>> queryProjectList(Pageable pageable) {
+    public PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, Pageable pageable) {
         Page<Project> page = projectRepository.findPage(pageable);
         List<Project> projects = page.getContent();
         if (projects.isEmpty()) {
@@ -125,7 +123,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             .map(Project::getId)
             .toList();
 
-        ListBatchData batch = loadListBatchData(projectIds);
+        ListBatchData batch = loadListBatchData(userId, projectIds);
         List<ProjectListResponse> contents = buildListResponses(projects, batch);
 
         return PageResponse.of(
@@ -136,24 +134,27 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             page.getTotalPages());
     }
 
-    private ListBatchData loadListBatchData(List<Long> projectIds) {
+    private ListBatchData loadListBatchData(Long userId, List<Long> projectIds) {
         Map<Long, List<ProjectRecruitPosition>> positionsMap = projectRepository.getProjectRecruitPositionsByProjectIds(projectIds);
 
         Map<Long, List<String>> requiredStacksMap = projectRequiredQueryUseCase.queryNamesByProjectIds(projectIds);
 
         Map<Long, Long> ownerUserIdByProject = projectUserRepository.findOwnerUserIdByProjectIds(projectIds);
 
-        List<Long> ownerUserIds = ownerUserIdByProject.values()
-            .stream()
-            .distinct()
-            .toList();
+        Map<Long, Boolean> isLikedProject = projectLikeQueryUseCase.isLikedByProjectIds(userId, projectIds);
+
+		List<Long> ownerUserIds = ownerUserIdByProject.values()
+			.stream()
+			.distinct()
+			.toList();
 
         Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(ownerUserIds);
         return new ListBatchData(
-            positionsMap,
-            requiredStacksMap,
-            ownerUserIdByProject,
-            userIdToName);
+			positionsMap,
+			requiredStacksMap,
+			ownerUserIdByProject,
+			userIdToName,
+			isLikedProject);
     }
 
     private List<ProjectListResponse> buildListResponses(List<Project> projects, ListBatchData batch) {
@@ -162,7 +163,8 @@ public class ProjectQueryService implements ProjectQueryUseCase {
                 project,
                 batch.positionsMap.getOrDefault(project.getId(), List.of()),
                 batch.requiredStacksMap.getOrDefault(project.getId(), List.of()),
-                resolveCreatorName(project.getId(), batch)))
+                resolveCreatorName(project.getId(), batch),
+                batch.likedByProjectId.getOrDefault(project.getId(), false)))
             .toList();
     }
 
@@ -174,11 +176,12 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     private record ListBatchData(
         Map<Long, List<ProjectRecruitPosition>> positionsMap,
         Map<Long, List<String>> requiredStacksMap,
-        Map<Long, Long> ownerUserIdByProject,
-        Map<Long, String> userIdToName
+		Map<Long, Long> ownerUserIdByProject,
+        Map<Long, String> userIdToName,
+        Map<Long, Boolean> likedByProjectId
     ) {}
 
-    private ProjectListResponse toProjectListResponse(Project project, List<ProjectRecruitPosition> positions, List<String> requiredStacks, String creatorName) {
+        private ProjectListResponse toProjectListResponse(Project project, List<ProjectRecruitPosition> positions, List<String> requiredStacks, String creatorName, boolean isLikedProject) {
         // Integer remainingDays=null;
         // if(!project.getStatus().equals(RECRUITING))
         // {
@@ -201,7 +204,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
                 project.getTitle(),
                 project.getDescription(),
                 project.getStatus(),
-                false,
+                isLikedProject,
                 recruitPositions,
                 requiredStacks != null ? requiredStacks : List.of(),
                 creatorName != null ? creatorName : "");

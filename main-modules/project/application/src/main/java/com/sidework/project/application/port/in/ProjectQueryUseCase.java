@@ -17,5 +17,5 @@ public interface ProjectQueryUseCase {
     ProjectDetailResponse queryProjectDetail(Long projectId);
     List<ProjectRecruitPosition> queryProjectRecruitPosition(Long projectId);
     Map<Long, List<ProjectRole>> queryUserRolesByProjects(Long userId, List<Long> projectIds);
-    PageResponse<List<ProjectListResponse>> queryProjectList(Pageable pageable);
+    PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, Pageable pageable);
 }
