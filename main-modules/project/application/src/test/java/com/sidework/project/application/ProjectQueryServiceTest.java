@@ -5,6 +5,7 @@ import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
+import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
@@ -58,6 +59,9 @@ class ProjectQueryServiceTest {
 
     @Mock
     private UserQueryUseCase userQueryUseCase;
+
+    @Mock
+    private ProjectLikeQueryUseCase projectLikeQueryUseCase;
 
     @InjectMocks
     private ProjectQueryService queryService;
@@ -173,12 +177,13 @@ class ProjectQueryServiceTest {
 
     @Test
     void queryProjectList_프로젝트가_없으면_빈_페이지_반환한다() {
+        Long userId = 1L;
         Pageable pageable = PageRequest.of(0, 20);
         Page<Project> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
         when(projectRepository.findPage(pageable)).thenReturn(emptyPage);
 
-        PageResponse<List<ProjectListResponse>> result = queryService.queryProjectList(pageable);
+        PageResponse<List<ProjectListResponse>> result = queryService.queryProjectList(userId, pageable);
 
         assertNotNull(result.content());
         assertTrue(result.content().isEmpty());
@@ -191,6 +196,7 @@ class ProjectQueryServiceTest {
 
     @Test
     void queryProjectList_프로젝트가_있으면_배치_조회_후_PageResponse_반환한다() {
+        Long userId = 1L;
         Pageable pageable = PageRequest.of(0, 20);
         Project project1 = createProject(1L);
         Project project2 = createProject(2L);
@@ -208,8 +214,10 @@ class ProjectQueryServiceTest {
             .thenReturn(Map.of(1L, 10L, 2L, 10L));
         when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
             .thenReturn(Map.of(10L, "테스트유저"));
+        when(projectLikeQueryUseCase.isLikedByProjectIds(userId, List.of(1L, 2L)))
+            .thenReturn(Map.of(1L, true, 2L, false));
 
-        PageResponse<List<ProjectListResponse>> result = queryService.queryProjectList(pageable);
+        PageResponse<List<ProjectListResponse>> result = queryService.queryProjectList(userId, pageable);
 
         assertNotNull(result.content());
         assertEquals(2, result.content().size());
@@ -221,8 +229,13 @@ class ProjectQueryServiceTest {
         assertEquals("테스트 프로젝트", first.title());
         assertEquals(List.of("Java", "Spring"), first.requiredStacks());
         assertEquals("테스트유저", first.creatorName());
+        assertTrue(first.liked());
         assertEquals(1, first.recruitPositions().size());
         assertEquals(ProjectRole.BACKEND, first.recruitPositions().get(0).role());
+
+        ProjectListResponse second = result.content().get(1);
+        assertEquals(2L, second.projectId());
+        assertFalse(second.liked());
     }
 
     private Project createProject(Long id) {

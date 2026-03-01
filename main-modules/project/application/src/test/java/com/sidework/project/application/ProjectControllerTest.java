@@ -15,6 +15,8 @@ import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
+import com.sidework.project.application.port.in.ProjectLikeCommandUseCase;
+import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.domain.SkillLevel;
@@ -68,6 +70,12 @@ public class ProjectControllerTest {
 
     @MockitoBean
     private ProjectQueryUseCase projectQueryUseCase;
+
+    @MockitoBean
+    private ProjectLikeCommandUseCase projectLikeCommandUseCase;
+
+    @MockitoBean
+    private ProjectLikeQueryUseCase projectLikeQueryUseCase;
 
     @MockitoBean
     private ProjectOutPort repo;

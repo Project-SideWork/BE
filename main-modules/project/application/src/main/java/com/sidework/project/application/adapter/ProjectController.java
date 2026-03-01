@@ -7,6 +7,7 @@ import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
+import com.sidework.project.application.port.in.ProjectLikeCommandUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,8 @@ import java.util.List;
 public class ProjectController {
     private final ProjectCommandUseCase commandService;
     private final ProjectApplyCommandUseCase applyCommandService;
-
     private final ProjectQueryUseCase queryService;
+    private final ProjectLikeCommandUseCase likeCommandService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> postNewProject(@Validated @RequestBody ProjectCommand command) {
@@ -79,6 +80,13 @@ public class ProjectController {
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
         @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectList(pageable)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectList(1L,pageable)));
     }
+
+    @PostMapping("/{projectId}/like")
+    public ResponseEntity<ApiResponse<Void>> likeProject(@PathVariable("projectId") Long projectId) {
+        likeCommandService.like(1L, projectId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
 }

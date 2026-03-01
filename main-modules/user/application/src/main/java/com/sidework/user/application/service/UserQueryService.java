@@ -37,6 +37,11 @@ public class UserQueryService implements UserQueryUseCase {
     }
 
     @Override
+    public void validateExists(Long id) {
+        userRepository.findById(id);
+    }
+
+    @Override
     public Map<Long, String> findNamesByUserIds(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return Map.of();
