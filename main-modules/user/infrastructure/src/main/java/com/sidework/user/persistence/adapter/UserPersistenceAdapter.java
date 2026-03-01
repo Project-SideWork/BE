@@ -1,5 +1,7 @@
 package com.sidework.user.persistence.adapter;
 
+import java.util.List;
+
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import com.sidework.user.persistence.entity.UserEntity;
@@ -36,5 +38,14 @@ public class UserPersistenceAdapter implements UserOutPort {
         UserEntity user = repo.findByEmail(email);
         if(user == null) throw new UserNotFoundException(email);
         return mapper.toDomain(user);
+    }
+
+    @Override
+    public List<User> findAllByUserIdIn(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        List<UserEntity> users = repo.findAllById(ids);
+        return users.stream().map(mapper::toDomain).toList();
     }
 }

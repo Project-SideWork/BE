@@ -1,11 +1,16 @@
 package com.sidework.project.application.service;
 
-import java.util.ArrayList;
+import static com.sidework.project.domain.ProjectStatus.*;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
+import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
@@ -19,8 +24,12 @@ import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillQueryUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredQueryUseCase;
+import com.sidework.user.application.port.in.UserQueryUseCase;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +43,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
     private final ProjectPreferredSkillQueryUseCase projectPreferredSkillQueryUseCase;
     private final ProjectRequiredQueryUseCase projectRequiredQueryUseCase;
+    private final UserQueryUseCase userQueryUseCase;
 
 
 
@@ -97,6 +107,104 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     @Override
     public Map<Long, List<ProjectRole>> queryUserRolesByProjects(Long userId, List<Long> projectIds) {
         return projectUserRepository.queryUserRolesByProjects(userId, projectIds);
+    }
+
+    @Override
+    public PageResponse<List<ProjectListResponse>> queryProjectList(Pageable pageable) {
+        Page<Project> page = projectRepository.findPage(pageable);
+        List<Project> projects = page.getContent();
+        if (projects.isEmpty()) {
+            return PageResponse.of(
+                List.of(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages());
+        }
+        List<Long> projectIds = projects.stream()
+            .map(Project::getId)
+            .toList();
+
+        ListBatchData batch = loadListBatchData(projectIds);
+        List<ProjectListResponse> contents = buildListResponses(projects, batch);
+
+        return PageResponse.of(
+            contents,
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages());
+    }
+
+    private ListBatchData loadListBatchData(List<Long> projectIds) {
+        Map<Long, List<ProjectRecruitPosition>> positionsMap = projectRepository.getProjectRecruitPositionsByProjectIds(projectIds);
+
+        Map<Long, List<String>> requiredStacksMap = projectRequiredQueryUseCase.queryNamesByProjectIds(projectIds);
+
+        Map<Long, Long> ownerUserIdByProject = projectUserRepository.findOwnerUserIdByProjectIds(projectIds);
+
+        List<Long> ownerUserIds = ownerUserIdByProject.values()
+            .stream()
+            .distinct()
+            .toList();
+
+        Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(ownerUserIds);
+        return new ListBatchData(
+            positionsMap,
+            requiredStacksMap,
+            ownerUserIdByProject,
+            userIdToName);
+    }
+
+    private List<ProjectListResponse> buildListResponses(List<Project> projects, ListBatchData batch) {
+        return projects.stream()
+            .map(project -> toProjectListResponse(
+                project,
+                batch.positionsMap.getOrDefault(project.getId(), List.of()),
+                batch.requiredStacksMap.getOrDefault(project.getId(), List.of()),
+                resolveCreatorName(project.getId(), batch)))
+            .toList();
+    }
+
+    private String resolveCreatorName(Long projectId, ListBatchData batch) {
+        Long ownerUserId = batch.ownerUserIdByProject.get(projectId);
+        return ownerUserId != null ? batch.userIdToName.get(ownerUserId) : null;
+    }
+
+    private record ListBatchData(
+        Map<Long, List<ProjectRecruitPosition>> positionsMap,
+        Map<Long, List<String>> requiredStacksMap,
+        Map<Long, Long> ownerUserIdByProject,
+        Map<Long, String> userIdToName
+    ) {}
+
+    private ProjectListResponse toProjectListResponse(Project project, List<ProjectRecruitPosition> positions, List<String> requiredStacks, String creatorName) {
+        // Integer remainingDays=null;
+        // if(!project.getStatus().equals(RECRUITING))
+        // {
+        //     remainingDays = Optional.ofNullable(project.getEndDt())
+        //         .map(end -> (int) ChronoUnit.DAYS.between(LocalDate.now(), end))
+        //         .orElse(null);
+        // }
+        //
+        //
+        // int durationMonths = 0;
+        // if (project.getStartDt() != null && project.getEndDt() != null) {
+        //     durationMonths = Math.max(0,
+        //         (int) ChronoUnit.MONTHS.between(project.getStartDt(), project.getEndDt())
+        //     );
+        // }
+
+        List<RecruitPositionResponse> recruitPositions = buildRecruitPositions(positions);
+        return ProjectListResponse.of(
+                project.getId(),
+                project.getTitle(),
+                project.getDescription(),
+                project.getStatus(),
+                false,
+                recruitPositions,
+                requiredStacks != null ? requiredStacks : List.of(),
+                creatorName != null ? creatorName : "");
     }
 
     private List<String> queryRequiredStacks(Long projectId) {

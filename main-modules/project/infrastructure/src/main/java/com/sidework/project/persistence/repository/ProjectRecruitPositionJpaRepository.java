@@ -15,6 +15,8 @@ public interface ProjectRecruitPositionJpaRepository extends JpaRepository<Proje
 
 	List<ProjectRecruitPositionEntity> findByProjectId(Long projectId);
 
+	List<ProjectRecruitPositionEntity> findByProjectIdIn(List<Long> projectIds);
+
 	@Modifying(clearAutomatically = true)
 	@Query("DELETE FROM ProjectRecruitPositionEntity WHERE projectId = :projectId")
 	void deleteByProjectId(@Param("projectId") Long projectId);

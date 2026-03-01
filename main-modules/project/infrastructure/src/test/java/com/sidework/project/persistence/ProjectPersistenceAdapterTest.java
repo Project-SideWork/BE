@@ -11,7 +11,9 @@ import com.sidework.project.persistence.adapter.ProjectPersistenceAdapter;
 import com.sidework.project.persistence.entity.ProjectEntity;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.persistence.mapper.ProjectMapper;
+import com.sidework.project.persistence.mapper.ProjectRecruitPositionMapper;
 import com.sidework.project.persistence.repository.ProjectJpaRepository;
+import com.sidework.project.persistence.repository.ProjectRecruitPositionJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,12 +35,15 @@ import static org.mockito.Mockito.when;
 public class ProjectPersistenceAdapterTest {
     @Mock
     private ProjectJpaRepository repo;
+    @Mock
+    private ProjectRecruitPositionJpaRepository recruitPositionRepo;
     private final ProjectMapper mapper = Mappers.getMapper(ProjectMapper.class);
+    private final ProjectRecruitPositionMapper recruitPositionMapper = Mappers.getMapper(ProjectRecruitPositionMapper.class);
     private ProjectPersistenceAdapter adapter;
 
     @BeforeEach
     public void setUp() {
-        adapter = new ProjectPersistenceAdapter(repo, mapper);
+        adapter = new ProjectPersistenceAdapter(repo, recruitPositionRepo, mapper, recruitPositionMapper);
     }
 
     @Test

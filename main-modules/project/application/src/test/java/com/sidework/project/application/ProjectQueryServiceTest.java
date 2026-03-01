@@ -1,6 +1,8 @@
 package com.sidework.project.application;
 
+import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
+import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.out.ProjectOutPort;
@@ -17,14 +19,20 @@ import com.sidework.project.domain.ProjectUser;
 import com.sidework.project.domain.SkillLevel;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillQueryUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredQueryUseCase;
+import com.sidework.user.application.port.in.UserQueryUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -47,6 +55,9 @@ class ProjectQueryServiceTest {
 
     @Mock
     private ProjectRequiredQueryUseCase projectRequiredQueryUseCase;
+
+    @Mock
+    private UserQueryUseCase userQueryUseCase;
 
     @InjectMocks
     private ProjectQueryService queryService;
@@ -158,6 +169,60 @@ class ProjectQueryServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(ProjectRole.BACKEND, result.get(0).getRole());
+    }
+
+    @Test
+    void queryProjectList_프로젝트가_없으면_빈_페이지_반환한다() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Project> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(projectRepository.findPage(pageable)).thenReturn(emptyPage);
+
+        PageResponse<List<ProjectListResponse>> result = queryService.queryProjectList(pageable);
+
+        assertNotNull(result.content());
+        assertTrue(result.content().isEmpty());
+        assertEquals(1, result.page());
+        assertEquals(20, result.size());
+        assertEquals(0, result.totalElements());
+        assertEquals(0, result.totalPages());
+        verify(projectRepository).findPage(pageable);
+    }
+
+    @Test
+    void queryProjectList_프로젝트가_있으면_배치_조회_후_PageResponse_반환한다() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Project project1 = createProject(1L);
+        Project project2 = createProject(2L);
+        Page<Project> page = new PageImpl<>(List.of(project1, project2), pageable, 2);
+
+        List<ProjectRecruitPosition> positions1 = List.of(
+            ProjectRecruitPosition.builder().projectId(1L).role(ProjectRole.BACKEND).headCount(1).currentCount(0).level(SkillLevel.JUNIOR).build()
+        );
+        when(projectRepository.findPage(pageable)).thenReturn(page);
+        when(projectRepository.getProjectRecruitPositionsByProjectIds(List.of(1L, 2L)))
+            .thenReturn(Map.of(1L, positions1, 2L, List.of()));
+        when(projectRequiredQueryUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
+            .thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
+        when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L, 2L)))
+            .thenReturn(Map.of(1L, 10L, 2L, 10L));
+        when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
+            .thenReturn(Map.of(10L, "테스트유저"));
+
+        PageResponse<List<ProjectListResponse>> result = queryService.queryProjectList(pageable);
+
+        assertNotNull(result.content());
+        assertEquals(2, result.content().size());
+        assertEquals(2, result.totalElements());
+        assertEquals(1, result.totalPages());
+
+        ProjectListResponse first = result.content().get(0);
+        assertEquals(1L, first.projectId());
+        assertEquals("테스트 프로젝트", first.title());
+        assertEquals(List.of("Java", "Spring"), first.requiredStacks());
+        assertEquals("테스트유저", first.creatorName());
+        assertEquals(1, first.recruitPositions().size());
+        assertEquals(ProjectRole.BACKEND, first.recruitPositions().get(0).role());
     }
 
     private Project createProject(Long id) {
