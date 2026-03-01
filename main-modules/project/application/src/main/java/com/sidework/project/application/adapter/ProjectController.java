@@ -85,7 +85,7 @@ public class ProjectController {
 
     @PostMapping("/{projectId}/like")
     public ResponseEntity<ApiResponse<Void>> likeProject(@PathVariable("projectId") Long projectId) {
-        likeCommandService.like(projectId,1L);
+        likeCommandService.like(1L, projectId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
     }
 
