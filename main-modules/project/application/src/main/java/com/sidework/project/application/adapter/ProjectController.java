@@ -80,7 +80,7 @@ public class ProjectController {
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
         @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectList(pageable)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectList(1L,pageable)));
     }
 
     @PostMapping("/{projectId}/like")
