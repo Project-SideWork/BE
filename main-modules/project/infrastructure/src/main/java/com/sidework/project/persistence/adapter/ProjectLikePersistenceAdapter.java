@@ -1,5 +1,11 @@
 package com.sidework.project.persistence.adapter;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.sidework.project.application.port.out.ProjectLikeOutPort;
@@ -29,5 +35,19 @@ public class ProjectLikePersistenceAdapter implements ProjectLikeOutPort {
 	@Override
 	public boolean isLiked(Long userId, Long projectId) {
 		return projectLikeRepository.existsByUserIdAndProjectId(userId, projectId);
+	}
+
+	@Override
+	public Map<Long, Boolean> getLikes(Long userId, List<Long> projectIds) {
+		if (projectIds == null || projectIds.isEmpty()) {
+			return Map.of();
+		}
+		Set<Long> projectIdSet = new HashSet<>(
+			projectLikeRepository.findProjectIdsByUserIdAndProjectIdIn(
+				userId, projectIds)
+		);
+
+		return projectIdSet.stream()
+			.collect(Collectors.toMap(id->id, projectIdSet::contains));
 	}
 }
