@@ -47,7 +47,7 @@ public class ProjectLikePersistenceAdapter implements ProjectLikeOutPort {
 				userId, projectIds)
 		);
 
-		return projectIdSet.stream()
+		return projectIds.stream()
 			.collect(Collectors.toMap(id->id, projectIdSet::contains));
 	}
 }
