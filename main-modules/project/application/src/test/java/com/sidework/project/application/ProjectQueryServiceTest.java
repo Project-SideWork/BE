@@ -199,16 +199,13 @@ class ProjectQueryServiceTest {
         List<ProjectRecruitPosition> positions1 = List.of(
             ProjectRecruitPosition.builder().projectId(1L).role(ProjectRole.BACKEND).headCount(1).currentCount(0).level(SkillLevel.JUNIOR).build()
         );
-        ProjectUser owner1 = ProjectUser.builder().projectId(1L).userId(10L).role(ProjectRole.OWNER).status(ApplyStatus.ACCEPTED).build();
-        ProjectUser owner2 = ProjectUser.builder().projectId(2L).userId(10L).role(ProjectRole.OWNER).status(ApplyStatus.ACCEPTED).build();
-
         when(projectRepository.findPage(pageable)).thenReturn(page);
         when(projectRepository.getProjectRecruitPositionsByProjectIds(List.of(1L, 2L)))
             .thenReturn(Map.of(1L, positions1, 2L, List.of()));
         when(projectRequiredQueryUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
             .thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
         when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L, 2L)))
-            .thenReturn(Map.of(1L, owner1, 2L, owner2));
+            .thenReturn(Map.of(1L, 10L, 2L, 10L));
         when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
             .thenReturn(Map.of(10L, "테스트유저"));
 

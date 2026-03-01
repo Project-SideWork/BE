@@ -141,11 +141,10 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
         Map<Long, List<String>> requiredStacksMap = projectRequiredQueryUseCase.queryNamesByProjectIds(projectIds);
 
-        Map<Long, ProjectUser> ownerByProject = projectUserRepository.findOwnerUserIdByProjectIds(projectIds);
+        Map<Long, Long> ownerUserIdByProject = projectUserRepository.findOwnerUserIdByProjectIds(projectIds);
 
-        List<Long> ownerUserIds = ownerByProject.values()
+        List<Long> ownerUserIds = ownerUserIdByProject.values()
             .stream()
-            .map(ProjectUser::getUserId)
             .distinct()
             .toList();
 
@@ -153,7 +152,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         return new ListBatchData(
             positionsMap,
             requiredStacksMap,
-            ownerByProject,
+            ownerUserIdByProject,
             userIdToName);
     }
 
@@ -168,14 +167,14 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     private String resolveCreatorName(Long projectId, ListBatchData batch) {
-        ProjectUser owner = batch.ownerByProject.get(projectId);
-        return owner != null ? batch.userIdToName.get(owner.getUserId()) : null;
+        Long ownerUserId = batch.ownerUserIdByProject.get(projectId);
+        return ownerUserId != null ? batch.userIdToName.get(ownerUserId) : null;
     }
 
     private record ListBatchData(
         Map<Long, List<ProjectRecruitPosition>> positionsMap,
         Map<Long, List<String>> requiredStacksMap,
-        Map<Long, ProjectUser> ownerByProject,
+        Map<Long, Long> ownerUserIdByProject,
         Map<Long, String> userIdToName
     ) {}
 
