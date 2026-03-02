@@ -1,5 +1,7 @@
 package com.sidework.notification.application;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -16,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import com.sidework.common.response.CursorResponse;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.notification.application.port.in.*;
 import org.junit.jupiter.api.Test;
@@ -86,7 +89,8 @@ class NotificationControllerTest {
 		List<NotificationResponse> list = List.of(
 			new NotificationResponse(1L, 1L, NotificationType.PROJECT_APPROVED, "제목", "내용", false)
 		);
-		when(queryUseCase.getByUserId(anyLong())).thenReturn(list);
+		CursorResponse<NotificationResponse> cursorResponse = new CursorResponse<>(list, null, false);
+		when(queryUseCase.getByUserId(anyLong(), any(), anyInt())).thenReturn(cursorResponse);
 
 		mockMvc.perform(get("/api/v1/notifications")
                         .with(user(authenticatedUserDetails))
@@ -94,10 +98,10 @@ class NotificationControllerTest {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.isSuccess").value(true))
-			.andExpect(jsonPath("$.result.length()").value(1))
-			.andExpect(jsonPath("$.result[0].id").value(1))
-			.andExpect(jsonPath("$.result[0].title").value("제목"))
-			.andExpect(jsonPath("$.result[0].read").value(false));
+			.andExpect(jsonPath("$.result.content.length()").value(1))
+			.andExpect(jsonPath("$.result.content[0].id").value(1))
+			.andExpect(jsonPath("$.result.content[0].title").value("제목"))
+			.andExpect(jsonPath("$.result.content[0].read").value(false));
 	}
 
 	@Test
