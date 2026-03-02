@@ -1,6 +1,7 @@
 package com.sidework.project.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.project.application.adapter.ProjectController;
@@ -40,19 +41,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProjectController.class)
-@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ProjectTestApplication.class)
 @Import(ExceptionAdvice.class)
 public class ProjectControllerTest {
@@ -83,12 +85,17 @@ public class ProjectControllerTest {
     @MockitoBean
     private SkillOutPort skillRepo;
 
+    private AuthenticatedUserDetails authenticatedUserDetails = new AuthenticatedUserDetails(
+            1L, "test@test.com", "테스터", "password");
+
     @Test
     void 프로젝트_게시글_생성_요청시_성공하면_201을_반환한다() throws Exception {
         ProjectCommand command = createCommand(ProjectStatus.PREPARING);
-        doNothing().when(projectCommandUseCase).create(command);
+        doNothing().when(projectCommandUseCase).create(anyLong(), any(ProjectCommand.class));
 
         mockMvc.perform(post("/api/v1/projects")
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
         .andDo(print())
@@ -101,6 +108,8 @@ public class ProjectControllerTest {
         ProjectCommand command = createNullCommand();
 
         mockMvc.perform(post("/api/v1/projects")
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -113,6 +122,8 @@ public class ProjectControllerTest {
         ProjectCommand command = createRequiredSkillEmptyCommand();
 
         mockMvc.perform(post("/api/v1/projects")
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -124,9 +135,11 @@ public class ProjectControllerTest {
         ProjectCommand command = createCommand(ProjectStatus.RECRUITING);
         doThrow(new InvalidCommandException("존재하지 않거나 비활성화된 기술 id: " + 1L))
                 .when(projectCommandUseCase)
-                        .create(command);
+                        .create(anyLong(), any(ProjectCommand.class));
 
         mockMvc.perform(post("/api/v1/projects")
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -138,9 +151,11 @@ public class ProjectControllerTest {
         ProjectCommand command = createCommand(ProjectStatus.RECRUITING);
         doThrow(new InvalidCommandException("존재하지 않거나 비활성화된 기술 id: " + 2L))
                 .when(projectCommandUseCase)
-                .create(command);
+                .create(anyLong(), any(ProjectCommand.class));
 
         mockMvc.perform(post("/api/v1/projects")
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -173,6 +188,8 @@ public class ProjectControllerTest {
         """;
 
         mockMvc.perform(post("/api/v1/projects")
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidJson))
                 .andDo(print())
@@ -185,6 +202,8 @@ public class ProjectControllerTest {
         Long projectId = 1L;
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -197,6 +216,8 @@ public class ProjectControllerTest {
         Long projectId = 1L;
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -209,6 +230,8 @@ public class ProjectControllerTest {
         Long projectId = 1L;
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -221,9 +244,11 @@ public class ProjectControllerTest {
         Long projectId = 1L;
         doThrow(new InvalidCommandException("존재하지 않거나 비활성화된 기술 id: " + 1L))
                 .when(projectCommandUseCase)
-                .update(projectId, command);
+                .update(anyLong(), eq(projectId), any(ProjectCommand.class));
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -236,9 +261,11 @@ public class ProjectControllerTest {
         Long projectId = 1L;
         doThrow(new InvalidCommandException("존재하지 않거나 비활성화된 기술 id: " + 3L))
                 .when(projectCommandUseCase)
-                .update(projectId, command);
+                .update(anyLong(), eq(projectId), any(ProjectCommand.class));
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -251,6 +278,8 @@ public class ProjectControllerTest {
         Long projectId = 1L;
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -283,6 +312,8 @@ public class ProjectControllerTest {
         """;
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andDo(print())
@@ -296,9 +327,11 @@ public class ProjectControllerTest {
 
         doThrow(new ProjectNotFoundException(projectId))
                 .when(projectCommandUseCase)
-                .update(projectId, command);
+                .update(anyLong(), eq(projectId), any(ProjectCommand.class));
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -310,9 +343,11 @@ public class ProjectControllerTest {
         Long projectId = 1L;
         ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
-        doNothing().when(projectApplyCommandUseCase).apply(1L, projectId, command);
+        doNothing().when(projectApplyCommandUseCase).apply(anyLong(), eq(projectId), any(ProjectApplyCommand.class));
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -331,6 +366,8 @@ public class ProjectControllerTest {
         """;
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidJson))
                 .andDo(print())
@@ -343,9 +380,11 @@ public class ProjectControllerTest {
         ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
         doThrow(new ProjectNotFoundException(projectId))
-                .when(projectApplyCommandUseCase).apply(eq(2L), eq(projectId), any(ProjectApplyCommand.class));
+                .when(projectApplyCommandUseCase).apply(anyLong(), eq(projectId), any(ProjectApplyCommand.class));
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -358,9 +397,11 @@ public class ProjectControllerTest {
         ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
         doThrow(new ProjectNotRecruitingException(projectId))
-                .when(projectApplyCommandUseCase).apply(eq(2L), eq(projectId), any(ProjectApplyCommand.class));
+                .when(projectApplyCommandUseCase).apply(anyLong(), eq(projectId), any(ProjectApplyCommand.class));
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -373,9 +414,11 @@ public class ProjectControllerTest {
         ProjectApplyCommand command = new ProjectApplyCommand(1L, ProjectRole.BACKEND);
 
         doThrow(new ProjectAlreadyAppliedException(projectId))
-                .when(projectApplyCommandUseCase).apply(eq(2L), eq(projectId), any(ProjectApplyCommand.class));
+                .when(projectApplyCommandUseCase).apply(anyLong(), eq(projectId), any(ProjectApplyCommand.class));
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/apply", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -390,6 +433,8 @@ public class ProjectControllerTest {
         doNothing().when(projectApplyCommandUseCase).approve(anyLong(), eq(projectId), any(ProjectApplyDecisionCommand.class));
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}/approve", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -408,6 +453,8 @@ public class ProjectControllerTest {
         """;
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}/approve", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andDo(print())
@@ -422,6 +469,8 @@ public class ProjectControllerTest {
         doNothing().when(projectApplyCommandUseCase).reject(anyLong(), eq(projectId), any(ProjectApplyDecisionCommand.class));
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}/reject", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -440,6 +489,8 @@ public class ProjectControllerTest {
         """;
 
         mockMvc.perform(patch("/api/v1/projects/{projectId}/reject", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andDo(print())
@@ -451,6 +502,8 @@ public class ProjectControllerTest {
         Long projectId = 1L;
 
         mockMvc.perform(delete("/api/v1/projects/{projectId}", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -463,6 +516,8 @@ public class ProjectControllerTest {
                 .delete(anyLong(), eq(projectId));
 
         mockMvc.perform(delete("/api/v1/projects/{projectId}", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -476,9 +531,11 @@ public class ProjectControllerTest {
 
         doThrow(new ProjectNotFoundException(projectId))
                 .when(projectCommandUseCase)
-                .delete(userId, projectId);
+                .delete(eq(userId), eq(projectId));
 
         mockMvc.perform(delete("/api/v1/projects/{projectId}", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
@@ -503,7 +560,8 @@ public class ProjectControllerTest {
         );
         when(projectQueryUseCase.queryProjectDetail(projectId)).thenReturn(detail);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId)
+                .with(user(authenticatedUserDetails)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isSuccess").value(true))
@@ -520,7 +578,8 @@ public class ProjectControllerTest {
         doThrow(new ProjectNotFoundException(projectId))
                 .when(projectQueryUseCase).queryProjectDetail(projectId);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId)
+                .with(user(authenticatedUserDetails)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -531,7 +590,8 @@ public class ProjectControllerTest {
         doThrow(new ProjectHasNoMembersException(projectId))
                 .when(projectQueryUseCase).queryProjectDetail(projectId);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId)
+                .with(user(authenticatedUserDetails)))
                 .andDo(print())
                 .andExpect(status().isInternalServerError());
     }
