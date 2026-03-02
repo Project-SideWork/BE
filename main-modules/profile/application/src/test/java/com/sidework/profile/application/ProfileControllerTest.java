@@ -1,6 +1,7 @@
 package com.sidework.profile.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.profile.application.adapter.ProfileController;
 import com.sidework.profile.application.adapter.UserProfileResponse;
@@ -25,12 +26,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ProfileController.class)
-@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ProfileTestApplication.class)
 @Import(ExceptionAdvice.class)
 class ProfileControllerTest {
@@ -47,6 +49,9 @@ class ProfileControllerTest {
 	@MockitoBean
 	private ProfileCommandUseCase profileCommandUseCase;
 
+	private AuthenticatedUserDetails authenticatedUserDetails = new AuthenticatedUserDetails(
+		1L, "test@test.com", "홍길동", "password");
+
 	@Test
 	void 프로필_조회_요청시_성공하면_200을_반환한다() throws Exception {
 		// given
@@ -56,13 +61,14 @@ class ProfileControllerTest {
 
 		// when & then
 		mockMvc.perform(get("/api/v1/profiles")
-						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.isSuccess").value(true))
-				.andExpect(jsonPath("$.result.userId").value(userId))
-				.andExpect(jsonPath("$.result.email").value("test@test.com"))
-				.andExpect(jsonPath("$.result.name").value("홍길동"));
+				.with(user(authenticatedUserDetails))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.result.userId").value(userId))
+			.andExpect(jsonPath("$.result.email").value("test@test.com"))
+			.andExpect(jsonPath("$.result.name").value("홍길동"));
 
 		verify(profileQueryUseCase).getProfileByUserId(userId);
 	}
@@ -76,11 +82,12 @@ class ProfileControllerTest {
 
 		// when & then
 		mockMvc.perform(get("/api/v1/profiles")
-						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.isSuccess").value(true))
-				.andExpect(jsonPath("$.result.profileId").isEmpty());
+				.with(user(authenticatedUserDetails))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.result.profileId").isEmpty());
 
 		verify(profileQueryUseCase).getProfileByUserId(userId);
 	}
@@ -92,11 +99,13 @@ class ProfileControllerTest {
 
 		// when & then
 		mockMvc.perform(put("/api/v1/profiles")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(command)))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.isSuccess").value(true));
+				.with(user(authenticatedUserDetails))
+				.with(csrf())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(command)))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true));
 
 		verify(profileCommandUseCase).update(1L, command);
 	}
@@ -111,10 +120,12 @@ class ProfileControllerTest {
 
 		// when & then
 		mockMvc.perform(put("/api/v1/profiles")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(command)))
-				.andDo(print())
-				.andExpect(status().isNotFound());
+				.with(user(authenticatedUserDetails))
+				.with(csrf())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(command)))
+			.andDo(print())
+			.andExpect(status().isNotFound());
 
 		verify(profileCommandUseCase).update(1L, command);
 	}

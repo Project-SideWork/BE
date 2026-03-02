@@ -32,17 +32,16 @@ public class ProjectCommandService implements ProjectCommandUseCase {
     private final ProjectRecruitPositionOutPort projectRecruitPositionRepository;
 
     @Override
-    //TODO: UserDetails 도입 후 하드코딩 제거
-    public void create(ProjectCommand command) {
+    public void create(Long userId, ProjectCommand command) {
         checkDateRangeIsValid(command.startDt(), command.endDt());
-        checkProjectTitleExists(1L, command.title(), null);
+        checkProjectTitleExists(userId, command.title(), null);
 
         Project project = Project.create(command.title(), command.description(),
                 command.startDt(), command.endDt(), command.meetingType());
         Long savedId = projectRepository.save(project);
 
-        ProjectUser projectUser = ProjectUser.create(1L, savedId, null,ApplyStatus.ACCEPTED, command.myRole());
-        ProjectUser ownerUser = ProjectUser.create(1L, savedId, null,ApplyStatus.ACCEPTED, ProjectRole.OWNER);
+        ProjectUser projectUser = ProjectUser.create(userId, savedId, null, ApplyStatus.ACCEPTED, command.myRole());
+        ProjectUser ownerUser = ProjectUser.create(userId, savedId, null, ApplyStatus.ACCEPTED, ProjectRole.OWNER);
 
         projectUserRepository.save(projectUser);
         projectUserRepository.save(ownerUser);
@@ -56,10 +55,10 @@ public class ProjectCommandService implements ProjectCommandUseCase {
     }
 
     @Override
-    public void update(Long projectId, ProjectCommand command) {
+    public void update(Long userId, Long projectId, ProjectCommand command) {
         checkProjectExists(projectId);
         checkDateRangeIsValid(command.startDt(), command.endDt());
-        checkProjectTitleExists(1L, command.title(), projectId);
+        checkProjectTitleExists(userId, command.title(), projectId);
 
         Project project = projectRepository.findById(projectId);
         checkProjectIsChangeable(projectId, project.getStatus());

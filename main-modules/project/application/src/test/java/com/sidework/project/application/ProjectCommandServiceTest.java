@@ -73,7 +73,7 @@ public class ProjectCommandServiceTest {
         doNothing().when(preferredSkillCommandService).create(anyLong(), any());
         doNothing().when(projectRecruitPositionRepository).saveAll(anyLong(), any());
 
-        service.create(command);
+        service.create(1L, command);
 
         verify(repo).save(projectArgumentCaptor.capture());
         Project saved = projectArgumentCaptor.getValue();
@@ -97,7 +97,7 @@ public class ProjectCommandServiceTest {
         ProjectCommand command = createInvalidDateRangeCommand();
         assertThrows(
                 InvalidCommandException.class,
-                () -> service.create(command)
+                () -> service.create(1L, command)
         );
     }
 
@@ -116,7 +116,7 @@ public class ProjectCommandServiceTest {
 
         assertThrows(
             InvalidCommandException.class,
-                () -> service.create(command)
+                () -> service.create(userId, command)
         );
 
     }
@@ -137,7 +137,7 @@ public class ProjectCommandServiceTest {
         doNothing().when(projectRecruitPositionRepository).deleteByProjectId(anyLong());
         doNothing().when(projectRecruitPositionRepository).saveAll(anyLong(), any());
 
-        service.update(projectId, updateCommand);
+        service.update(1L, projectId, updateCommand);
 
         assertNotEquals(command.title(), project.getTitle());
         assertNotEquals(command.description(), project.getDescription());
@@ -162,7 +162,7 @@ public class ProjectCommandServiceTest {
         when(repo.existsById(projectId)).thenReturn(true);
         assertThrows(
                 InvalidCommandException.class,
-                () -> service.update(projectId, command)
+                () -> service.update(1L, projectId, command)
         );
     }
 
@@ -176,7 +176,7 @@ public class ProjectCommandServiceTest {
 
         assertThrows(
                 ProjectNotChangeableException.class,
-                () -> service.update(projectId, command)
+                () -> service.update(1L, projectId, command)
         );
 
     }
@@ -191,7 +191,7 @@ public class ProjectCommandServiceTest {
 
         assertThrows(
                 ProjectNotChangeableException.class,
-                () -> service.update(projectId, command)
+                () -> service.update(1L, projectId, command)
         );
 
     }
@@ -206,7 +206,7 @@ public class ProjectCommandServiceTest {
 
         assertThrows(
                 ProjectNotChangeableException.class,
-                () -> service.update(projectId, command)
+                () -> service.update(1L, projectId, command)
         );
 
     }
@@ -229,7 +229,7 @@ public class ProjectCommandServiceTest {
 
         assertThrows(
                 InvalidCommandException.class,
-                () -> service.update(projectId, command)
+                () -> service.update(userId, projectId, command)
         );
 
 
@@ -262,7 +262,7 @@ public class ProjectCommandServiceTest {
         doNothing().when(projectRecruitPositionRepository).deleteByProjectId(anyLong());
         doNothing().when(projectRecruitPositionRepository).saveAll(anyLong(), any());
 
-        service.update(projectId, command);
+        service.update(userId, projectId, command);
 
         verify(repo).save(projectArgumentCaptor.capture());
         Project saved = projectArgumentCaptor.getValue();
