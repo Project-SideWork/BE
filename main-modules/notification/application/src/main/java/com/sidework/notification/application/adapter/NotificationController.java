@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.sidework.common.response.ApiResponse;
+import com.sidework.common.response.CursorResponse;
 import com.sidework.notification.application.port.in.FcmPushUseCase;
 import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationCommand;
@@ -44,8 +46,11 @@ public class NotificationController {
 	}
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<List<NotificationResponse>>> list(@AuthenticationPrincipal AuthenticatedUserDetails user) {
-		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getByUserId(user.getId())));
+	public ResponseEntity<ApiResponse<CursorResponse<NotificationResponse>>> list(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
+		@RequestParam(required = false, name = "cursor") String cursor,
+		@RequestParam(required = false, name = "size", defaultValue = "10") int size) {
+		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getByUserId(user.getId(), cursor, size)));
 	}
 
 	@PatchMapping("/{notificationId}/read")

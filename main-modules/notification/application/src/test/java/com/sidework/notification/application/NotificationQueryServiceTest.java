@@ -3,6 +3,8 @@ package com.sidework.notification.application;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sidework.notification.application.adapter.NotificationResponse;
 import com.sidework.notification.application.port.out.NotificationOutPort;
+import com.sidework.notification.application.port.out.NotificationPage;
 import com.sidework.notification.application.service.NotificationQueryService;
 import com.sidework.notification.domain.Notification;
 import com.sidework.notification.domain.NotificationType;
@@ -30,7 +33,7 @@ class NotificationQueryServiceTest {
 	private NotificationQueryService queryService;
 
 	@Test
-	void 유저_알림_목록_조회_시_repository_findByUserId_결과를_Response로_변환해_반환한다() {
+	void 유저_알림_목록_조회_시_findByUserIdAndCursor_결과를_CursorResponse로_반환한다() {
 		Long userId = 1L;
 		List<Notification> notifications = List.of(
 			Notification.builder()
@@ -50,28 +53,34 @@ class NotificationQueryServiceTest {
 				.isRead(true)
 				.build()
 		);
-		when(notificationRepository.findByUserId(userId)).thenReturn(notifications);
+		NotificationPage page = new NotificationPage(notifications, false, null, null);
+		when(notificationRepository.findByUserIdAndCursor(eq(userId), any(), any(), eq(10)))
+			.thenReturn(page);
 
-		List<NotificationResponse> result = queryService.getByUserId(userId);
+		var result = queryService.getByUserId(userId, null, 10);
 
-		verify(notificationRepository).findByUserId(userId);
-		assertEquals(2, result.size());
-		assertEquals(1L, result.get(0).id());
-		assertEquals("제목1", result.get(0).title());
-		assertFalse(result.get(0).read());
-		assertEquals(2L, result.get(1).id());
-		assertEquals("제목2", result.get(1).title());
-		assertTrue(result.get(1).read());
+		verify(notificationRepository).findByUserIdAndCursor(eq(userId), any(), any(), eq(10));
+		assertEquals(2, result.content().size());
+		assertEquals(1L, result.content().get(0).id());
+		assertEquals("제목1", result.content().get(0).title());
+		assertFalse(result.content().get(0).read());
+		assertEquals(2L, result.content().get(1).id());
+		assertEquals("제목2", result.content().get(1).title());
+		assertTrue(result.content().get(1).read());
+		assertFalse(result.hasNext());
 	}
 
 	@Test
-	void 유저_알림이_없으면_빈_목록을_반환한다() {
+	void 유저_알림이_없으면_빈_content를_반환한다() {
 		Long userId = 1L;
-		when(notificationRepository.findByUserId(userId)).thenReturn(List.of());
+		NotificationPage page = new NotificationPage(List.of(), false, null, null);
+		when(notificationRepository.findByUserIdAndCursor(eq(userId), any(), any(), eq(10)))
+			.thenReturn(page);
 
-		List<NotificationResponse> result = queryService.getByUserId(userId);
+		var result = queryService.getByUserId(userId, null, 10);
 
-		verify(notificationRepository).findByUserId(userId);
-		assertEquals(0, result.size());
+		verify(notificationRepository).findByUserIdAndCursor(eq(userId), any(), any(), eq(10));
+		assertEquals(0, result.content().size());
+		assertFalse(result.hasNext());
 	}
 }
