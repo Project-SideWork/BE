@@ -95,10 +95,8 @@ jobs:
                   REMOTE_MYSQL_PASSWORD=${{ secrets.REMOTE_MYSQL_PASSWORD }}
                   JWT_SECRET=${{ secrets.JWT_SECRET }}
                   EOF
-              
-                  scp /home/ubuntu/temp/myapp.tar \
-                  /home/ubuntu/temp/.env.production \
-                  app:/home/ubuntu/app/
+                  
+                  scp myapp.tar .env.production growp:/home/ubuntu/app/
                   
                   ssh growp << 'ENDSSH'
                     set -e
