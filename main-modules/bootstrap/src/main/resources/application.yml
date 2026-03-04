@@ -1,3 +1,49 @@
 spring:
   application:
     name: SideWork
+
+  cache:
+    type: redis
+
+  datasource:
+    url: jdbc:mysql://${REMOTE_MYSQL_HOST}:${REMOTE_MYSQL_PORT}/${REMOTE_MYSQL_DB}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${REMOTE_MYSQL_USER}
+    password: ${REMOTE_MYSQL_PASSWORD}
+
+  data:
+    redis:
+      url: redis://${REDIS_USERNAME}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
+      timeout: 6000ms
+
+  flyway:
+    enabled: true
+    validate-on-migrate: true
+    clean-disabled: false
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+
+jwt:
+  issuer: project.doctalk@gmail.com
+  secret: ${JWT_SECRET}
+  access-expiration: 3600
+  refresh-expiration: 8640
+
+
+firebase:
+  credentials-base64: ${FIREBASE_CREDENTIALS_BASE64}
