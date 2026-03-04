@@ -98,7 +98,7 @@ jobs:
                   
                   scp myapp.tar .env.production app:/home/ubuntu/app/
                   
-                  ssh app << 'ENDSSH'
+                  ssh growp << 'ENDSSH'
                     set -e
                     cd /home/ubuntu/app
                   
