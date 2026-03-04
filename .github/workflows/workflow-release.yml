@@ -84,6 +84,7 @@ jobs:
                   
                   cat << 'EOF' > .env.production
                   SPRING_PROFILES_ACTIVE=prod
+                  FIREBASE_CREDENTIALS_BASE64=${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}
                   REDIS_HOSTNAME=${{ secrets.REDIS_HOSTNAME }}
                   REDIS_USERNAME=${{ secrets.REDIS_USERNAME }}
                   REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
