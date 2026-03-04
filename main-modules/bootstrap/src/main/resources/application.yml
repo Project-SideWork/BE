@@ -13,7 +13,7 @@ spring:
 
   data:
     redis:
-      url: redis://${REDIS_USERNAME}:${REDIS_PASSWORD}@${REDIS_HOSTNAME}:${REDIS_PORT}
+      url: redis://${REDIS_USERNAME}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
       timeout: 6000ms
 
   flyway:
