@@ -88,11 +88,11 @@ jobs:
                   REDIS_USERNAME=${{ secrets.REDIS_USERNAME }}
                   REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
                   REDIS_PORT=${{ secrets.REDIS_PORT }}
-                  REMOTE_MYSQL_HOST = ${{ secrets.REMOTE_MYSQL_HOST }}
-                  REMOTE_MYSQL_PORT = ${{ secrets.REMOTE_MYSQL_PORT }}
-                  REMOTE_MYSQL_DB = ${{ secrets.REMOTE_MYSQL_DB }}
-                  REMOTE_MYSQL_USER = ${{ secrets.REMOTE_MYSQL_USER }}
-                  REMOTE_MYSQL_PASSWORD = ${{ secrets.REMOTE_MYSQL_PASSWORD }}
+                  REMOTE_MYSQL_HOST=${{ secrets.REMOTE_MYSQL_HOST }}
+                  REMOTE_MYSQL_PORT=${{ secrets.REMOTE_MYSQL_PORT }}
+                  REMOTE_MYSQL_DB=${{ secrets.REMOTE_MYSQL_DB }}
+                  REMOTE_MYSQL_USER=${{ secrets.REMOTE_MYSQL_USER }}
+                  REMOTE_MYSQL_PASSWORD=${{ secrets.REMOTE_MYSQL_PASSWORD }}
                   JWT_SECRET=${{ secrets.JWT_SECRET }}
                   EOF
                   
