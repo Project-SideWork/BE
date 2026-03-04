@@ -29,7 +29,10 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build --no-cache -t $IMAGE_NAME:$IMAGE_TAG .
+          docker build \
+          -f main-modules/bootstrap/Dockerfile \
+          -t $IMAGE_NAME:$IMAGE_TAG \ 
+          .
 
       - name: Save Docker image
         run: docker save $IMAGE_NAME:$IMAGE_TAG -o myapp.tar
