@@ -31,7 +31,7 @@ jobs:
         run: |
           docker build \
           -f main-modules/bootstrap/Dockerfile \
-          -t $IMAGE_NAME:$IMAGE_TAG \ 
+          -t $IMAGE_NAME:$IMAGE_TAG \
           .
 
       - name: Save Docker image
