@@ -2,7 +2,7 @@ name: CI / CD
 
 on:
   push:
-    branches: [ feat/#40-nhn-cloud-deploy ]
+    branches: [ main ]
 
 jobs:
   CI:
