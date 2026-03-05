@@ -209,3 +209,11 @@ CREATE TABLE IF NOT EXISTS project_preferred_skills (
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
     FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Region 테이블
+CREATE TABLE IF NOT EXISTS regions (
+    id BIGINT PRIMARY KEY,
+    region_name VARCHAR(15) NOT NULL,
+    parent_region_id BIGINT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
