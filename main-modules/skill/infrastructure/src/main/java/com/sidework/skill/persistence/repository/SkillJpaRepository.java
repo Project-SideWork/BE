@@ -26,4 +26,13 @@ public interface SkillJpaRepository extends JpaRepository<SkillEntity, Long> {
       AND s.isActive = true and s.categoryId is not null
     """)
     List<Long> findActiveIdsByIdIn(@Param("ids") List<Long> ids);
+
+
+    @Query(""" 
+    SELECT s 
+    FROM SkillEntity s 
+    WHERE s.isActive = true 
+    AND (:keyword IS NULL OR :keyword = '' OR LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY s.name ASC 
+    """)
+    List<SkillEntity> searchByName(@Param("keyword") String keyword);
 }

@@ -44,4 +44,12 @@ public class SkillPersistenceAdapter implements SkillOutPort {
                 .map(skillMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<Skill> searchByName(String keyword) {
+        List<SkillEntity> entities = repo.searchByName(keyword);
+        return entities.stream()
+                .map(skillMapper::toDomain)
+                .toList();
+    }
 }
