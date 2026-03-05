@@ -2,7 +2,7 @@ name: CI / CD
 
 on:
   push:
-    branches: [ fix/#45-health-check ]
+    branches: [ main ]
 
 jobs:
   CI:
