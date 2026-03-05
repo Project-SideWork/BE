@@ -56,7 +56,10 @@ public enum ErrorStatus implements BaseStatusCode {
     PORTFOLIO_NOT_FOUND(HttpStatus.NOT_FOUND, "PORTFOLIO_001", "해당 대외활동을 찾을 수 없습니다."),
 
     //NOTIFICATION
-    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_001", "해당 알림을 찾을 수 없습니다.");
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_001", "해당 알림을 찾을 수 없습니다."),
+
+    //REGION
+    REGION_NOT_FOUND(HttpStatus.NOT_FOUND, "REGION_001", "해당 지역을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
