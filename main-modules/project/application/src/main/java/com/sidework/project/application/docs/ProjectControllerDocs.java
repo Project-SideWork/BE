@@ -1,0 +1,221 @@
+package com.sidework.project.application.docs;
+
+import com.sidework.common.auth.AuthenticatedUserDetails;
+import com.sidework.common.response.ApiResponse;
+import com.sidework.common.response.PageResponse;
+import com.sidework.project.application.adapter.ProjectDetailResponse;
+import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.port.in.ProjectApplyCommand;
+import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
+import com.sidework.project.application.port.in.ProjectCommand;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
+
+@Tag(name = "프로젝트 API")
+public interface ProjectControllerDocs {
+
+    @Operation(description = "프로젝트 생성")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "생성 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "400 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_400",
+                                              "message": "잘못된 요청입니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> postNewProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @RequestBody ProjectCommand command
+    );
+
+    @Operation(description = "프로젝트 수정")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "403 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_403",
+                                              "message": "권한이 부족합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "프로젝트 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_404",
+                                              "message": "프로젝트를 찾을 수 없습니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> patchProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId,
+            @RequestBody ProjectCommand command
+    );
+
+    @Operation(description = "프로젝트 삭제")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "403 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_403",
+                                              "message": "권한이 부족합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "프로젝트 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_404",
+                                              "message": "프로젝트를 찾을 수 없습니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> deleteProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId
+    );
+
+    @Operation(description = "프로젝트 지원")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "지원 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_404",
+                                              "message": "프로젝트를 찾을 수 없습니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    ))
+    })
+    ResponseEntity<ApiResponse<Void>> applyProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId,
+            @RequestBody ProjectApplyCommand command
+    );
+
+    @Operation(description = "프로젝트 지원 승인")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "승인 성공")
+    })
+    ResponseEntity<ApiResponse<Void>> approveProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId,
+            @RequestBody ProjectApplyDecisionCommand command
+    );
+
+    @Operation(description = "프로젝트 지원 거절")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "거절 성공")
+    })
+    ResponseEntity<ApiResponse<Void>> rejectProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId,
+            @RequestBody ProjectApplyDecisionCommand command
+    );
+
+    @Operation(description = "프로젝트 상세 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "프로젝트 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_404",
+                                              "message": "프로젝트를 찾을 수 없습니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<ProjectDetailResponse>> getProject(
+            @PathVariable("projectId") Long projectId
+    );
+
+    @Operation(description = "프로젝트 목록 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+    })
+    ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            Pageable pageable
+    );
+
+    @Operation(description = "프로젝트 좋아요")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공")
+    })
+    ResponseEntity<ApiResponse<Void>> likeProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId
+    );
+}
