@@ -80,6 +80,38 @@ public interface ChatControllerDocs {
                                     """
                             )
                     )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "403 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_403",
+                                              "message": "권한이 부족합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
             )
     })
     ResponseEntity<ApiResponse<Void>> sendNewChatToCreateRoom(
@@ -105,6 +137,38 @@ public interface ChatControllerDocs {
                                     """
                             )
                     )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "403 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_403",
+                                              "message": "권한이 부족합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
             )
     })
     ResponseEntity<ApiResponse<Void>> sendNewChatToExistRoom(
@@ -116,7 +180,23 @@ public interface ChatControllerDocs {
     @Operation(description = "채팅 메시지 목록 조회")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "채팅방 접근 권한 없음",
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "권한 없음",
                     content = @Content(
                             mediaType = "application/json",
                             examples = @ExampleObject(

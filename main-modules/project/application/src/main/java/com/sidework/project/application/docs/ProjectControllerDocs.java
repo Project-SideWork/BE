@@ -139,11 +139,11 @@ public interface ProjectControllerDocs {
                     content = @Content(
                             mediaType = "application/json",
                             examples = @ExampleObject(
-                                    name = "404 예시",
+                                    name = "400 예시",
                                     value = """
                                             {
-                                              "code": "COMMON_404",
-                                              "message": "프로젝트를 찾을 수 없습니다.",
+                                              "code": "COMMON_400",
+                                              "message": "잘못된 요청입니다.",
                                               "isSuccess": false,
                                               "path": "/error"
                                             }
