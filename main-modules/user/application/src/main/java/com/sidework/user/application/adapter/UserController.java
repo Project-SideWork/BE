@@ -1,6 +1,7 @@
 package com.sidework.user.application.adapter;
 
 import com.sidework.common.response.ApiResponse;
+import com.sidework.user.application.docs.UserControllerDocs;
 import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.application.port.in.UserCommandUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserController implements UserControllerDocs {
     private final UserCommandUseCase commandService;
     private final UserQueryUseCase queryService;
 

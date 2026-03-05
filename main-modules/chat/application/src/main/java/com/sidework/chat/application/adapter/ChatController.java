@@ -1,6 +1,7 @@
 package com.sidework.chat.application.adapter;
 
 import com.sidework.chat.application.port.in.*;
+import com.sidework.chat.application.docs.ChatControllerDocs;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
 import com.sidework.common.response.ApiResponse;
@@ -16,7 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 @RequestMapping("/api/v1/chats")
 @RequiredArgsConstructor
-public class ChatController {
+public class ChatController implements ChatControllerDocs {
     private final ChatCommandUseCase chatCommandService;
     private final ChatQueryUseCase chatQueryService;
     private final SseSubscribeUseCase sseSubscribeUseCase;

@@ -23,6 +23,7 @@ import com.sidework.notification.application.port.in.FcmTokenCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationCommand;
 import com.sidework.notification.application.port.in.NotificationCommandUseCase;
 import com.sidework.notification.application.port.in.NotificationQueryUseCase;
+import com.sidework.notification.application.docs.NotificationControllerDocs;
 import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
 import com.sidework.notification.domain.NotificationType;
 
@@ -32,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
-public class NotificationController {
+public class NotificationController implements NotificationControllerDocs {
 
 	private final NotificationCommandUseCase commandService;
 	private final NotificationQueryUseCase queryService;
