@@ -10,6 +10,7 @@ import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.in.ProjectLikeCommandUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
+import com.sidework.project.application.docs.ProjectControllerDocs;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
-public class ProjectController {
+public class ProjectController implements ProjectControllerDocs {
     private final ProjectCommandUseCase commandService;
     private final ProjectApplyCommandUseCase applyCommandService;
     private final ProjectQueryUseCase queryService;

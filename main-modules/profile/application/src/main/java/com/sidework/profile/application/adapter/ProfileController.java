@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
+import com.sidework.profile.application.docs.ProfileControllerDocs;
 import com.sidework.profile.application.port.in.ProfileCommandUseCase;
 import com.sidework.profile.application.port.in.ProfileQueryUseCase;
 import com.sidework.profile.application.port.in.ProfileUpdateCommand;
@@ -20,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/profiles")
 @RequiredArgsConstructor
-public class ProfileController {
+public class ProfileController implements ProfileControllerDocs {
 	private final ProfileQueryUseCase queryService;
 	private final ProfileCommandUseCase commandService;
 
