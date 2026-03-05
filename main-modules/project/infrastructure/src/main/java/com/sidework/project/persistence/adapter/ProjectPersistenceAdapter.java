@@ -70,6 +70,12 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
     }
 
     @Override
+    public Page<Project> search(String keyword, Pageable pageable) {
+        Page<ProjectEntity> entities = repo.searchByKeyword(keyword, pageable);
+        return entities.map(mapper::toDomain);
+    }
+
+    @Override
     public Map<Long, List<ProjectRecruitPosition>> getProjectRecruitPositionsByProjectIds(List<Long> projectIds) {
         if (projectIds == null || projectIds.isEmpty()) {
             return Map.of();
