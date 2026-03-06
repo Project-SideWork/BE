@@ -3,6 +3,7 @@ package com.sidework.region.application.adapter;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.region.application.dto.ParentRegionResponse;
 import com.sidework.region.application.dto.SubRegionResponse;
+import com.sidework.region.application.docs.RegionControllerDocs;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
 import com.sidework.region.domain.Region;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/regions")
 @RequiredArgsConstructor
-public class RegionController {
+public class RegionController implements RegionControllerDocs {
     private final RegionQueryUseCase regionQueryService;
 
     @GetMapping
