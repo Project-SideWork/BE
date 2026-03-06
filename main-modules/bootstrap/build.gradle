@@ -27,6 +27,8 @@ dependencies {
     implementation project(':main-modules:notification:notification-infrastructure')
     implementation project(':main-modules:chat:chat-application')
     implementation project(':main-modules:chat:chat-infrastructure')
+    implementation project(':main-modules:region:region-application')
+    implementation project(':main-modules:region:region-infrastructure')
 
 
     implementation libs.bundles.jwt

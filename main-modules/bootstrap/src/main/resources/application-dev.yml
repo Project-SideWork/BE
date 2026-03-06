@@ -6,7 +6,7 @@ spring:
     type: redis
 
   datasource:
-    url: jdbc:mysql://localhost:3306/sidework?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/growp?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: ${LOCAL_MYSQL_PASSWORD}
