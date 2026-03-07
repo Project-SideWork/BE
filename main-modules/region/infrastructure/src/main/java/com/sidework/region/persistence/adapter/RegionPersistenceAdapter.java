@@ -32,4 +32,9 @@ public class RegionPersistenceAdapter implements RegionOutPort {
                 .map(mapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        return repo.existsById(id);
+    }
 }

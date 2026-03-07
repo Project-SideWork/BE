@@ -7,4 +7,5 @@ import java.util.List;
 public interface RegionOutPort {
     List<Region> findAllParents();
     List<Region> findAllByParent(Long id);
+    boolean existsById(Long id);
 }

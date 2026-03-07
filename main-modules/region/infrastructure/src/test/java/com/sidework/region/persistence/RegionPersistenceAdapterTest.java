@@ -70,4 +70,24 @@ public class RegionPersistenceAdapterTest {
 
         verify(repo).findAllByParentId(1L);
     }
+
+    @Test
+    void existsById는_id를_가진_객체가_존재하면_true를_반환한다() {
+        when(repo.existsById(1L)).thenReturn(true);
+
+        boolean res = adapter.existsById(1L);
+        assertTrue(res);
+
+        verify(repo).existsById(1L);
+    }
+
+    @Test
+    void existsById는_id를_가진_객체가_존재하지않으면_false를_반환한다() {
+        when(repo.existsById(1L)).thenReturn(false);
+
+        boolean res = adapter.existsById(1L);
+        assertFalse(res);
+
+        verify(repo).existsById(1L);
+    }
 }
