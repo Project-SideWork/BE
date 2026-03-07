@@ -1,7 +1,10 @@
 package com.sidework.user.application.service;
 
+import com.sidework.common.response.status.ErrorStatus;
+import com.sidework.region.application.exception.InvalidRegionLevelException;
 import com.sidework.region.application.exception.RegionNotFoundException;
 import com.sidework.region.application.port.out.RegionOutPort;
+import com.sidework.user.application.exception.DuplicatedInformationException;
 import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.application.port.in.UserCommandUseCase;
 import com.sidework.user.application.port.out.UserOutPort;
@@ -22,16 +25,32 @@ public class UserCommandService implements UserCommandUseCase {
 
     @Override
     public void signUp(SignUpCommand command) {
+        Long residenceRegionId = command.residenceRegionId();;
+        checkRegionValidation(residenceRegionId);
+        checkCommandInfoValidation(command.email(), command.nickname(), command.tel());
         User user = User.create(command.email(), command.name(), command.nickname(), encodePassword(command.password())
-                , command.age(), command.tel(), command.residenceRegionId(), UserType.LOCAL);
-        if(regionRepository.existsById(command.residenceRegionId())) {
-            userRepository.save(user);
-        } else {
-            throw new RegionNotFoundException(command.residenceRegionId());
-        }
+                , command.age(), command.tel(), residenceRegionId, UserType.LOCAL);
+
+        userRepository.save(user);
     }
 
     private String encodePassword(String rawPassword) {
         return encoder.encode(rawPassword);
+    }
+
+    private void checkRegionValidation(Long residenceRegionId) {
+        if(!regionRepository.existsById(residenceRegionId)) {
+            throw new RegionNotFoundException(residenceRegionId);
+        } else {
+            if(!regionRepository.checkIsSubRegion(residenceRegionId)) {
+                throw new InvalidRegionLevelException();
+            }
+        }
+    }
+
+    private void checkCommandInfoValidation(String email, String nickname, String tel) {
+        if(userRepository.existsByEmail(email)) throw new DuplicatedInformationException(ErrorStatus.EMAIL_ALREADY_EXISTS);
+        if(userRepository.existsByNickname(nickname)) throw new DuplicatedInformationException(ErrorStatus.NICKNAME_ALREADY_EXISTS);
+        if(userRepository.existsByTel(tel)) throw new DuplicatedInformationException(ErrorStatus.TEL_ALREADY_EXISTS);
     }
 }
