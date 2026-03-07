@@ -8,7 +8,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -36,8 +39,8 @@ public interface UserControllerDocs {
             )
     })
     ResponseEntity<ApiResponse<EmailExistResponse>> getEmailAvailable(
-            @RequestParam("email") String email
-    );
+            @RequestParam("email") @Email @NotNull String email
+            );
 
     @Operation(description = "회원가입")
     @ApiResponses({
