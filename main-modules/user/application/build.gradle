@@ -18,6 +18,7 @@ dependencies {
 
     implementation project(':main-modules:common')
     implementation project(':main-modules:user:user-domain')
+    implementation project(':main-modules:region:region-application')
 
     implementation("org.springframework:spring-context")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
