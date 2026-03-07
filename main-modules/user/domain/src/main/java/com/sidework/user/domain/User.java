@@ -24,6 +24,8 @@ public class User {
 
     private String tel;
 
+    private Long residenceRegionId;
+
     private UserType type;
 
     private Boolean isActive = true;
@@ -35,9 +37,10 @@ public class User {
             String password,
             Integer age,
             String tel,
+            Long residenceRegionId,
             UserType type
     ) {
-        return new User(null, email, name, nickname, password, age, tel, type, true);
+        return new User(null, email, name, nickname, password, age, tel, residenceRegionId, type, true);
     }
     // 탈퇴 처리
     public void deactivate() {
