@@ -1,8 +1,6 @@
 package com.sidework.user.application.port.in;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record SignUpCommand(
         @NotNull @Email String email,
@@ -10,6 +8,7 @@ public record SignUpCommand(
         @NotNull String name,
         @NotNull String nickname,
         @NotNull Integer age,
-        @NotNull String tel
+        @NotNull String tel,
+        @NotNull @Positive Long residenceRegionId
 ) {
 }
