@@ -86,7 +86,8 @@ public class UserPersistenceAdapterTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678"
+                "010-1234-5678",
+                1L
         );
     }
 
@@ -97,6 +98,7 @@ public class UserPersistenceAdapterTest {
                 command.password(),
                 command.age(),
                 command.tel(),
+                1L,
                 UserType.LOCAL);
     }
 
@@ -109,6 +111,7 @@ public class UserPersistenceAdapterTest {
                 "password123!",
                 20,
                 "010-1234-5678",
+                1L,
                 UserType.LOCAL,
                 true
         );
