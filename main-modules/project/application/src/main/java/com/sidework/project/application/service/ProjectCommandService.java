@@ -7,9 +7,11 @@ import com.sidework.project.application.exception.ProjectNotChangeableException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
+import com.sidework.project.application.port.in.ProjectScheduleCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
+import com.sidework.project.application.port.out.ProjectScheduleOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.*;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
@@ -19,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +32,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
     private final ProjectPreferredSkillCommandUseCase preferredSkillCommandService;
     private final ProjectRequiredCommandUseCase requiredSkillCommandService;
     private final ProjectOutPort projectRepository;
+    private final ProjectScheduleOutPort projectScheduleRepository;
     private final ProjectUserOutPort projectUserRepository;
     private final ProjectRecruitPositionOutPort projectRecruitPositionRepository;
 
@@ -36,9 +41,14 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         checkDateRangeIsValid(command.startDt(), command.endDt());
         checkProjectTitleExists(userId, command.title(), null);
 
-        Project project = Project.create(command.title(), command.description(),
+        Project project = Project.create(command.meetRegionId(), command.title(), command.description(),
                 command.startDt(), command.endDt(), command.meetingType());
         Long savedId = projectRepository.save(project);
+
+        if(command.meetingSchedules() != null) {
+            List<ProjectSchedule> projectSchedules = createProjectSchedules(savedId, command.meetingSchedules());
+            projectScheduleRepository.saveAll(projectSchedules);
+        }
 
         ProjectUser projectUser = ProjectUser.create(userId, savedId, null, ApplyStatus.ACCEPTED, command.myRole());
         ProjectUser ownerUser = ProjectUser.create(userId, savedId, null, ApplyStatus.ACCEPTED, ProjectRole.OWNER);
@@ -63,6 +73,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         Project project = projectRepository.findById(projectId);
         checkProjectIsChangeable(projectId, project.getStatus());
         project.update(
+                command.meetRegionId(),
                 command.title(), command.description(), command.startDt(),
                 command.endDt(), command.meetingType(), command.status()
         );
@@ -140,5 +151,17 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         return recruitPositions.stream()
             .map(position -> ProjectRecruitPosition.create(projectId, position.role(), position.headCount(), position.level()))
             .toList();
+    }
+
+    private List<ProjectSchedule> createProjectSchedules(Long projectId, List<ProjectScheduleCommand> schedules) {
+        return schedules.stream()
+                .flatMap(schedule -> toProjectSchedules(projectId, schedule))
+                .distinct()
+                .toList();
+    }
+
+    private Stream<ProjectSchedule> toProjectSchedules(Long projectId, ProjectScheduleCommand schedule) {
+        return schedule.hours().stream()
+                .map(hour -> ProjectSchedule.create(projectId, schedule.day().getValue(), hour.getValue()));
     }
 }
