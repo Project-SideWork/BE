@@ -38,7 +38,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/fcm-test.html",
             "/firebase-messaging-sw.js",
             "/error",
-            "/health"
+            "/health",
+            "/api/v1/regions/**"
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";

@@ -120,3 +120,7 @@ project(':main-modules:notification:infrastructure').name = 'notification-infras
 project(':main-modules:chat:domain').name = 'chat-domain'
 project(':main-modules:chat:application').name = 'chat-application'
 project(':main-modules:chat:infrastructure').name = 'chat-infrastructure'
+
+project(':main-modules:region:domain').name = 'region-domain'
+project(':main-modules:region:application').name = 'region-application'
+project(':main-modules:region:infrastructure').name = 'region-infrastructure'
