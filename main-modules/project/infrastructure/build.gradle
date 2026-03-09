@@ -2,6 +2,9 @@ plugins {
     id 'java'
     id 'io.spring.dependency-management'
 }
+ext {
+    queryDslVersion = '7.1'
+}
 tasks.named('jar') {
     enabled = true
 }
@@ -11,6 +14,7 @@ dependencies {
     implementation project(':main-modules:project:project-domain')
     implementation project(':main-modules:project:project-application')
     implementation project(':main-modules:profile:profile-infrastructure')
+    implementation project(':main-modules:skill:skill-infrastructure')
 
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security
@@ -24,6 +28,20 @@ dependencies {
     implementation libs.mapstruct
     annotationProcessor libs.mapstruct.processor
     testAnnotationProcessor libs.mapstruct.processor
+
+    implementation libs.querydsl.jpa
+
+    annotationProcessor(libs.querydsl.apt) {
+        artifact {
+            classifier = "jakarta"
+        }
+    }
+
+    testAnnotationProcessor(libs.querydsl.apt) {
+        artifact {
+            classifier = "jakarta"
+        }
+    }
 
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.database.h2
