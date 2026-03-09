@@ -114,8 +114,8 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     @Override
-    public PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, String keyword, Pageable pageable) {
-        Page<Project> page = projectRepository.search(keyword, pageable);
+    public PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable) {
+        Page<Project> page = projectRepository.search(keyword, skillIds, pageable);
         return buildProjectListPageResponse(userId, page);
     }
 
