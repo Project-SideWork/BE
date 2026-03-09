@@ -11,26 +11,12 @@ import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
-import com.sidework.project.application.port.in.ProjectApplyCommand;
-import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
-import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
-import com.sidework.project.application.port.in.ProjectCommand;
-import com.sidework.project.application.port.in.ProjectCommandUseCase;
-import com.sidework.project.application.port.in.ProjectLikeCommandUseCase;
-import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
-import com.sidework.project.application.port.in.ProjectQueryUseCase;
-import com.sidework.project.application.port.in.RecruitPosition;
-import com.sidework.project.domain.SkillLevel;
+import com.sidework.project.application.port.in.*;
+import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
-import com.sidework.project.domain.MeetingType;
-import com.sidework.project.domain.ApplyStatus;
-import com.sidework.project.domain.Project;
-import com.sidework.project.domain.ProjectRole;
-import com.sidework.project.domain.ProjectStatus;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -162,6 +148,46 @@ public class ProjectControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void 프로젝트_게시글_생성_요청시_일정에_지원하지_않는_ENUM이_포함되면_400을_반환한다() throws Exception {
+        String invalidJson = """
+        {
+          "title": "버스 실시간 위치 서비스",
+          "description": "WebSocket 기반 실시간 위치 공유 프로젝트",
+          "role": "BACKEND",
+          "recruitPositions": [
+            {
+              "role": "BACKEND",
+              "count": 1,
+              "skillLevel": "JUNIOR"
+            }
+          ],
+          "startDt": "2025-01-01",
+          "endDt": "2025-03-31",
+          "meetingType": "OFFLINE",
+          "meetRegionId": 11110,
+          "meetingSchedules": [
+                      {
+                        "day": "MON",
+                        "hours": [
+                          "HOUR_25"
+                        ]
+                      }
+          ],
+          "requiredStacks": ["Spring Boot"],
+          "preferredStacks": ["Redis"],
+          "status": "RECRUITING"
+        }
+        """;
+
+        mockMvc.perform(post("/api/v1/projects")
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
 
     @Test
     void 프로젝트_게시글_생성_요청시_지원하지_않는_ENUM이_포함되면_400을_반환한다() throws Exception {
@@ -616,7 +642,11 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2025, 3, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L), // requiredStacks
                 List.of(3L, 4L),       // preferredStacks
                 status         // status
@@ -643,7 +673,11 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2025, 3, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(), // requiredStacks
                 List.of(3L, 4L),       // preferredStacks
                 ProjectStatus.RECRUITING         // status
@@ -670,7 +704,11 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2025, 12, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L), // requiredStacks
                 List.of(3L, 4L),       // preferredStacks
                 ProjectStatus.RECRUITING          // status
@@ -697,7 +735,42 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2025, 12, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
+                List.of(1L, 2L), // requiredStacks
+                List.of(3L, 4L),       // preferredStacks
+                ProjectStatus.RECRUITING          // status
+        );
+    }
+
+    private ProjectCommand createInvalidScheduleCommand() {
+        return new ProjectCommand(
+                null,
+                "WebSocket 기반 실시간 위치 공유 프로젝트", // description
+                ProjectRole.BACKEND,
+                List.of(
+                        new RecruitPosition(
+                                ProjectRole.BACKEND,
+                                1,
+                                SkillLevel.JUNIOR
+                        ),
+                        new RecruitPosition(
+                                ProjectRole.FRONTEND,
+                                1,
+                                SkillLevel.MID
+                        )
+                ),
+                LocalDate.of(2025, 1, 1),   // startDt
+                LocalDate.of(2025, 12, 31),  // endDt
+                MeetingType.HYBRID,         // meetingType
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(null, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(null, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L), // requiredStacks
                 List.of(3L, 4L),       // preferredStacks
                 ProjectStatus.RECRUITING          // status
@@ -725,7 +798,11 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 4, 1),   // startDt
                 LocalDate.of(2025, 7, 31),  // endDt
                 MeetingType.ONLINE,         // meetingType
-                "전면 온라인, 필요 시 비동기 협업", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L), // requiredStacks
                 List.of(3L, 4L),       // preferredStacks
                 ProjectStatus.PREPARING                         // status
@@ -736,6 +813,7 @@ public class ProjectControllerTest {
     ) {
         return new Project(
                 null,
+                1L,
                 command.title(),
                 command.description(),
                 command.startDt(),

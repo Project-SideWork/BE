@@ -6,18 +6,15 @@ import com.sidework.project.application.exception.ProjectDeleteAuthorityExceptio
 import com.sidework.project.application.exception.ProjectNotChangeableException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectCommand;
+import com.sidework.project.application.port.in.ProjectScheduleCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
-import com.sidework.project.domain.ProjectRole;
-import com.sidework.project.domain.SkillLevel;
+import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.service.ProjectCommandService;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredCommandUseCase;
-import com.sidework.project.domain.MeetingType;
-import com.sidework.project.domain.Project;
-import com.sidework.project.domain.ProjectStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -339,7 +336,11 @@ public class ProjectCommandServiceTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2025, 3, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L, 3L), // requiredStacks
                 List.of(1L, 2L, 3L),           // preferredStacks
                 status         // status
@@ -365,7 +366,11 @@ public class ProjectCommandServiceTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2024, 12, 31),  // endDt
                 null,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L, 3L), // requiredStacks
                 List.of(1L, 2L, 3L),           // preferredStacks
                 ProjectStatus.RECRUITING          // status
@@ -392,7 +397,11 @@ public class ProjectCommandServiceTest {
                 LocalDate.of(2025, 4, 1),   // startDt
                 LocalDate.of(2025, 7, 31),  // endDt
                 MeetingType.ONLINE,         // meetingType
-                "전면 온라인, 필요 시 비동기 협업", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L, 3L), // requiredStacks
                 List.of(1L, 2L, 3L),           // preferredStacks
                 ProjectStatus.PREPARING                         // status
@@ -403,6 +412,7 @@ public class ProjectCommandServiceTest {
     ) {
         return new Project(
                 null,
+                1L,
                 command.title(),
                 command.description(),
                 command.startDt(),
@@ -414,6 +424,7 @@ public class ProjectCommandServiceTest {
     private Project createSavedProject(
     ) {
         return new Project(
+                1L,
                 1L,
                 "Dummy",
                 "Dummy",
