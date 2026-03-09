@@ -34,10 +34,10 @@ public class CustomProjectJpaRepositoryImpl implements CustomProjectJpaRepositor
                 keywordContains(condition.getKeyword()),
                 skillExists(condition.getSkillIds(), condition.getSkillCount())
             )
+            .orderBy(project.id.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize());
 
-        applySorting(contentQuery, pageable);
 
         List<ProjectEntity> content = contentQuery.fetch();
 
@@ -89,28 +89,4 @@ public class CustomProjectJpaRepositoryImpl implements CustomProjectJpaRepositor
             .exists();
     }
 
-    private void applySorting(JPAQuery<ProjectEntity> query, Pageable pageable) {
-
-        QProjectEntity project = QProjectEntity.projectEntity;
-
-        if (pageable.getSort().isEmpty()) {
-            query.orderBy(project.id.desc());
-            return;
-        }
-
-        pageable.getSort().forEach(order -> {
-
-            OrderSpecifier<?> orderSpecifier = null;
-
-            if ("id".equals(order.getProperty())) {
-                orderSpecifier = order.isAscending()
-                    ? project.id.asc()
-                    : project.id.desc();
-            }
-
-            if (orderSpecifier != null) {
-                query.orderBy(orderSpecifier);
-            }
-        });
-    }
 }
