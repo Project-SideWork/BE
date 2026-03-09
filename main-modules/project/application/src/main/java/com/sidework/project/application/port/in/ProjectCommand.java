@@ -1,9 +1,6 @@
 package com.sidework.project.application.port.in;
 
-import com.sidework.project.domain.MeetingType;
-import com.sidework.project.domain.Project;
-import com.sidework.project.domain.ProjectRole;
-import com.sidework.project.domain.ProjectStatus;
+import com.sidework.project.domain.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
@@ -25,8 +22,6 @@ public record ProjectCommand(
         @NotNull
         List<@Valid RecruitPosition> recruitPositions,
 
-        @NotNull @Positive Long residenceRegionId,
-
         @NotNull
         LocalDate startDt,
 
@@ -36,7 +31,10 @@ public record ProjectCommand(
         @NotNull
         MeetingType meetingType,
 
-        String meetingDetail,
+        @NotNull @Positive Long meetRegionId,
+
+        @Valid
+        List<ProjectScheduleCommand> meetingSchedules,
 
         @NotEmpty
         List<Long> requiredStacks,
