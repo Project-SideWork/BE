@@ -238,6 +238,37 @@ class ProjectQueryServiceTest {
         assertFalse(second.liked());
     }
 
+    @Test
+    void queryProjectList_키워드와_스킬이_있을때_ProjectOutPort_search를_호출한다() {
+        Long userId = 1L;
+        String keyword = "테스트";
+        List<Long> skillIds = List.of(1L, 2L);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Project project1 = createProject(1L);
+        Page<Project> page = new PageImpl<>(List.of(project1), pageable, 1);
+
+        when(projectRepository.search(keyword, skillIds, pageable)).thenReturn(page);
+        when(projectRepository.getProjectRecruitPositionsByProjectIds(List.of(1L)))
+            .thenReturn(Map.of());
+        when(projectRequiredQueryUseCase.queryNamesByProjectIds(List.of(1L)))
+            .thenReturn(Map.of(1L, List.of("Java")));
+        when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L)))
+            .thenReturn(Map.of(1L, 10L));
+        when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
+            .thenReturn(Map.of(10L, "테스트유저"));
+        when(projectLikeQueryUseCase.isLikedByProjectIds(userId, List.of(1L)))
+            .thenReturn(Map.of(1L, true));
+
+        PageResponse<List<ProjectListResponse>> result =
+            queryService.queryProjectList(userId, keyword, skillIds, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.totalElements());
+        assertEquals(1, result.content().size());
+        verify(projectRepository).search(keyword, skillIds, pageable);
+    }
+
     private Project createProject(Long id) {
         return Project.builder()
             .id(id)

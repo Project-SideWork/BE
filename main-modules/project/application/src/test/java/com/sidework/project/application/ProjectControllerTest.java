@@ -1,6 +1,7 @@
 package com.sidework.project.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sidework.common.response.PageResponse;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.response.exception.ExceptionAdvice;
@@ -14,6 +15,12 @@ import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.port.in.*;
 import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
+import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.domain.MeetingType;
+import com.sidework.project.domain.ApplyStatus;
+import com.sidework.project.domain.Project;
+import com.sidework.project.domain.ProjectRole;
+import com.sidework.project.domain.ProjectStatus;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,6 +154,7 @@ public class ProjectControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
+
 
     @Test
     void 프로젝트_게시글_생성_요청시_지역ID가_양수가_아니면_400을_반환한다() throws Exception {
@@ -734,6 +742,44 @@ public class ProjectControllerTest {
                 .with(user(authenticatedUserDetails)))
                 .andDo(print())
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void 프로젝트_리스트_조회시_키워드와_스킬필터를_적용해_200과_PageResponse를_반환한다() throws Exception {
+        Long userId = authenticatedUserDetails.getId();
+        String keyword = "테스트";
+        List<Long> skillIds = List.of(1L, 2L);
+
+        ProjectListResponse listItem = ProjectListResponse.of(
+            1L,
+            "테스트 프로젝트",
+            "설명",
+            ProjectStatus.RECRUITING,
+            true,
+            List.of(),
+            List.of("Java", "Spring"),
+            "테스트유저"
+        );
+
+        PageResponse<List<ProjectListResponse>> pageResponse =
+            PageResponse.of(List.of(listItem), 0, 20, 1, 1);
+
+        when(projectQueryUseCase.queryProjectList(
+            eq(userId),
+            eq(keyword),
+            eq(skillIds),
+            any()
+        )).thenReturn(pageResponse);
+
+        mockMvc.perform(get("/api/v1/projects/list")
+                .with(user(authenticatedUserDetails))
+                .param("keyword", keyword)
+                .param("skillIds", "1", "2"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true))
+            .andExpect(jsonPath("$.result.content[0].projectId").value(1))
+            .andExpect(jsonPath("$.result.content[0].title").value("테스트 프로젝트"));
     }
 
     private ProjectCommand createCommand(ProjectStatus status) {
