@@ -132,6 +132,12 @@ class ProfileControllerTest {
 
 	private ProfileUpdateCommand createProfileUpdateCommand() {
 		return new ProfileUpdateCommand(
+			"test@test.com", // email
+			"홍길동",         // name
+			"길동이",         // nickname
+			25,              // age
+			"010-1234-5678", // tel
+			1L,              // residenceRegionId
 			List.of(
 				new ProfileUpdateCommand.SchoolUpdateRequest(
 					1L,
@@ -152,9 +158,7 @@ class ProfileControllerTest {
 				)
 			),
 			List.of(new ProfileUpdateCommand.SkillUpdateRequest(1L, null)),
-			List.of(1L, 3L),
-			null,
-			null
+			null // selfIntroduction
 		);
 	}
 
