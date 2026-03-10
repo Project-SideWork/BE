@@ -311,7 +311,7 @@ public class ProjectControllerTest {
                   "meetRegionId": 11110,
                   "meetingSchedules": [
                     {
-                      "day": "MON"
+                      "day": "MON",
                        "hours": [
                                 "HOUR_24"
                        ]
