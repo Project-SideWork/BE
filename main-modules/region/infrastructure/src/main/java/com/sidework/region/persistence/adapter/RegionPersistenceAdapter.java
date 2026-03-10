@@ -42,4 +42,10 @@ public class RegionPersistenceAdapter implements RegionOutPort {
     public boolean checkIsSubRegion(Long id) {
         return repo.isSubRegion(id);
     }
+
+    @Override
+    public Region findById(Long id) {
+        RegionEntity regionEntity = repo.findById(id).get();
+        return mapper.toDomain(regionEntity);
+    }
 }

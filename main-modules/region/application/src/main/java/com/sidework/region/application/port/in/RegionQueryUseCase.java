@@ -7,4 +7,5 @@ import java.util.List;
 public interface RegionQueryUseCase {
     List<Region> queryParents();
     List<Region> queryByParent(Long id);
+    String getRegion(Long id);
 }
