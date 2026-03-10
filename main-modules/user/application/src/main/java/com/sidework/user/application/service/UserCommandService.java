@@ -34,6 +34,16 @@ public class UserCommandService implements UserCommandUseCase {
         userRepository.save(user);
     }
 
+    @Override
+    public void updateMe(Long userId, String email, String name, String nickname, Integer age, String tel, Long residenceRegionId) {
+        User current = userRepository.findById(userId);
+
+        current.update(email, name, nickname, age, tel, residenceRegionId);
+        userRepository.save(current);
+
+
+    }
+
     private String encodePassword(String rawPassword) {
         return encoder.encode(rawPassword);
     }

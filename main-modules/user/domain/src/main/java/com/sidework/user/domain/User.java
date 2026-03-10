@@ -46,4 +46,32 @@ public class User {
     public void deactivate() {
         this.isActive = false;
     }
+
+    public void update(
+        String email,
+        String name,
+        String nickname,
+        Integer age,
+        String tel,
+        Long residenceRegionId
+    ) {
+        if (email != null) {
+            this.email = email;
+        }
+        if (name != null) {
+            this.name = name;
+        }
+        if (nickname != null) {
+            this.nickname = nickname;
+        }
+        if (age != null) {
+            this.age = age;
+        }
+        if (tel != null) {
+            this.tel = tel;
+        }
+        if (residenceRegionId != null) {
+            this.residenceRegionId = residenceRegionId;
+        }
+    }
 }
