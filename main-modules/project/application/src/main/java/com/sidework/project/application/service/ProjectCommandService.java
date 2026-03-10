@@ -70,8 +70,9 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         checkDateRangeIsValid(command.startDt(), command.endDt());
         checkProjectTitleExists(userId, command.title(), projectId);
 
-        Project project = projectRepository.findById(projectId);
+        Project project = projectRepository.findById(projectId) ;
         checkProjectIsChangeable(projectId, project.getStatus());
+
         project.update(
                 command.meetRegionId(),
                 command.title(), command.description(), command.startDt(),
@@ -79,10 +80,18 @@ public class ProjectCommandService implements ProjectCommandUseCase {
         );
         projectRepository.save(project);
 
+        if(command.meetingSchedules() != null) {
+            projectScheduleRepository.deleteAll(projectId);
+            List<ProjectSchedule> projectSchedules = createProjectSchedules(projectId, command.meetingSchedules());
+            projectScheduleRepository.saveAll(projectSchedules);
+        }
+
         requiredSkillCommandService.update(projectId, command.requiredStacks());
+
         if(!command.preferredStacks().isEmpty()) {
             preferredSkillCommandService.update(projectId, command.preferredStacks());
         }
+
         projectRecruitPositionRepository.deleteByProjectId(projectId);
         List<ProjectRecruitPosition> recruitPositions = toRecruitPositions(projectId, command.recruitPositions());
         projectRecruitPositionRepository.saveAll(projectId, recruitPositions);
@@ -99,6 +108,7 @@ public class ProjectCommandService implements ProjectCommandUseCase {
 
         projectRepository.save(project);
 
+        projectScheduleRepository.deleteAll(projectId);
         projectRecruitPositionRepository.deleteByProjectId(projectId);
     }
 
