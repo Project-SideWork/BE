@@ -2,6 +2,7 @@ package com.sidework.profile.application.service;
 
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
+import com.sidework.region.application.port.in.RegionQueryUseCase;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import com.sidework.skill.application.service.ProjectRequiredSkillQueryService;
 import com.sidework.skill.domain.Skill;
@@ -49,6 +50,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	private final UserQueryUseCase userQueryUseCase;
 	private final ProjectQueryUseCase projectQueryUseCase;
 	private final ProjectRequiredSkillQueryService requiredSkillUseCase;
+	private final RegionQueryUseCase regionQueryUseCase;
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long userId) {
@@ -67,6 +69,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		Map<Long, List<String>> skillNamesByProjectId = requiredSkillUseCase.queryNamesByProjectIds(projectIds);
 		Map<Long, List<ProjectRole>> rolesByProjectId = projectQueryUseCase.queryUserRolesByProjects(userId, projectIds);
 
+		String residenceText = buildResidenceText(user.getResidenceRegionId());
 		return new UserProfileResponse(
 			user.getId(),
 			user.getEmail(),
@@ -76,7 +79,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			user.getTel(),
 			profile.getId(),
 			profile.getSelfIntroduction(),
-			profile.getResidence(),
+			residenceText,
 			projectCounts,
 			buildRoleInfos(profile.getId()),
 			buildSchoolInfos(profile.getId()),
@@ -241,6 +244,13 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			})
 			.filter(portfolioInfo -> portfolioInfo != null)
 			.collect(Collectors.toList());
+	}
+
+	private String buildResidenceText(Long subRegionId) {
+		if (subRegionId == null) {
+			return null;
+		}
+		return regionQueryUseCase.getRegion(subRegionId);
 	}
 
 
