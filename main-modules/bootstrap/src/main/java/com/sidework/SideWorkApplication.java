@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EntityScan(basePackages = {"com.sidework.project.persistence.entity", "com.sidework.user.persistence.entity",
         "com.sidework.profile.persistence.entity", "com.sidework.skill.persistence.entity",
         "com.sidework.notification.persistence.entity", "com.sidework.chat.persistence.entity",
-        "com.sidework.region.persistence.entity"})
+        "com.sidework.region.persistence.entity", "com.sidework.school.persistence.entity"})
 public class SideWorkApplication {
 
 	public static void main(String[] args) {
