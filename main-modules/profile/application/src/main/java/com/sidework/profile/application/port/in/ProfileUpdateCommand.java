@@ -13,12 +13,12 @@ public record ProfileUpdateCommand(
 	String nickname,
 	Integer age,
 	String tel,
+	Long residenceRegionId,
 	List<SchoolUpdateRequest> schools,
 	List<PortfolioUpdateRequest> portfolios,
 	List<SkillUpdateRequest> skills,
 	List<Long> roleIds,
-	String selfIntroduction,
-	String residence
+	String selfIntroduction
 ) {
 	public record PortfolioUpdateRequest(
 		Long portfolioId,
