@@ -71,7 +71,8 @@ public class UserPersistenceAdapterTest {
         assertFalse(notExists);
 
         verify(repo).existsByNickname(nicknameExists);
-        verify(repo).existsByNickname(nicknameExists);
+        verify(repo).existsByNickname(nicknameNotExists);
+
     }
 
     @Test

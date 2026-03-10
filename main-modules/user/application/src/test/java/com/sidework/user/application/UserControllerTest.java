@@ -189,7 +189,7 @@ public class UserControllerTest {
 
     private SignUpCommand createAgeLowerCommand(){
         return new SignUpCommand(
-                "email",
+                "test@test.com",
                 "password123!",
                 "홍길동",
                 "길동",
@@ -201,7 +201,7 @@ public class UserControllerTest {
 
     private SignUpCommand createAgeHigherCommand(){
         return new SignUpCommand(
-                "email",
+                "test@test.com",
                 "password123!",
                 "홍길동",
                 "길동",

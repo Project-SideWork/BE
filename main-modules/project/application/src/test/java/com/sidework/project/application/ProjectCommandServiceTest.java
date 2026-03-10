@@ -109,12 +109,16 @@ public class ProjectCommandServiceTest {
     @Test
     void 생성시_일정이_중복되면_하나만_저장된다() {
         ProjectCommand command = createDuplicatedMeetingCommand();
+        when(repo.save(any(Project.class))).thenReturn(1L);
+        when(projectUserRepo.queryAllProjectIds(anyLong())).thenReturn(List.of());
+
 
         service.create(1L, command);
 
         verify(projectScheduleRepo).saveAll(projectScheduleArgumentCaptor.capture());
         List<ProjectSchedule> saved = projectScheduleArgumentCaptor.getValue();
         assertEquals(1, saved.size());
+        assertEquals(1L, saved.getFirst().getProjectId());
     }
 
     @Test

@@ -294,25 +294,37 @@ public class ProjectControllerTest {
     @Test
     void 프로젝트_게시글_생성_요청시_지원하지_않는_ENUM이_포함되면_400을_반환한다() throws Exception {
         String invalidJson = """
-        {
-          "title": "버스 실시간 위치 서비스",
-          "description": "WebSocket 기반 실시간 위치 공유 프로젝트",
-          "role": "BACKEND",
-          "recruitPositions": [
-            {
-              "role": "BACKEND",
-              "count": 1,
-              "skillLevel": "JUNIOR"
-            }
-          ],
-          "startDt": "2025-01-01",
-          "endDt": "2025-03-31",
-          "meetingType": "OFLINE",
-          "meetingDetail": "주 2회 온라인",
-          "requiredStacks": ["Spring Boot"],
-          "preferredStacks": ["Redis"],
-          "status": "RECRUITING"
-        }
+                {
+                  "title": "프로젝트 지역 및 날짜 테스트144",
+                  "description": "string",
+                  "myRole": "BACKEND",
+                  "recruitPositions": [
+                    {
+                      "role": "OWNER",
+                      "headCount": 1,
+                      "level": "JUNIOR"
+                    }
+                  ],
+                  "startDt": "2026-03-09",
+                  "endDt": "2026-03-10",
+                  "meetingType": "OFLINE",
+                  "meetRegionId": 11110,
+                  "meetingSchedules": [
+                    {
+                      "day": "MON"
+                       "hours": [
+                                "HOUR_24"
+                       ]
+                    }
+                  ],
+                  "requiredStacks": [
+                    10
+                  ],
+                  "preferredStacks": [
+                    12
+                  ],
+                  "status": "RECRUITING"
+                }
         """;
 
         mockMvc.perform(post("/api/v1/projects")
