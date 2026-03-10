@@ -58,9 +58,6 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		if (command.portfolios() != null) {
 			updatePortfolios(profile.getId(), command.portfolios());
 		}
-		if (command.roleIds() != null) {
-			updateRoles(profile, command.roleIds());
-		}
 		boolean profileDirty = false;
 		if (command.selfIntroduction() != null) {
 			profile.updateSelfIntroduction(command.selfIntroduction());

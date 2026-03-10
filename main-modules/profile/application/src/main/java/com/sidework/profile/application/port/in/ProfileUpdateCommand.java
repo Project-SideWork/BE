@@ -17,7 +17,6 @@ public record ProfileUpdateCommand(
 	List<SchoolUpdateRequest> schools,
 	List<PortfolioUpdateRequest> portfolios,
 	List<SkillUpdateRequest> skills,
-	List<Long> roleIds,
 	String selfIntroduction
 ) {
 	public record PortfolioUpdateRequest(
