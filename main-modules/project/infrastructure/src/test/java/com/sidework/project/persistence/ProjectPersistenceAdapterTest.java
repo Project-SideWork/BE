@@ -1,12 +1,9 @@
 package com.sidework.project.persistence;
 
 import com.sidework.project.application.port.in.ProjectCommand;
+import com.sidework.project.application.port.in.ProjectScheduleCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
-import com.sidework.project.domain.ProjectRole;
-import com.sidework.project.domain.SkillLevel;
-import com.sidework.project.domain.MeetingType;
-import com.sidework.project.domain.Project;
-import com.sidework.project.domain.ProjectStatus;
+import com.sidework.project.domain.*;
 import com.sidework.project.persistence.adapter.ProjectPersistenceAdapter;
 import com.sidework.project.persistence.entity.ProjectEntity;
 import com.sidework.project.application.exception.ProjectNotFoundException;
@@ -100,44 +97,23 @@ public class ProjectPersistenceAdapterTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2025, 3, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L, 3L), // requiredStacks
                 List.of(1L, 2L, 3L), // preferredStacks
                 ProjectStatus.RECRUITING          // status
         );
     }
 
-    private ProjectCommand createUpdateCommand() {
-        return new ProjectCommand(
-                "AI 기반 관광 코스 추천 서비스",              // title
-                "사용자 위치와 혼잡도를 반영한 여행 코스 추천", // description
-                ProjectRole.BACKEND,
-                List.of(
-                        new RecruitPosition(
-                                ProjectRole.BACKEND,
-                                2,
-                                SkillLevel.MID
-                        ),
-                        new RecruitPosition(
-                                ProjectRole.FRONTEND,
-                                1,
-                                SkillLevel.JUNIOR
-                        )
-                ),
-                LocalDate.of(2025, 4, 1),   // startDt
-                LocalDate.of(2025, 7, 31),  // endDt
-                MeetingType.ONLINE,         // meetingType
-                "전면 온라인, 필요 시 비동기 협업", // meetingDetail
-                List.of(1L, 2L, 3L), // requiredStacks
-                List.of(1L, 2L, 3L), // preferredStacks
-                ProjectStatus.PREPARING                         // status
-        );
-    }
     private Project createProject(
             ProjectCommand command
     ) {
         return new Project(
                 null,
+                1L,
                 command.title(),
                 command.description(),
                 command.startDt(),
@@ -148,6 +124,7 @@ public class ProjectPersistenceAdapterTest {
     }
     private ProjectEntity createProjectEntity() {
         return new ProjectEntity(
+                1L,
                 1L,
                 "버스 실시간 위치 서비스",              // title
                 "사용자 위치와 혼잡도를 반영한 여행 코스 추천", // description

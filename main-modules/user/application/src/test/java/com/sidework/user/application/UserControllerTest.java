@@ -94,6 +94,32 @@ public class UserControllerTest {
     }
 
     @Test
+    void 회원가입_요청시_나이가_19보다_작으면_400을_반환한다() throws Exception {
+        // given
+        SignUpCommand command = createAgeLowerCommand();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 회원가입_요청시_나이가_100보다_크면_400을_반환한다() throws Exception {
+        // given
+        SignUpCommand command = createAgeHigherCommand();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void 이메일_중복_확인시_중복이면_true를_반환한다() throws Exception {
         // given
         String email = "test@test.com";
@@ -132,7 +158,8 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678"
+                "010-1234-5678",
+                1L
         );
     }
 
@@ -143,7 +170,8 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678"
+                "010-1234-5678",
+                1L
         );
     }
 
@@ -154,7 +182,32 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678"
+                "010-1234-5678",
+                1L
+        );
+    }
+
+    private SignUpCommand createAgeLowerCommand(){
+        return new SignUpCommand(
+                "test@test.com",
+                "password123!",
+                "홍길동",
+                "길동",
+                18,
+                "010-1234-5678",
+                1L
+        );
+    }
+
+    private SignUpCommand createAgeHigherCommand(){
+        return new SignUpCommand(
+                "test@test.com",
+                "password123!",
+                "홍길동",
+                "길동",
+                101,
+                "010-1234-5678",
+                1L
         );
     }
 
@@ -165,7 +218,8 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678"
+                "010-1234-5678",
+                1L
         );
     }
 }

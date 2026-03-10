@@ -14,6 +14,8 @@ import java.time.LocalDate;
 public class Project {
     private Long id;
 
+    private Long meetRegionId;
+
     private String title;
 
     private String description;
@@ -26,12 +28,14 @@ public class Project {
 
     private ProjectStatus status;
 
-    public static Project create(String title,
+    public static Project create(Long regionId,
+                                 String title,
                                  String description,
                                  LocalDate startDt,
                                  LocalDate endDt,
                                  MeetingType meetingType) {
         return Project.builder()
+                .meetRegionId(regionId)
                 .title(title)
                 .description(description)
                 .startDt(startDt)
@@ -45,13 +49,14 @@ public class Project {
         this.status = ProjectStatus.CANCELED;
     }
 
-    public void update(String title,
-                          String description,
-                          LocalDate startDt,
-                          LocalDate endDt,
-                          MeetingType meetingType,
-                          ProjectStatus status) {
-
+    public void update(Long regionId,
+                       String title,
+                       String description,
+                       LocalDate startDt,
+                       LocalDate endDt,
+                       MeetingType meetingType,
+                       ProjectStatus status) {
+        this.meetRegionId = regionId;
         this.title = title;
         this.description = description;
         this.startDt = startDt;

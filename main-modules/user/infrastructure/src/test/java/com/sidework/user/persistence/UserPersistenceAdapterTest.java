@@ -58,6 +58,41 @@ public class UserPersistenceAdapterTest {
     }
 
     @Test
+    void existByNickname은_닉네임_중복_여부를_확인한다() {
+        String nicknameExists = "test1";
+        String nicknameNotExists = "test2";
+        when(repo.existsByNickname(nicknameExists)).thenReturn(true);
+        when(repo.existsByNickname(nicknameNotExists)).thenReturn(false);
+
+        boolean exists = adapter.existsByNickname(nicknameExists);
+        boolean notExists = adapter.existsByNickname(nicknameNotExists);
+
+        assertTrue(exists);
+        assertFalse(notExists);
+
+        verify(repo).existsByNickname(nicknameExists);
+        verify(repo).existsByNickname(nicknameNotExists);
+
+    }
+
+    @Test
+    void existByTel은_전화번호_중복_여부를_확인한다() {
+        String telExists = "010-1234-5678";
+        String telNotExists = "010-1234-5679";
+        when(repo.existsByTel(telExists)).thenReturn(true);
+        when(repo.existsByTel(telNotExists)).thenReturn(false);
+
+        boolean exists = adapter.existsByTel(telExists);
+        boolean notExists = adapter.existsByTel(telNotExists);
+
+        assertTrue(exists);
+        assertFalse(notExists);
+
+        verify(repo).existsByTel(telExists);
+        verify(repo).existsByTel(telNotExists);
+    }
+
+    @Test
     void findById는_Id로_사용자를_조회해_도메인_객체로_변환한다() {
         UserEntity entity = createUserEntity(1L);
 
@@ -86,7 +121,8 @@ public class UserPersistenceAdapterTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678"
+                "010-1234-5678",
+                1L
         );
     }
 
@@ -97,6 +133,7 @@ public class UserPersistenceAdapterTest {
                 command.password(),
                 command.age(),
                 command.tel(),
+                1L,
                 UserType.LOCAL);
     }
 
@@ -109,6 +146,7 @@ public class UserPersistenceAdapterTest {
                 "password123!",
                 20,
                 "010-1234-5678",
+                1L,
                 UserType.LOCAL,
                 true
         );

@@ -42,6 +42,10 @@ public class UserEntity extends BaseEntity {
     @Column(name = "tel", nullable = false, length = 20)
     private String tel;
 
+    // 거주지
+    @Column(name = "residence_region_id", nullable = false)
+    private Long residenceRegionId;
+
     // 회원가입 종류 (LOCAL, KAKAO, GITHUB, GOOGLE)
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 10)

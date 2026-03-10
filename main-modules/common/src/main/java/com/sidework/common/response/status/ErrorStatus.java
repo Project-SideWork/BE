@@ -26,6 +26,8 @@ public enum ErrorStatus implements BaseStatusCode {
     USER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_001", "이미 존재하는 사용자입니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_002", "해당 사용자를 찾을 수 없습니다."),
     EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_003", "이미 사용 중인 이메일입니다."),
+    NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_004", "이미 사용 중인 닉네임입니다."),
+    TEL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_005", "이미 사용 중인 전화번호입니다."),
 
     // PROJECT
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_001", "해당 프로젝트를 찾을 수 없습니다."),
@@ -56,7 +58,12 @@ public enum ErrorStatus implements BaseStatusCode {
     PORTFOLIO_NOT_FOUND(HttpStatus.NOT_FOUND, "PORTFOLIO_001", "해당 대외활동을 찾을 수 없습니다."),
 
     //NOTIFICATION
-    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_001", "해당 알림을 찾을 수 없습니다.");
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_001", "해당 알림을 찾을 수 없습니다."),
+
+    // REGION
+    REGION_NOT_FOUND(HttpStatus.NOT_FOUND, "REGION_001", "해당 지역을 찾을 수 없습니다."),
+
+    REGION_INVALID_LEVEL(HttpStatus.BAD_REQUEST, "REGION_002", "상위 행정구역은 입력될 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

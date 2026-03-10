@@ -2,20 +2,16 @@ package com.sidework.project.application.service;
 
 import static com.sidework.project.domain.ApplyStatus.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import com.sidework.project.application.exception.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sidework.project.application.event.ProjectApplyDecisionEvent;
-import com.sidework.project.application.exception.ProfileNotFoundException;
-import com.sidework.project.application.exception.ProjectApplicantNotFoundException;
-import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
-import com.sidework.project.application.exception.ProjectApplyAlreadyProcessedException;
-import com.sidework.project.application.exception.ProjectNotRecruitingException;
-import com.sidework.project.application.exception.ProjectOwnerNotFoundException;
-import com.sidework.project.application.exception.ProjectUserNotFoundException;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
@@ -32,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = false)
+@Slf4j
 public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 
 	private final ProjectOutPort projectRepository;
@@ -92,7 +89,7 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 
 	private Project checkProjectExistsAndIsRecruiting(Long projectId) {
 		Project project = projectRepository.findById(projectId);
-		if (!project.getStatus().equals(ProjectStatus.RECRUITING)) {
+		if (!project.getStatus().equals(ProjectStatus.RECRUITING) || project.getEndDt().isBefore(LocalDate.now())) {
 			throw new ProjectNotRecruitingException(projectId);
 		}
 		return project;
@@ -127,5 +124,4 @@ public class ProjectApplyCommandService implements ProjectApplyCommandUseCase {
 		}
 		return projectUser;
 	}
-
 }

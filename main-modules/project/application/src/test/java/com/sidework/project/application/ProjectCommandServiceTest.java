@@ -6,18 +6,16 @@ import com.sidework.project.application.exception.ProjectDeleteAuthorityExceptio
 import com.sidework.project.application.exception.ProjectNotChangeableException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectCommand;
+import com.sidework.project.application.port.in.ProjectScheduleCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
+import com.sidework.project.application.port.out.ProjectScheduleOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
-import com.sidework.project.domain.ProjectRole;
-import com.sidework.project.domain.SkillLevel;
+import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.service.ProjectCommandService;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillCommandUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredCommandUseCase;
-import com.sidework.project.domain.MeetingType;
-import com.sidework.project.domain.Project;
-import com.sidework.project.domain.ProjectStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,13 +28,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.sidework.project.domain.ProjectStatus.CANCELED;
+import static com.sidework.project.domain.ProjectStatus.PREPARING;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectCommandServiceTest {
@@ -45,6 +42,9 @@ public class ProjectCommandServiceTest {
 
     @Mock
     private ProjectUserOutPort projectUserRepo;
+
+    @Mock
+    private ProjectScheduleOutPort projectScheduleRepo;
 
     @Mock
     private ProjectRequiredCommandUseCase requiredSkillCommandService;
@@ -62,6 +62,9 @@ public class ProjectCommandServiceTest {
     ArgumentCaptor<Project> projectArgumentCaptor;
 
     @Captor
+    ArgumentCaptor<List<ProjectSchedule>> projectScheduleArgumentCaptor;
+
+    @Captor
     ArgumentCaptor<List<com.sidework.project.domain.ProjectRecruitPosition>> recruitPositionsCaptor;
 
     @Test
@@ -69,6 +72,7 @@ public class ProjectCommandServiceTest {
         ProjectCommand command = createCommand(ProjectStatus.PREPARING);
         when(repo.save(any(Project.class))).thenReturn(1L);
         when(projectUserRepo.queryAllProjectIds(anyLong())).thenReturn(List.of());
+        doNothing().when(projectScheduleRepo).saveAll(any());
         doNothing().when(requiredSkillCommandService).create(anyLong(), any());
         doNothing().when(preferredSkillCommandService).create(anyLong(), any());
         doNothing().when(projectRecruitPositionRepository).saveAll(anyLong(), any());
@@ -85,11 +89,36 @@ public class ProjectCommandServiceTest {
         assertEquals(command.meetingType(), saved.getMeetingType());
         assertEquals(ProjectStatus.PREPARING, saved.getStatus());
         verify(projectRecruitPositionRepository).saveAll(eq(1L), recruitPositionsCaptor.capture());
-        List<com.sidework.project.domain.ProjectRecruitPosition> positions = recruitPositionsCaptor.getValue();
+
+        List<ProjectRecruitPosition> positions = recruitPositionsCaptor.getValue();
         assertEquals(command.recruitPositions().size(), positions.size());
         assertEquals(command.recruitPositions().get(0).role(), positions.get(0).getRole());
         assertEquals(command.recruitPositions().get(0).headCount(), positions.get(0).getHeadCount());
         assertEquals(command.recruitPositions().get(0).level(), positions.get(0).getLevel());
+    }
+
+    @Test
+    void 생성시_미팅_일정이_없으면_일정을_저장하지_않는다() {
+        ProjectCommand command = createNoMeetingCommand();
+
+        service.create(1L, command);
+
+        verify(projectScheduleRepo, never()).saveAll(any());
+    }
+
+    @Test
+    void 생성시_일정이_중복되면_하나만_저장된다() {
+        ProjectCommand command = createDuplicatedMeetingCommand();
+        when(repo.save(any(Project.class))).thenReturn(1L);
+        when(projectUserRepo.queryAllProjectIds(anyLong())).thenReturn(List.of());
+
+
+        service.create(1L, command);
+
+        verify(projectScheduleRepo).saveAll(projectScheduleArgumentCaptor.capture());
+        List<ProjectSchedule> saved = projectScheduleArgumentCaptor.getValue();
+        assertEquals(1, saved.size());
+        assertEquals(1L, saved.getFirst().getProjectId());
     }
 
     @Test
@@ -165,6 +194,34 @@ public class ProjectCommandServiceTest {
                 () -> service.update(1L, projectId, command)
         );
     }
+
+    @Test
+    void 수정시_미팅_일정이_없으면_일정을_저장하지_않는다() {
+        ProjectCommand command = createNoMeetingCommand();
+
+        when(repo.existsById(1L)).thenReturn(true);
+        when(repo.findById(1L)).thenReturn(createSavedProject());
+
+        service.update(1L, 1L, command);
+
+        verify(projectScheduleRepo, never()).saveAll(any());
+    }
+
+    @Test
+    void 수정시_일정이_중복되면_하나만_저장된다() {
+        ProjectCommand command = createDuplicatedMeetingCommand();
+        when(repo.existsById(1L)).thenReturn(true);
+        when(repo.findById(1L)).thenReturn(createSavedProject());
+
+        service.update(1L, 1L, command);
+
+        verify(projectScheduleRepo).saveAll(projectScheduleArgumentCaptor.capture());
+        List<ProjectSchedule> saved = projectScheduleArgumentCaptor.getValue();
+        assertEquals(1, saved.size());
+
+        verify(projectScheduleRepo).deleteAll(1L);
+    }
+
 
     @Test
     void FINISHED_상태의_프로젝트를_상태_변경시_ProjectNotChangeableException을_던진다() {
@@ -289,6 +346,9 @@ public class ProjectCommandServiceTest {
         service.delete(userId, projectId);
 
         assertEquals(CANCELED, project.getStatus());
+
+        verify(projectScheduleRepo).deleteAll(1L);
+        verify(projectRecruitPositionRepository).deleteByProjectId(1L);
     }
 
     @Test
@@ -339,7 +399,11 @@ public class ProjectCommandServiceTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2025, 3, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L, 3L), // requiredStacks
                 List.of(1L, 2L, 3L),           // preferredStacks
                 status         // status
@@ -365,12 +429,76 @@ public class ProjectCommandServiceTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2024, 12, 31),  // endDt
                 null,         // meetingType
-                "주 2회 온라인, 월 1회 오프라인", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L, 3L), // requiredStacks
                 List.of(1L, 2L, 3L),           // preferredStacks
                 ProjectStatus.RECRUITING          // status
         );
     }
+
+    private ProjectCommand createNoMeetingCommand() {
+        return new ProjectCommand(
+                "버스 실시간 위치 서비스",                 // title
+                "WebSocket 기반 실시간 위치 공유 프로젝트", // description
+                ProjectRole.BACKEND,
+                List.of(
+                        new RecruitPosition(
+                                ProjectRole.BACKEND,
+                                1,
+                                SkillLevel.JUNIOR
+                        ),
+                        new RecruitPosition(
+                                ProjectRole.FRONTEND,
+                                2,
+                                SkillLevel.MID
+                        )
+                ),
+                LocalDate.of(2025, 1, 1),   // startDt
+                LocalDate.of(2025, 3, 31),  // endDt
+                MeetingType.HYBRID,         // meetingType
+                1L,
+                null,
+                List.of(1L, 2L), // requiredStacks
+                List.of(3L, 4L),       // preferredStacks
+                PREPARING         // status
+        );
+    }
+
+    private ProjectCommand createDuplicatedMeetingCommand() {
+        return new ProjectCommand(
+                "버스 실시간 위치 서비스",                 // title
+                "WebSocket 기반 실시간 위치 공유 프로젝트", // description
+                ProjectRole.BACKEND,
+                List.of(
+                        new RecruitPosition(
+                                ProjectRole.BACKEND,
+                                1,
+                                SkillLevel.JUNIOR
+                        ),
+                        new RecruitPosition(
+                                ProjectRole.FRONTEND,
+                                2,
+                                SkillLevel.MID
+                        )
+                ),
+                LocalDate.of(2025, 1, 1),   // startDt
+                LocalDate.of(2025, 3, 31),  // endDt
+                MeetingType.HYBRID,         // meetingType
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1)),
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1))
+                ),
+                List.of(1L, 2L), // requiredStacks
+                List.of(3L, 4L),       // preferredStacks
+                PREPARING         // status
+        );
+    }
+
 
     private ProjectCommand createUpdateCommand() {
         return new ProjectCommand(
@@ -392,7 +520,11 @@ public class ProjectCommandServiceTest {
                 LocalDate.of(2025, 4, 1),   // startDt
                 LocalDate.of(2025, 7, 31),  // endDt
                 MeetingType.ONLINE,         // meetingType
-                "전면 온라인, 필요 시 비동기 협업", // meetingDetail
+                1L,
+                List.of(
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.THU, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                ),
                 List.of(1L, 2L, 3L), // requiredStacks
                 List.of(1L, 2L, 3L),           // preferredStacks
                 ProjectStatus.PREPARING                         // status
@@ -403,6 +535,7 @@ public class ProjectCommandServiceTest {
     ) {
         return new Project(
                 null,
+                1L,
                 command.title(),
                 command.description(),
                 command.startDt(),
@@ -414,6 +547,7 @@ public class ProjectCommandServiceTest {
     private Project createSavedProject(
     ) {
         return new Project(
+                1L,
                 1L,
                 "Dummy",
                 "Dummy",

@@ -21,4 +21,10 @@ public interface RegionJpaRepository extends JpaRepository<RegionEntity, Long> {
             WHERE r.parentRegionId = :id
             """)
     List<RegionEntity> findAllByParentId(@Param("id") Long id);
+
+    @Query("""
+               SELECT count(r) > 0 FROM RegionEntity r
+               WHERE r.id = :id and r.parentRegionId is NOT NULL
+            """)
+     boolean isSubRegion(@Param("id") Long id);
 }

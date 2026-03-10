@@ -23,6 +23,9 @@ public class ProjectEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "meet_region_id")
+    private Long meetRegionId;
+
     @Column(length = 100, nullable = false)
     private String title;           // 프로젝트 제목
 
