@@ -31,7 +31,7 @@ public record ProjectCommand(
         @NotNull
         MeetingType meetingType,
 
-        @NotNull @Positive Long meetRegionId,
+        @Positive Long meetRegionId,
 
         @Valid
         List<ProjectScheduleCommand> meetingSchedules,
