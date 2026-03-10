@@ -149,6 +149,19 @@ public class ProjectControllerTest {
     }
 
     @Test
+    void 프로젝트_게시글_생성_요청시_지역ID가_양수가_아니면_400을_반환한다() throws Exception {
+        ProjectCommand command = createInvalidRegionCommand();
+
+        mockMvc.perform(post("/api/v1/projects")
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(command)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void 프로젝트_게시글_생성_요청시_일정에_지원하지_않는_ENUM이_포함되면_400을_반환한다() throws Exception {
         String invalidJson = """
         {
@@ -186,6 +199,95 @@ public class ProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_게시글_생성_요청시_일정_중_day가_미포함되면_400을_반환한다() throws Exception {
+        String invalidJson = """
+                {
+                  "title": "프로젝트 지역 및 날짜 테스트15",
+                  "description": "string",
+                  "myRole": "BACKEND",
+                  "recruitPositions": [
+                    {
+                      "role": "OWNER",
+                      "headCount": 1,
+                      "level": "JUNIOR"
+                    }
+                  ],
+                  "startDt": "2026-03-09",
+                  "endDt": "2026-03-10",
+                  "meetingType": "OFFLINE",
+                  "meetRegionId": 11110,
+                  "meetingSchedules": [
+                    {
+                      "hours": [
+                "HOUR_1"
+                      ]
+                    }
+                  ],
+                  "requiredStacks": [
+                    10
+                  ],
+                  "preferredStacks": [
+                    12
+                  ],
+                  "status": "RECRUITING"
+                }
+        """;
+
+        mockMvc.perform(post("/api/v1/projects")
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andDo(print())
+                .andExpect(jsonPath("$.message").value("요일은 필수입니다."))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_게시글_생성_요청시_일정_중_hours가_빈배열이면_400을_반환한다() throws Exception {
+        String invalidJson = """
+                {
+                  "title": "프로젝트 지역 및 날짜 테스트15",
+                  "description": "string",
+                  "myRole": "BACKEND",
+                  "recruitPositions": [
+                    {
+                      "role": "OWNER",
+                      "headCount": 1,
+                      "level": "JUNIOR"
+                    }
+                  ],
+                  "startDt": "2026-03-09",
+                  "endDt": "2026-03-10",
+                  "meetingType": "OFFLINE",
+                  "meetRegionId": 11110,
+                  "meetingSchedules": [
+                    {
+                       "day" : "MON",
+                       "hours": []
+                    }
+                  ],
+                  "requiredStacks": [
+                    10
+                  ],
+                  "preferredStacks": [
+                    12
+                  ],
+                  "status": "RECRUITING"
+                }
+        """;
+
+        mockMvc.perform(post("/api/v1/projects")
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andDo(print())
+                .andExpect(jsonPath("$.message").value("시간을 최소 1개 이상 선택해주세요."))
                 .andExpect(status().isBadRequest());
     }
 
@@ -746,10 +848,10 @@ public class ProjectControllerTest {
         );
     }
 
-    private ProjectCommand createInvalidScheduleCommand() {
+    private ProjectCommand createInvalidRegionCommand() {
         return new ProjectCommand(
-                null,
-                "WebSocket 기반 실시간 위치 공유 프로젝트", // description
+                "버스 실시간 위치 서비스",
+                "WebSocket 기반 실시간 위치 공유 프로젝트",
                 ProjectRole.BACKEND,
                 List.of(
                         new RecruitPosition(
@@ -766,10 +868,10 @@ public class ProjectControllerTest {
                 LocalDate.of(2025, 1, 1),   // startDt
                 LocalDate.of(2025, 12, 31),  // endDt
                 MeetingType.HYBRID,         // meetingType
-                1L,
+                -1L,
                 List.of(
-                        new ProjectScheduleCommand(null, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
-                        new ProjectScheduleCommand(null, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
+                        new ProjectScheduleCommand(MeetingDay.MON, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3)),
+                        new ProjectScheduleCommand(MeetingDay.FRI, List.of(MeetingHour.HOUR_1,MeetingHour.HOUR_2,MeetingHour.HOUR_3))
                 ),
                 List.of(1L, 2L), // requiredStacks
                 List.of(3L, 4L),       // preferredStacks
@@ -806,20 +908,6 @@ public class ProjectControllerTest {
                 List.of(1L, 2L), // requiredStacks
                 List.of(3L, 4L),       // preferredStacks
                 ProjectStatus.PREPARING                         // status
-        );
-    }
-    private Project createProject(
-            ProjectCommand command
-    ) {
-        return new Project(
-                null,
-                1L,
-                command.title(),
-                command.description(),
-                command.startDt(),
-                command.endDt(),
-                command.meetingType(),
-                command.status()
         );
     }
 }
