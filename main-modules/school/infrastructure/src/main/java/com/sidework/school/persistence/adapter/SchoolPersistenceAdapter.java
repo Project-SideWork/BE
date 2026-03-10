@@ -1,22 +1,22 @@
-package com.sidework.profile.persistence.adapter;
+package com.sidework.school.persistence.adapter;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sidework.profile.application.port.out.SchoolOutPort;
-import com.sidework.profile.domain.School;
-import com.sidework.profile.persistence.entity.SchoolEntity;
-import com.sidework.profile.persistence.exception.SchoolNotFoundException;
-import com.sidework.profile.persistence.mapper.SchoolMapper;
-import com.sidework.profile.persistence.repository.SchoolJpaRepository;
+import com.sidework.school.application.exception.SchoolNotFoundException;
+import com.sidework.school.application.port.in.SchoolQueryUseCase;
+import com.sidework.school.domain.School;
+import com.sidework.school.persistence.entity.SchoolEntity;
+import com.sidework.school.persistence.mapper.SchoolMapper;
+import com.sidework.school.persistence.repository.SchoolJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class SchoolPersistenceAdapter implements SchoolOutPort {
+public class SchoolPersistenceAdapter implements SchoolQueryUseCase {
 
 	private final SchoolJpaRepository schoolRepository;
 	private final SchoolMapper schoolMapper;
@@ -39,3 +39,4 @@ public class SchoolPersistenceAdapter implements SchoolOutPort {
 			.collect(Collectors.toList());
 	}
 }
+

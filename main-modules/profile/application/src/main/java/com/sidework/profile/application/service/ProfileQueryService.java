@@ -3,6 +3,8 @@ package com.sidework.profile.application.service;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
+import com.sidework.school.application.port.in.SchoolQueryUseCase;
+import com.sidework.school.domain.School;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import com.sidework.skill.application.service.ProjectRequiredSkillQueryService;
 import com.sidework.skill.domain.Skill;
@@ -14,10 +16,8 @@ import com.sidework.profile.application.port.in.ProfileQueryUseCase;
 import com.sidework.profile.application.port.out.PortfolioOutPort;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.application.port.out.RoleOutPort;
-import com.sidework.profile.application.port.out.SchoolOutPort;
 import com.sidework.profile.domain.Portfolio;
 import com.sidework.profile.domain.Role;
-import com.sidework.profile.domain.School;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.domain.Project;
 import com.sidework.user.application.port.in.UserQueryUseCase;
@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 public class ProfileQueryService implements ProfileQueryUseCase
 {
 	private final ProfileOutPort profileRepository;
-	private final SchoolOutPort schoolRepository;
 	private final SkillOutPort skillRepository;
 	private final PortfolioOutPort portfolioRepository;
 	private final RoleOutPort roleRepository;
@@ -51,6 +50,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	private final ProjectQueryUseCase projectQueryUseCase;
 	private final ProjectRequiredSkillQueryService requiredSkillUseCase;
 	private final RegionQueryUseCase regionQueryUseCase;
+	private final SchoolQueryUseCase schoolQueryUseCase;
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long userId) {
@@ -176,7 +176,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		List<Long> schoolIds = profileSchools.stream()
 			.map(ProfileSchool::getSchoolId)
 			.collect(Collectors.toList());
-		Map<Long, School> schoolMap = schoolRepository.findByIdIn(schoolIds).stream()
+		Map<Long, School> schoolMap = schoolQueryUseCase.findByIdIn(schoolIds).stream()
 			.collect(Collectors.toMap(School::getId, Function.identity()));
 
 		return profileSchools.stream()

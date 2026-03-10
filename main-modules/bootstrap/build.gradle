@@ -29,6 +29,8 @@ dependencies {
     implementation project(':main-modules:chat:chat-infrastructure')
     implementation project(':main-modules:region:region-application')
     implementation project(':main-modules:region:region-infrastructure')
+    implementation project(':main-modules:school:school-application')
+    implementation project(':main-modules:school:school-infrastructure')
 
 
     implementation libs.bundles.jwt

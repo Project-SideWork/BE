@@ -25,6 +25,10 @@ dependencies {
     implementation project(':main-modules:project:project-application')
     implementation project(':main-modules:skill:skill-domain')
     implementation project(':main-modules:skill:skill-application')
+    implementation project(':main-modules:region:region-domain')
+    implementation project(':main-modules:region:region-application')
+    implementation project(':main-modules:school:school-domain')
+    implementation project(':main-modules:school:school-application')
     implementation("org.springframework:spring-context")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
 }
