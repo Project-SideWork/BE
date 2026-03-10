@@ -22,4 +22,12 @@ public class RegionQueryService implements RegionQueryUseCase {
     public List<Region> queryByParent(Long id) {
         return repo.findAllByParent(id);
     }
+
+    @Override
+    public String getRegion(Long id) {
+        Region region = repo.findById(id);
+        Region parentRegion = repo.findById(region.getParentRegionId());
+        return parentRegion.getRegionName()+ " " + region.getRegionName();
+
+    }
 }
