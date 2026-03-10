@@ -3,4 +3,4 @@ MODIFY start_dt DATE NOT NULL,
 MODIFY end_dt DATE NOT NULL;
 
 ALTER TABLE projects
-ADD COLUMN meet_region_id BIGINT NOT NULL;
+ADD COLUMN meet_region_id BIGINT NULL;
