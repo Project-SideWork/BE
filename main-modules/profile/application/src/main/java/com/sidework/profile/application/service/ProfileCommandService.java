@@ -20,6 +20,7 @@ import com.sidework.profile.domain.ProfileRole;
 import com.sidework.profile.domain.ProfileSchool;
 import com.sidework.profile.domain.ProfileSkill;
 import com.sidework.profile.domain.ProjectPortfolio;
+import com.sidework.user.application.port.in.UserCommandUseCase;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,19 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 	private final ProfileOutPort profileRepository;
 	private final PortfolioOutPort portfolioRepository;
 
+	private final UserCommandUseCase userCommandUseCase;
+
 	@Override
 	public void update(Long userId, ProfileUpdateCommand command) {
+		updateUserIfNeeded(
+			userId,
+			command.email(),
+			command.name(),
+			command.nickname(),
+			command.age(),
+			command.tel(),
+			command.residenceRegionId()
+		);
 		Profile profile = getProfileOrThrow(userId);
 
 		if (command.schools() != null) {
@@ -52,10 +64,6 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		boolean profileDirty = false;
 		if (command.selfIntroduction() != null) {
 			profile.updateSelfIntroduction(command.selfIntroduction());
-			profileDirty = true;
-		}
-		if (command.residence() != null) {
-			profile.updateResidence(command.residence());
 			profileDirty = true;
 		}
 		if (profileDirty) {
@@ -199,5 +207,26 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 			.map(role -> ProfileRole.create(profile.getId(), role))
 			.toList();
 		profileRepository.saveProfileRoles(roles);
+	}
+
+	private void updateUserIfNeeded(
+		Long userId,
+		String email,
+		String name,
+		String nickname,
+		Integer age,
+		String tel,
+		Long residenceRegionId
+	) {
+		boolean hasUserChange =
+			email != null ||
+				name != null ||
+				nickname != null ||
+				age != null ||
+				tel != null;
+		if (!hasUserChange) {
+			return;
+		}
+		userCommandUseCase.updateMe(userId, email, name, nickname, age, tel, residenceRegionId);
 	}
 }
