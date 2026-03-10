@@ -17,6 +17,11 @@ public class ProjectSchedulePersistenceAdapter implements ProjectScheduleOutPort
     private final ProjectScheduleJpaRepository repo;
 
     @Override
+    public void deleteAll(Long projectId) {
+        repo.deleteAllByProjectId(projectId);
+    }
+
+    @Override
     public void saveAll(List<ProjectSchedule> schedules) {
         List<ProjectScheduleEntity> entities = schedules.stream().map(
                 mapper::toEntity
