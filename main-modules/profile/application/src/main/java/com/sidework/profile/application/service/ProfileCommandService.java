@@ -220,7 +220,8 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 				name != null ||
 				nickname != null ||
 				age != null ||
-				tel != null;
+				tel != null ||
+				residenceRegionId != null;
 		if (!hasUserChange) {
 			return;
 		}
