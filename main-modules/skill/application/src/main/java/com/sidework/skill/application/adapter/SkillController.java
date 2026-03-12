@@ -1,8 +1,8 @@
 package com.sidework.skill.application.adapter;
 
 import com.sidework.common.response.ApiResponse;
+import com.sidework.skill.application.docs.SkillControllerDocs;
 import com.sidework.skill.application.port.in.SkillSearchQueryUseCase;
-import com.sidework.skill.domain.Skill;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/skills")
 @RequiredArgsConstructor
-public class SkillController {
+public class SkillController implements SkillControllerDocs {
 
 	private final SkillSearchQueryUseCase skillSearchQueryUseCase;
 
