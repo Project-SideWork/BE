@@ -11,6 +11,8 @@ import com.sidework.project.persistence.mapper.ProjectMapper;
 import com.sidework.project.persistence.mapper.ProjectRecruitPositionMapper;
 import com.sidework.project.persistence.repository.ProjectJpaRepository;
 import com.sidework.project.persistence.repository.ProjectRecruitPositionJpaRepository;
+import com.sidework.project.persistence.repository.condition.ProjectSearchCondition;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -66,6 +68,26 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
     @Override
     public Page<Project> findPage(Pageable pageable) {
         Page<ProjectEntity> entities = repo.findAll(pageable);
+        return entities.map(mapper::toDomain);
+    }
+
+    @Override
+    public Page<Project> search(String keyword, Pageable pageable) {
+        Page<ProjectEntity> entities = repo.searchByKeyword(keyword, pageable);
+        return entities.map(mapper::toDomain);
+    }
+
+    @Override
+    public Page<Project> search(String keyword, List<Long> skillIds, Pageable pageable) {
+
+        ProjectSearchCondition condition = new ProjectSearchCondition();
+        condition.setKeyword(keyword);
+        condition.setSkillIds(skillIds);
+        condition.setSkillCount(skillIds == null ? 0L : skillIds.size());
+
+        Page<ProjectEntity> entities =
+            repo.searchByKeywordAndSkillIdsQuerydsl(condition, pageable);
+
         return entities.map(mapper::toDomain);
     }
 

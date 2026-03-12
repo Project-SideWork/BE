@@ -8,5 +8,6 @@ public interface SkillOutPort {
     List<Long> findActiveSkillsByIdIn(List<Long> ids);
     Skill findById(Long id);
     List<Skill> findByIdIn(List<Long> ids);
+    List<Skill> searchByName(String keyword);
 }
 

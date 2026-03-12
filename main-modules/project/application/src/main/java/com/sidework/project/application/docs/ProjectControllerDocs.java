@@ -14,10 +14,13 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -205,9 +208,12 @@ public interface ProjectControllerDocs {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
     })
+
     ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
-            @AuthenticationPrincipal AuthenticatedUserDetails user,
-            Pageable pageable
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PageableDefault(size = 20) Pageable pageable,
+        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
     );
 
     @Operation(description = "프로젝트 좋아요")

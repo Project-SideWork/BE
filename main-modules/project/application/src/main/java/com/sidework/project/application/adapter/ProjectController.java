@@ -93,8 +93,15 @@ public class ProjectController implements ProjectControllerDocs {
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
-            @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectList(user.getId(), pageable)));
+            @PageableDefault(size = 20) Pageable pageable,
+            @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+            @RequestParam(name = "skillIds", required = false) List<Long> skillIds
+    ) {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                queryService.queryProjectList(user.getId(), keyword, skillIds, pageable)
+            )
+        );
     }
 
     @PostMapping("/{projectId}/like")

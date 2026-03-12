@@ -17,5 +17,7 @@ public interface ProjectOutPort {
     List<Project> findByIdIn(List<Long> ids);
     List<ProjectTitleDto> findAllTitles(List<Long> projectIds);
     Page<Project> findPage(Pageable pageable);
+    Page<Project> search(String keyword, Pageable pageable);
+    Page<Project> search(String keyword, List<Long> skillIds, Pageable pageable);
     Map<Long, List<ProjectRecruitPosition>> getProjectRecruitPositionsByProjectIds(List<Long> projectIds);
 }

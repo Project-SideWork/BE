@@ -2,6 +2,9 @@ plugins {
     id 'java'
     id 'io.spring.dependency-management'
 }
+ext {
+    queryDslVersion = '7.1'
+}
 tasks.named('jar') {
     enabled = true
 }
@@ -27,6 +30,19 @@ dependencies {
     annotationProcessor libs.mapstruct.processor
     testAnnotationProcessor libs.mapstruct.processor
 
+    implementation libs.querydsl.jpa
+
+    annotationProcessor(libs.querydsl.apt) {
+        artifact {
+            classifier = "jakarta"
+        }
+    }
+
+    testAnnotationProcessor(libs.querydsl.apt) {
+        artifact {
+            classifier = "jakarta"
+        }
+    }
 
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.database.h2
