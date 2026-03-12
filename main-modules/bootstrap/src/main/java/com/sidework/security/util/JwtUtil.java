@@ -2,7 +2,6 @@ package com.sidework.security.util;
 
 
 import com.sidework.security.exception.InvalidTokenException;
-import com.sidework.user.application.port.out.UserOutPort;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

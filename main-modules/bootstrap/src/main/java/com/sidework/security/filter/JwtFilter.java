@@ -30,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final TokenBlackListService tokenBlackListService;
 
     private static final List<String> ALLOW_ORIGINS = List.of(
-            "/api/v1/login",
+            "/api/v1/login/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/api/v1/signup",
@@ -40,7 +40,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/error",
             "/health",
             "/api/v1/regions/**",
-            "/api/v1/users"
+            "/api/v1/users",
+            "/login/oauth2/code/github"
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";
