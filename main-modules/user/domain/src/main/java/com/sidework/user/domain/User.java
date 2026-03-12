@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 public class User {
     private Long id;
 
+    private Long githubId;
+
+    private String githubAccessToken;
+
     private String email;
 
     private String name;
@@ -40,10 +44,24 @@ public class User {
             Long residenceRegionId,
             UserType type
     ) {
-        return new User(null, email, name, nickname, password, age, tel, residenceRegionId, type, true);
+        return User.builder()
+                .email(email)
+                .name(name)
+                .nickname(nickname)
+                .password(password)
+                .age(age)
+                .tel(tel)
+                .residenceRegionId(residenceRegionId)
+                .type(type)
+                .build();
     }
     // 탈퇴 처리
     public void deactivate() {
         this.isActive = false;
+    }
+
+    public void addGithubInfo(Long githubId, String githubAccessToken) {
+        this.githubId = githubId;
+        this.githubAccessToken = githubAccessToken;
     }
 }
