@@ -74,7 +74,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .securityMatcher("/**")
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login/**","/swagger-ui/**",    // Swagger UI 관련 경로
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login","/swagger-ui/**",    // Swagger UI 관련 경로
                                 "/v3/api-docs/**", "/api/v1/users/email" ,"/api/v1/users", "/api/v1/reissue",
                                 "/firebase-messaging-sw.js", "/fcm-test.html", "/health", "/api/v1/oauth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/regions/**", "/login/oauth2/code/github").permitAll()
