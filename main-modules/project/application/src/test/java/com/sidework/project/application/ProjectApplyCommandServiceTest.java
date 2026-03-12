@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +80,7 @@ class ProjectApplyCommandServiceTest {
 		Project project = Project.builder()
 			.id(projectId)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
@@ -141,6 +143,7 @@ class ProjectApplyCommandServiceTest {
 		Project project = Project.builder()
 			.id(projectId)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
@@ -162,6 +165,7 @@ class ProjectApplyCommandServiceTest {
 		Project project = Project.builder()
 			.id(projectId)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
@@ -185,6 +189,7 @@ class ProjectApplyCommandServiceTest {
 			.id(projectId)
 			.title(projectTitle)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 		ProjectUser applicant = ProjectUser.builder()
 			.id(10L)
@@ -227,6 +232,7 @@ class ProjectApplyCommandServiceTest {
 			.id(projectId)
 			.title(projectTitle)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 		ProjectUser applicant = ProjectUser.builder()
 			.id(10L)
@@ -263,6 +269,7 @@ class ProjectApplyCommandServiceTest {
 		Project project = Project.builder()
 			.id(projectId)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
@@ -283,6 +290,7 @@ class ProjectApplyCommandServiceTest {
 		Project project = Project.builder()
 			.id(projectId)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
@@ -304,6 +312,7 @@ class ProjectApplyCommandServiceTest {
 		Project project = Project.builder()
 			.id(projectId)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 		ProjectUser applicant = ProjectUser.builder()
 			.id(10L)
@@ -351,6 +360,7 @@ class ProjectApplyCommandServiceTest {
 		Project project = Project.builder()
 			.id(projectId)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
@@ -371,6 +381,7 @@ class ProjectApplyCommandServiceTest {
 		Project project = Project.builder()
 			.id(projectId)
 			.status(ProjectStatus.RECRUITING)
+			.endDt(LocalDate.now().plusDays(7))
 			.build();
 		ProjectUser applicant = ProjectUser.builder()
 			.id(10L)
