@@ -30,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final TokenBlackListService tokenBlackListService;
 
     private static final List<String> ALLOW_ORIGINS = List.of(
-            "/api/v1/login/**",
+            "/api/v1/login",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/api/v1/signup",
@@ -54,7 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String requestUri = request.getRequestURI();
-        String accessToken = request.getHeader("Authorization");
+        String accessToken = CookieUtil.getAccessTokenFromRequest(request);
         String refreshToken = CookieUtil.getRefreshTokenFromRequest(request);
 
         if (isAllowedPath(requestUri)) {
@@ -78,13 +78,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
         }
 
-        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
+        if (accessToken == null) {
             log.debug("access 토큰 없음, URI={}", requestUri);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");
             return;
         }
 
-        accessToken = accessToken.substring(7);
 
         try {
             if (jwtUtil.isExpired(accessToken)) {

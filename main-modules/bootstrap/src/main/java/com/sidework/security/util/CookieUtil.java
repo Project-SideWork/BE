@@ -38,6 +38,17 @@ public class CookieUtil {
         res.addCookie(cookie);
     }
 
+    public static String getAccessTokenFromRequest(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> "access".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);  // Optional을 String으로
+    }
+
     public static String getRefreshTokenFromRequest(HttpServletRequest request) {
         if (request.getCookies() == null) {
             return null;
