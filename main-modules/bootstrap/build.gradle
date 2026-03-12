@@ -41,6 +41,7 @@ dependencies {
     implementation libs.spring.boot.starter.security
     implementation libs.spring.boot.starter.redis
     implementation libs.spring.boot.spring.doc
+    implementation libs.spring.boot.starter.oauth2.client
     implementation libs.org.redisson.starter
     implementation libs.bundles.bootstrap
     testImplementation libs.bundles.test
