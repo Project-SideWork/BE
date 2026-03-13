@@ -97,6 +97,7 @@ jobs:
                   JWT_SECRET=${{ secrets.JWT_SECRET }}
                   GIT_CLIENT_ID=${{ secrets.GIT_CLIENT_ID }}
                   GIT_CLIENT_SECRET=${{ secrets.GIT_CLIENT_SECRET }}
+                  AES_ENCRYPT_KEY=${AES_ENCRYPT_KEY}
                   EOF
                   
                   scp myapp.tar .env.production growp:/home/ubuntu/app/
