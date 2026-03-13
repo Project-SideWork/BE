@@ -88,6 +88,5 @@ public interface AuthControllerDocs {
             )
     })
     void linkGithub(
-            @AuthenticationPrincipal AuthenticatedUserDetails user,
             HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

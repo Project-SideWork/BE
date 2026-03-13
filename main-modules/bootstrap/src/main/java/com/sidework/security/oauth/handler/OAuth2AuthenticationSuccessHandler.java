@@ -1,5 +1,6 @@
 package com.sidework.security.oauth.handler;
 
+import com.sidework.common.util.AesEncryptor;
 import com.sidework.security.oauth.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.sidework.security.oauth.service.OAuth2UserPrincipal;
 import com.sidework.security.oauth.user.OAuth2UserUnlinkManager;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -34,6 +36,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final OAuth2UserUnlinkManager oAuth2UserUnlinkManager;
     private final JwtUtil jwtUtil;
     private final UserOutPort userRepository;
+    private final AesEncryptor encryptor;
 
     private final OAuth2AuthorizedClientService authorizedClientService;
 
@@ -51,6 +54,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 
         if (oAuth2User != null) {
+            if (accessToken == null) {
+                log.error("Access token cookie not found. Cannot link GitHub account.");
+                return;
+            }
             OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
                     oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
 
@@ -59,7 +66,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             String email = jwtUtil.getEmail(accessToken);
 
             User user = userRepository.findByEmail(email);
-            user.addGithubInfo(githubId, githubAccessToken);
+            user.addGithubInfo(githubId, encryptor.encrypt(githubAccessToken));
             userRepository.save(user);
         }
 

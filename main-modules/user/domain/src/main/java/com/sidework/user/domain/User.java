@@ -32,7 +32,7 @@ public class User {
 
     private UserType type;
 
-    private Boolean isActive = true;
+    private Boolean isActive;
 
     public static User create(
             String email,
@@ -53,6 +53,7 @@ public class User {
                 .tel(tel)
                 .residenceRegionId(residenceRegionId)
                 .type(type)
+                .isActive(true)
                 .build();
     }
     // 탈퇴 처리
@@ -60,8 +61,8 @@ public class User {
         this.isActive = false;
     }
 
-    public void addGithubInfo(Long githubId, String githubAccessToken) {
+    public void addGithubInfo(Long githubId, String encodedToken) {
         this.githubId = githubId;
-        this.githubAccessToken = githubAccessToken;
+        this.githubAccessToken = encodedToken;
     }
 }

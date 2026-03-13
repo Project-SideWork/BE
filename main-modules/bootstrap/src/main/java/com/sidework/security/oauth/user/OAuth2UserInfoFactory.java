@@ -11,7 +11,6 @@ public class OAuth2UserInfoFactory {
     public static OAuth2UserInfo getOAuth2UserInfo(String registrationId,
                                                    String accessToken,
                                                    Map<String, Object> attributes) {
-        System.out.println(registrationId);
         if (OAuth2Provider.GITHUB.getRegistrationId().equals(registrationId)) {
             return new GithubOAuth2UserInfo(accessToken, attributes);
         } else {

@@ -39,7 +39,7 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
         CookieUtil.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
                 CookieUtil.serialize(authorizationRequest), COOKIE_EXPIRE_SECONDS);
 
-        String token = request.getParameter("token");
+        String token = CookieUtil.getAccessTokenFromRequest(request);
 
         if (StringUtils.hasText(token)) {
             CookieUtil.addCookie(response, JWT_COOKIE_NAME, token, COOKIE_EXPIRE_SECONDS);
@@ -49,7 +49,9 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
     @Override
     public OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request,
                                                                  HttpServletResponse response) {
-        return this.loadAuthorizationRequest(request);
+        OAuth2AuthorizationRequest authorizationRequest = this.loadAuthorizationRequest(request);
+        removeAuthorizationRequestCookies(request, response);
+        return authorizationRequest;
     }
 
     public void removeAuthorizationRequestCookies(HttpServletRequest request, HttpServletResponse response) {

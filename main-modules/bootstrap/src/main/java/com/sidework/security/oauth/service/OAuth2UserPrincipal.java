@@ -26,7 +26,7 @@ public class OAuth2UserPrincipal implements OAuth2User, UserDetails {
 
     @Override
     public String getUsername() {
-        return userInfo.getEmail();
+        return userInfo.getName();
     }
 
     @Override
@@ -61,7 +61,7 @@ public class OAuth2UserPrincipal implements OAuth2User, UserDetails {
 
     @Override
     public String getName() {
-        return userInfo.getEmail();
+        return userInfo.getName();
     }
 
 }

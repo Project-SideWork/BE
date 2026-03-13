@@ -41,7 +41,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/health",
             "/api/v1/regions/**",
             "/api/v1/users",
-            "/login/oauth2/code/github"
+            "/login/oauth2/code/github",
+            "/oauth2/authorization/github"
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";

@@ -33,13 +33,7 @@ public class AuthController implements AuthControllerDocs {
 
     @GetMapping("/login/github")
     public void linkGithub(
-            @AuthenticationPrincipal AuthenticatedUserDetails user,
             HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String token = CookieUtil.getCookie(request, "access")
-                .map(Cookie::getValue)
-                .orElseThrow();
-
-        request.getSession().setAttribute("link_token", token);
         response.sendRedirect("/oauth2/authorization/github");
     }
 }
