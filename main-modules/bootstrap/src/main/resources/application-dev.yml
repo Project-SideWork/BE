@@ -62,3 +62,6 @@ jwt:
 
 firebase:
   credentials-base64: ${FIREBASE_CREDENTIALS_BASE64}
+
+encryption:
+  key: ${AES_ENCRYPT_KEY}
