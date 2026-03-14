@@ -26,7 +26,14 @@ public class RegionQueryService implements RegionQueryUseCase {
     @Override
     public String getRegion(Long id) {
         Region region = repo.findById(id);
+        if (region == null) {
+            return null;
+        }
+
         Region parentRegion = repo.findById(region.getParentRegionId());
+        if (parentRegion == null) {
+            return region.getRegionName();
+        }
         return parentRegion.getRegionName()+ " " + region.getRegionName();
 
     }
