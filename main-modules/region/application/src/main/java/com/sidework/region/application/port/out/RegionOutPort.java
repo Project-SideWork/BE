@@ -9,4 +9,5 @@ public interface RegionOutPort {
     List<Region> findAllByParent(Long id);
     boolean existsById(Long id);
     boolean checkIsSubRegion(Long id);
+    Region findById(Long id);
 }

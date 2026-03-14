@@ -1,4 +1,4 @@
-package com.sidework.profile.domain;
+package com.sidework.school.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class School
-{
+public class School {
+
 	private Long id;
 	private String name;
 	private String address;
 }
+

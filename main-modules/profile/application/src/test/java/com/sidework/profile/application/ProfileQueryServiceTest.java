@@ -4,7 +4,7 @@ import com.sidework.profile.application.adapter.UserProfileResponse;
 import com.sidework.profile.application.port.out.PortfolioOutPort;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.application.port.out.RoleOutPort;
-import com.sidework.profile.application.port.out.SchoolOutPort;
+import com.sidework.school.application.port.in.SchoolQueryUseCase;
 import com.sidework.profile.application.service.ProfileQueryService;
 import com.sidework.profile.domain.Portfolio;
 import com.sidework.profile.domain.PortfolioType;
@@ -14,7 +14,7 @@ import com.sidework.profile.domain.ProfileSchool;
 import com.sidework.profile.domain.ProfileSkill;
 import com.sidework.profile.domain.ProjectPortfolio;
 import com.sidework.profile.domain.Role;
-import com.sidework.profile.domain.School;
+import com.sidework.school.domain.School;
 import com.sidework.profile.domain.SchoolStateType;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.domain.MeetingType;
@@ -50,7 +50,7 @@ class ProfileQueryServiceTest {
 	private ProfileOutPort profileRepository;
 
 	@Mock
-	private SchoolOutPort schoolRepository;
+	private SchoolQueryUseCase schoolQueryUseCase;
 
 	@Mock
 	private SkillOutPort skillRepository;
@@ -131,7 +131,7 @@ class ProfileQueryServiceTest {
 		when(profileRepository.getProfileSkills(profileId)).thenReturn(profileSkills);
 		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(projectPortfolios);
 		when(roleRepository.findByIdIn(anyList())).thenReturn(roles);
-		when(schoolRepository.findByIdIn(anyList())).thenReturn(schools);
+		when(schoolQueryUseCase.findByIdIn(anyList())).thenReturn(schools);
 		when(skillRepository.findByIdIn(anyList())).thenReturn(skills);
 		when(portfolioRepository.findByIdIn(anyList())).thenReturn(portfolios);
 		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
