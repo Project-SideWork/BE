@@ -44,7 +44,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         String targetUrl = determineTargetUrl(request, response, authentication);
-        String accessToken = CookieUtil.getCookie(request, HttpCookieOAuth2AuthorizationRequestRepository.JWT_COOKIE_NAME)
+        String accessToken = CookieUtil.getCookie(request, "access")
                 .map(Cookie::getValue)
                 .orElse(null);
         OAuth2UserPrincipal principal = getOAuth2UserPrincipal(authentication);

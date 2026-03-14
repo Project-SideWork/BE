@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Component
 public class CookieUtil {
-    private static final int COOKIE_EXPIRE_TIME = 30 * 60; // 30분
+    public static final int COOKIE_EXPIRE_TIME = 30 * 60; // 30분
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new CoreJackson2Module())
             .registerModule(new OAuth2ClientJackson2Module());

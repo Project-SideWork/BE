@@ -79,7 +79,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         }
 
-        if (accessToken == null) {
+        if (accessToken == null || accessToken.isEmpty()) {
             log.debug("access 토큰 없음, URI={}", requestUri);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");
             return;

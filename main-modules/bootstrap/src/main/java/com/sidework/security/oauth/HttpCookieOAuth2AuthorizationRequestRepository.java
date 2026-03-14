@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import static com.sidework.security.util.CookieUtil.COOKIE_EXPIRE_TIME;
+
 
 @RequiredArgsConstructor
 @Component
@@ -37,13 +39,13 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
         }
 
         CookieUtil.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
-                CookieUtil.serialize(authorizationRequest), COOKIE_EXPIRE_SECONDS);
-
-        String token = CookieUtil.getAccessTokenFromRequest(request);
-
-        if (StringUtils.hasText(token)) {
-            CookieUtil.addCookie(response, JWT_COOKIE_NAME, token, COOKIE_EXPIRE_SECONDS);
-        }
+                CookieUtil.serialize(authorizationRequest), COOKIE_EXPIRE_TIME);
+//
+//        String token = CookieUtil.getAccessTokenFromRequest(request);
+//
+//        if (StringUtils.hasText(token)) {
+//            CookieUtil.addCookie(response, JWT_COOKIE_NAME, token, COOKIE_EXPIRE_TIME);
+//        }
     }
 
     @Override
