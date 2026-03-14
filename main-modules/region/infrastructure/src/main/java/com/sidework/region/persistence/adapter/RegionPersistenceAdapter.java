@@ -1,6 +1,5 @@
 package com.sidework.region.persistence.adapter;
 
-import com.sidework.region.application.exception.RegionNotFoundException;
 import com.sidework.region.application.port.out.RegionOutPort;
 import com.sidework.region.domain.Region;
 import com.sidework.region.persistence.entity.RegionEntity;
@@ -46,8 +45,8 @@ public class RegionPersistenceAdapter implements RegionOutPort {
 
     @Override
     public Region findById(Long id) {
-        RegionEntity regionEntity = repo.findById(id)
-            .orElseThrow(() -> new RegionNotFoundException(id));
-        return mapper.toDomain(regionEntity);
+        return repo.findById(id)
+            .map(mapper::toDomain)
+            .orElse(null);
     }
 }
