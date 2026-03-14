@@ -37,11 +37,30 @@ public class UserCommandService implements UserCommandUseCase {
     @Override
     public void updateMe(Long userId, String email, String name, String nickname, Integer age, String tel, Long residenceRegionId) {
         User current = userRepository.findById(userId);
-
+        checkUpdateInfoValidation(userId, current, email, nickname, tel, residenceRegionId);
         current.update(email, name, nickname, age, tel, residenceRegionId);
         userRepository.save(current);
+    }
 
-
+    private void checkUpdateInfoValidation(Long userId, User current, String email, String nickname, String tel, Long residenceRegionId) {
+        if (residenceRegionId != null) {
+            checkRegionValidation(residenceRegionId);
+        }
+        if (email != null && !email.equals(current.getEmail())) {
+            if (userRepository.existsByEmailExcludingUserId(email, userId)) {
+                throw new DuplicatedInformationException(ErrorStatus.EMAIL_ALREADY_EXISTS);
+            }
+        }
+        if (nickname != null && !nickname.equals(current.getNickname())) {
+            if (userRepository.existsByNicknameExcludingUserId(nickname, userId)) {
+                throw new DuplicatedInformationException(ErrorStatus.NICKNAME_ALREADY_EXISTS);
+            }
+        }
+        if (tel != null && !tel.equals(current.getTel())) {
+            if (userRepository.existsByTelExcludingUserId(tel, userId)) {
+                throw new DuplicatedInformationException(ErrorStatus.TEL_ALREADY_EXISTS);
+            }
+        }
     }
 
     private String encodePassword(String rawPassword) {

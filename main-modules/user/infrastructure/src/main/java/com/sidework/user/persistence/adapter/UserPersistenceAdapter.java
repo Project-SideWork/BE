@@ -34,6 +34,21 @@ public class UserPersistenceAdapter implements UserOutPort {
     public boolean existsByTel(String tel) { return repo.existsByTel(tel); }
 
     @Override
+    public boolean existsByEmailExcludingUserId(String email, Long excludeUserId) {
+        return repo.existsByEmailAndIdNot(email, excludeUserId);
+    }
+
+    @Override
+    public boolean existsByNicknameExcludingUserId(String nickname, Long excludeUserId) {
+        return repo.existsByNicknameAndIdNot(nickname, excludeUserId);
+    }
+
+    @Override
+    public boolean existsByTelExcludingUserId(String tel, Long excludeUserId) {
+        return repo.existsByTelAndIdNot(tel, excludeUserId);
+    }
+
+    @Override
     public User findById(Long id) {
         UserEntity user = repo.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         return mapper.toDomain(user);
