@@ -62,7 +62,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         try {
             String accessToken = jwtUtil.createAccess(email);
             String refreshToken = jwtUtil.createRefresh(email);
-            response.addHeader("access", accessToken);
+            response.addCookie(cookieUtil.createCookie("access", accessToken));
             response.addCookie(cookieUtil.createCookie("refresh", refreshToken));
             response.setStatus(HttpStatus.OK.value());
         } catch (Exception e) {

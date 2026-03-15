@@ -40,7 +40,9 @@ public class JwtFilter extends OncePerRequestFilter {
             "/error",
             "/health",
             "/api/v1/regions/**",
-            "/api/v1/users"
+            "/api/v1/users",
+            "/login/oauth2/code/github",
+            "/oauth2/authorization/github"
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";
@@ -53,7 +55,7 @@ public class JwtFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String requestUri = request.getRequestURI();
-        String accessToken = request.getHeader("Authorization");
+        String accessToken = CookieUtil.getAccessTokenFromRequest(request);
         String refreshToken = CookieUtil.getRefreshTokenFromRequest(request);
 
         if (isAllowedPath(requestUri)) {
@@ -77,13 +79,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
         }
 
-        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
+        if (accessToken == null || accessToken.isEmpty()) {
             log.debug("access 토큰 없음, URI={}", requestUri);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");
             return;
         }
 
-        accessToken = accessToken.substring(7);
 
         try {
             if (jwtUtil.isExpired(accessToken)) {

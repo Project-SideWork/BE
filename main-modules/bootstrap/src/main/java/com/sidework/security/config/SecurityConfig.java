@@ -5,6 +5,9 @@ import com.sidework.security.component.CustomAuthenticationEntryPoint;
 import com.sidework.security.filter.JwtFilter;
 import com.sidework.security.filter.LoginFilter;
 import com.sidework.security.handler.CustomLogoutHandler;
+import com.sidework.security.oauth.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.sidework.security.oauth.handler.OAuth2AuthenticationSuccessHandler;
+import com.sidework.security.oauth.service.CustomOAuth2UserService;
 import com.sidework.security.service.TokenBlackListService;
 import com.sidework.security.util.CookieUtil;
 import com.sidework.security.util.JwtUtil;
@@ -42,6 +45,11 @@ public class SecurityConfig {
     private final CustomLogoutHandler customLogoutHandler;
     private final TokenBlackListService tokenBlackListService;
 
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -66,13 +74,18 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .securityMatcher("/**")
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login", "/swagger-ui/**",    // Swagger UI 관련 경로
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login","/swagger-ui/**",    // Swagger UI 관련 경로
                                 "/v3/api-docs/**", "/api/v1/users/email" ,"/api/v1/users", "/api/v1/reissue",
-                                "/firebase-messaging-sw.js", "/fcm-test.html", "/health").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/regions/**").permitAll()
+                                "/firebase-messaging-sw.js", "/fcm-test.html", "/health", "/oauth2/authorization/github").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/regions/**", "/login/oauth2/code/github").permitAll()
                         .anyRequest().authenticated()
                 ).headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())
+                )
+                .oauth2Login(configure ->
+                        configure.authorizationEndpoint(config -> config.authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository))
+                                .userInfoEndpoint(config -> config.userService(customOAuth2UserService))
+                                .successHandler(oAuth2AuthenticationSuccessHandler)
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil, userDetailsService, tokenBlackListService), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(new LoginFilter(jwtUtil, cookieUtil, authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class)
