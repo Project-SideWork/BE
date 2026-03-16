@@ -8,12 +8,16 @@ import com.sidework.profile.domain.SchoolStateType;
 import com.sidework.profile.domain.SkillProficiencyType;
 
 public record ProfileUpdateCommand(
+	String email,
+	String name,
+	String nickname,
+	Integer age,
+	String tel,
+	Long residenceRegionId,
 	List<SchoolUpdateRequest> schools,
 	List<PortfolioUpdateRequest> portfolios,
 	List<SkillUpdateRequest> skills,
-	List<Long> roleIds,
-	String selfIntroduction,
-	String residence
+	String selfIntroduction
 ) {
 	public record PortfolioUpdateRequest(
 		Long portfolioId,

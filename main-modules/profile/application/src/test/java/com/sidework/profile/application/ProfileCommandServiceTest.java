@@ -130,30 +130,6 @@ class ProfileCommandServiceTest {
 	}
 
 	@Test
-	void Roles_업데이트에_성공한다() {
-		// given
-		Long userId = 1L;
-		Long profileId = 1L;
-		Profile profile = createProfile(profileId, userId);
-		ProfileUpdateCommand command = createCommandWithRoles();
-
-		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
-
-		// when
-		service.update(userId, command);
-
-		// then
-		verify(profileRepository).deleteAllProfileRolesByProfileId(profileId);
-		verify(profileRepository).saveProfileRoles(profileRoleCaptor.capture());
-
-		List<ProfileRole> savedRoles = profileRoleCaptor.getValue();
-		assertEquals(2, savedRoles.size());
-		assertEquals(profileId, savedRoles.get(0).getProfileId());
-		assertEquals(1L, savedRoles.get(0).getRoleId());
-		assertEquals(3L, savedRoles.get(1).getRoleId());
-	}
-
-	@Test
 	void Portfolios가_비어있을_때_기존_포트폴리오만_삭제한다() {
 		// given
 		Long userId = 1L;
@@ -400,8 +376,6 @@ class ProfileCommandServiceTest {
 		verify(profileRepository).saveProfileSchools(anyList());
 		verify(profileRepository).deleteAllProfileSkillsByProfileId(profileId);
 		verify(profileRepository).saveProfileSkills(anyList());
-		verify(profileRepository).deleteAllProfileRolesByProfileId(profileId);
-		verify(profileRepository).saveProfileRoles(anyList());
 		verify(portfolioRepository).savePortfolios(anyList());
 		verify(profileRepository).saveProjectPortfolios(anyList());
 	}
@@ -413,12 +387,16 @@ class ProfileCommandServiceTest {
 		Long profileId = 1L;
 		Profile profile = createProfile(profileId, userId);
 		ProfileUpdateCommand command = new ProfileUpdateCommand(
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
 			null, // schools
 			null, // portfolios
 			null, // skills
-			null, // roleIds
-			null, // selfIntroduction
-			null  // residence
+			null  // selfIntroduction
 		);
 
 		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
@@ -446,17 +424,27 @@ class ProfileCommandServiceTest {
 
 	private ProfileUpdateCommand createEmptyCommand() {
 		return new ProfileUpdateCommand(
-			new ArrayList<>(),
-			new ArrayList<>(),
-			new ArrayList<>(),
-			new ArrayList<>(),
-			null,
-			null
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
+			new ArrayList<>(), // schools
+			new ArrayList<>(), // portfolios
+			new ArrayList<>(), // skills
+			null // selfIntroduction
 		);
 	}
 
 	private ProfileUpdateCommand createCommandWithSchools() {
 		return new ProfileUpdateCommand(
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
 			List.of(
 				new ProfileUpdateCommand.SchoolUpdateRequest(
 					1L,
@@ -466,53 +454,54 @@ class ProfileCommandServiceTest {
 					LocalDate.of(2024, 2, 29)
 				)
 			),
-			null,
-			null,
-			null,
-			null,
-			null
+			null, // portfolios
+			null, // skills
+			null  // selfIntroduction
 		);
 	}
 
 	private ProfileUpdateCommand createCommandWithSkills() {
 		return new ProfileUpdateCommand(
-			null,
-			null,
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
+			null, // schools
+			null, // portfolios
 			List.of(
 				new ProfileUpdateCommand.SkillUpdateRequest(1L, null),
 				new ProfileUpdateCommand.SkillUpdateRequest(2L, null)
 			),
-			null,
-			null,
-			null
-		);
-	}
-
-	private ProfileUpdateCommand createCommandWithRoles() {
-		return new ProfileUpdateCommand(
-			null,
-			null,
-			null,
-			List.of(1L, 3L),
-			null,
-			null
+			null  // selfIntroduction
 		);
 	}
 
 	private ProfileUpdateCommand createCommandWithEmptyPortfolios() {
 		return new ProfileUpdateCommand(
-			null,
-			new ArrayList<>(),
-			null,
-			null,
-			null,
-			null
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
+			null, // schools
+			new ArrayList<>(), // portfolios
+			null, // skills
+			null  // selfIntroduction
 		);
 	}
 
 	private ProfileUpdateCommand createCommandWithExistingPortfolio(Long portfolioId) {
 		return new ProfileUpdateCommand(
-			null,
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
+			null, // schools
 			List.of(
 				new ProfileUpdateCommand.PortfolioUpdateRequest(
 					portfolioId,
@@ -523,16 +512,20 @@ class ProfileCommandServiceTest {
 					null
 				)
 			),
-			null,
-			null,
-			null,
-			null
+			null, // skills
+			null  // selfIntroduction
 		);
 	}
 
 	private ProfileUpdateCommand createCommandWithNewPortfolio() {
 		return new ProfileUpdateCommand(
-			null,
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
+			null, // schools
 			List.of(
 				new ProfileUpdateCommand.PortfolioUpdateRequest(
 					null,
@@ -543,16 +536,20 @@ class ProfileCommandServiceTest {
 					null
 				)
 			),
-			null,
-			null,
-			null,
-			null
+			null, // skills
+			null  // selfIntroduction
 		);
 	}
 
 	private ProfileUpdateCommand createCommandWithMixedPortfolios(Long existingPortfolioId) {
 		return new ProfileUpdateCommand(
-			null,
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
+			null, // schools
 			List.of(
 				new ProfileUpdateCommand.PortfolioUpdateRequest(
 					existingPortfolioId,
@@ -571,15 +568,19 @@ class ProfileCommandServiceTest {
 					null
 				)
 			),
-			null,
-			null,
-			null,
-			null
+			null, // skills
+			null  // selfIntroduction
 		);
 	}
 
 	private ProfileUpdateCommand createFullCommand() {
 		return new ProfileUpdateCommand(
+			null, // email
+			null, // name
+			null, // nickname
+			null, // age
+			null, // tel
+			null, // residenceRegionId
 			List.of(
 				new ProfileUpdateCommand.SchoolUpdateRequest(
 					1L,
@@ -603,9 +604,7 @@ class ProfileCommandServiceTest {
 				new ProfileUpdateCommand.SkillUpdateRequest(1L, null),
 				new ProfileUpdateCommand.SkillUpdateRequest(2L, null)
 			),
-			List.of(1L, 3L),
-			null,
-			null
+			null // selfIntroduction
 		);
 	}
 }

@@ -1,12 +1,15 @@
-package com.sidework.profile.persistence.mapper;
+package com.sidework.school.persistence.mapper;
 
-import com.sidework.profile.domain.School;
-import com.sidework.profile.persistence.entity.SchoolEntity;
 import org.mapstruct.Mapper;
+
+import com.sidework.school.domain.School;
+import com.sidework.school.persistence.entity.SchoolEntity;
 
 @Mapper(componentModel = "spring")
 public interface SchoolMapper {
+
 	School toDomain(SchoolEntity entity);
+
 	SchoolEntity toEntity(School domain);
 }
 
