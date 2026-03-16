@@ -44,5 +44,13 @@ public class SchoolPersistenceAdapter implements SchoolQueryOutPort {
 			.map(schoolMapper::toDomain)
 			.collect(Collectors.toList());
 	}
+
+	@Override
+	public List<School> searchByName(String keyword) {
+		List<SchoolEntity> entity = schoolRepository.searchByName(keyword);
+		return entity.stream()
+			.map(schoolMapper::toDomain)
+			.toList();
+	}
 }
 

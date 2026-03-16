@@ -9,5 +9,6 @@ public interface SchoolQueryUseCase {
 
 	List<School> findByIdIn(List<Long> ids);
 	List<SchoolResponse> findAll();
+	List<SchoolResponse> searchByName(String name);
 }
 

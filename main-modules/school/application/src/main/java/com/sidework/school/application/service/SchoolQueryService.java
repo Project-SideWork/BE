@@ -33,4 +33,11 @@ public class SchoolQueryService implements SchoolQueryUseCase {
 			.map(SchoolResponse::from)
 			.toList();
 	}
+
+	@Override
+	public List<SchoolResponse> searchByName(String keyword) {
+		return schoolQueryOutPort.searchByName(keyword).stream()
+			.map(SchoolResponse::from)
+			.toList();
+	}
 }
