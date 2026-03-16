@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sidework.common.response.ApiResponse;
+import com.sidework.school.application.docs.SchoolControllerDocs;
 import com.sidework.school.application.port.in.SchoolQueryUseCase;
-import com.sidework.school.application.service.SchoolQueryService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/schools")
 @RequiredArgsConstructor
-public class SchoolController {
+public class SchoolController implements SchoolControllerDocs {
 
 	private final SchoolQueryUseCase schoolQueryUseCase;
 
