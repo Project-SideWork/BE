@@ -8,6 +8,10 @@ import com.sidework.profile.domain.ProfileSkill;
 import com.sidework.profile.domain.ProjectPortfolio;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ProfileOutPort
 {
@@ -29,5 +33,8 @@ public interface ProfileOutPort
 	boolean existsProjectPortfolioByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId);
 	List<Long> findPortfolioIdsReferencedByOtherProfiles(Long excludeProfileId, List<Long> portfolioIds);
 	boolean existsByIdAndUserId(Long profileId,Long userId);
+	Page<Profile> searchProfilesBySkillName(List<String> keywords, Pageable pageable);
+	List<ProfileSkill> getProfileSkillsByProfileIds(List<Long> profileIds);
+
 
 }

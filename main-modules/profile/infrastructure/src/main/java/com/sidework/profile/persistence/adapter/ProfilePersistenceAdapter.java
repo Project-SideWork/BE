@@ -3,9 +3,10 @@ package com.sidework.profile.persistence.adapter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import com.sidework.profile.application.port.in.ProfileUpdateCommand;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.domain.Profile;
 import com.sidework.profile.domain.ProfileRole;
@@ -17,7 +18,6 @@ import com.sidework.profile.persistence.entity.ProfileRoleEntity;
 import com.sidework.profile.persistence.entity.ProfileSchoolEntity;
 import com.sidework.profile.persistence.entity.ProfileSkillEntity;
 import com.sidework.profile.persistence.entity.ProjectPortfolioEntity;
-import com.sidework.profile.persistence.exception.ProfileNotFoundException;
 import com.sidework.profile.persistence.mapper.ProfileMapper;
 import com.sidework.profile.persistence.mapper.ProfileRoleMapper;
 import com.sidework.profile.persistence.mapper.ProfileSchoolMapper;
@@ -183,5 +183,22 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	public boolean existsByIdAndUserId(Long profileId, Long userId) {
 		if (profileId == null || userId == null) return false;
 		return profileRepository.existsByIdAndUserId(profileId, userId);
+	}
+
+	@Override
+	public Page<Profile> searchProfilesBySkillName(List<String> keywords, Pageable pageable) {
+		Page<ProfileEntity> page = profileRepository.searchProfilesBySkillNames(keywords, pageable);
+		return page.map(profileMapper::toDomain);
+	}
+
+	@Override
+	public List<ProfileSkill> getProfileSkillsByProfileIds(List<Long> profileIds) {
+		if (profileIds == null || profileIds.isEmpty()) {
+			return List.of();
+		}
+		List<ProfileSkillEntity> entities = profileSkillRepository.findByProfileIdIn(profileIds);
+		return entities.stream()
+			.map(profileSkillMapper::toDomain)
+			.toList();
 	}
 }
