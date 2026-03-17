@@ -21,6 +21,7 @@ import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
 import com.sidework.profile.application.docs.ProfileControllerDocs;
 import com.sidework.profile.application.port.in.ProfileCommandUseCase;
+import com.sidework.profile.application.port.in.ProfileLikeCommandUseCase;
 import com.sidework.profile.application.port.in.ProfileQueryUseCase;
 import com.sidework.profile.application.port.in.ProfileUpdateCommand;
 
@@ -33,6 +34,7 @@ public class ProfileController implements ProfileControllerDocs {
 	private final ProfileQueryUseCase queryService;
 	private final ProfileCommandUseCase commandService;
 	private final ProfileQueryUseCase profileQueryUseCase;
+	private final ProfileLikeCommandUseCase profileLikeCommandUseCase;
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
@@ -50,14 +52,23 @@ public class ProfileController implements ProfileControllerDocs {
 
 	@GetMapping("/list")
 	public ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getUserProfiles(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PageableDefault(size = 20) Pageable pageable,
 		@RequestParam(name = "keyword", required = false, defaultValue = "") String keyword){
 
-		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProfileList(keyword,pageable)));
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProfileList(user.getId(), keyword, pageable)));
 	}
 
 	@GetMapping("/{userId}")
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(@PathVariable("userId") Long userId) {
 		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getProfileByUserId(userId)));
+	}
+
+	@PatchMapping("/{profileId}/like")
+	public ResponseEntity<ApiResponse<Void>> likeUser(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
+		@PathVariable("profileId") Long profileId) {
+		profileLikeCommandUseCase.like(user.getId(), profileId);
+		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 }
