@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ProfileJpaRepository extends JpaRepository<ProfileEntity, Long> {
+public interface ProfileJpaRepository extends JpaRepository<ProfileEntity, Long>, ProfileQuerydslRepository {
 	Optional<ProfileEntity> findByUserId(Long userId);
 	boolean existsByUserId(Long userId);
 	boolean existsByIdAndUserId(Long profileId, Long userId);
