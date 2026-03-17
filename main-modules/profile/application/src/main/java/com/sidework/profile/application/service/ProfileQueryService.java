@@ -1,5 +1,6 @@
 package com.sidework.profile.application.service;
 
+import com.sidework.profile.application.adapter.UserProfileListResponse;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
@@ -8,6 +9,10 @@ import com.sidework.school.domain.School;
 import com.sidework.skill.application.port.out.SkillOutPort;
 import com.sidework.skill.application.service.ProjectRequiredSkillQueryService;
 import com.sidework.skill.domain.Skill;
+import com.sidework.common.response.PageResponse;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -121,6 +127,116 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			buildProjectInfos(projects, skillNamesByProjectId, rolesByProjectId)
 		);
 	}
+
+	@Override
+	public PageResponse<List<UserProfileListResponse>> getUserProfileList(String keyword, Pageable pageable) {
+		Page<Profile> page = profileRepository.searchProfilesBySkillName(List.of(keyword), pageable);
+		List<Profile> profiles = page.getContent();
+		if (profiles.isEmpty()) {
+			return toPageResponse(List.of(), page);
+		}
+
+		List<Long> profileIds = collectProfileIds(profiles);
+		List<Long> userIds = collectDistinctUserIds(profiles);
+
+		Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(userIds);
+		Map<Long, List<ProfileSkill>> skillsByProfileId = loadProfileSkillsByProfileId(profileIds);
+		Map<Long, Skill> skillMap = loadSkillMap(skillsByProfileId);
+
+		List<UserProfileListResponse> contents = profiles.stream()
+			.map(profile -> toUserProfileListResponse(profile, userIdToName, skillsByProfileId, skillMap))
+			.toList();
+
+		return toPageResponse(contents, page);
+	}
+
+	private PageResponse<List<UserProfileListResponse>> toPageResponse(List<UserProfileListResponse> contents, Page<?> page) {
+		return PageResponse.of(
+			contents,
+			page.getNumber(),
+			page.getSize(),
+			page.getTotalElements(),
+			page.getTotalPages()
+		);
+	}
+
+	private List<Long> collectProfileIds(List<Profile> profiles) {
+		return profiles.stream()
+			.map(Profile::getId)
+			.toList();
+	}
+
+	private List<Long> collectDistinctUserIds(List<Profile> profiles) {
+		return profiles.stream()
+			.map(Profile::getUserId)
+			.distinct()
+			.toList();
+	}
+
+	private Map<Long, List<ProfileSkill>> loadProfileSkillsByProfileId(List<Long> profileIds) {
+		List<ProfileSkill> profileSkills = profileRepository.getProfileSkillsByProfileIds(profileIds);
+		return profileSkills.stream()
+			.collect(Collectors.groupingBy(ProfileSkill::getProfileId));
+	}
+
+	private Map<Long, Skill> loadSkillMap(Map<Long, List<ProfileSkill>> skillsByProfileId) {
+		List<Long> skillIds = skillsByProfileId.values()
+			.stream()
+			.flatMap(List::stream)
+			.map(ProfileSkill::getSkillId)
+			.distinct()
+			.toList();
+
+		if (skillIds.isEmpty()) {
+			return Map.of();
+		}
+
+		return skillRepository.findByIdIn(skillIds).stream()
+			.collect(Collectors.toMap(Skill::getId, Function.identity(), (a, b) -> a));
+	}
+
+	private UserProfileListResponse toUserProfileListResponse(
+		Profile profile,
+		Map<Long, String> userIdToName,
+		Map<Long, List<ProfileSkill>> skillsByProfileId,
+		Map<Long, Skill> skillMap
+	) {
+		Long profileId = profile.getId();
+		Long userId = profile.getUserId();
+
+		List<UserProfileListResponse.SkillInfo> skillInfos = skillsByProfileId
+			.getOrDefault(profileId, List.of())
+			.stream()
+			.map(ps -> toUserProfileListSkillInfo(ps, skillMap))
+			.filter(Objects::nonNull)
+			.toList();
+
+		return new UserProfileListResponse(
+			userId,
+			userIdToName.get(userId),
+			profile.getSelfIntroduction(),
+			skillInfos,
+			false
+		);
+	}
+
+	private UserProfileListResponse.SkillInfo toUserProfileListSkillInfo(
+		ProfileSkill profileSkill,
+		Map<Long, Skill> skillMap
+	) {
+		Skill skill = skillMap.get(profileSkill.getSkillId());
+		if (skill == null) {
+			return null;
+		}
+		return new UserProfileListResponse.SkillInfo(
+			skill.getId(),
+			skill.getName(),
+			profileSkill.getProficiency()
+		);
+	}
+
+
+
 	private int countCompletedProjects(List<Project> projects) {
 		return (int) projects.stream()
 			.filter(p -> p.getStatus() == ProjectStatus.FINISHED)
