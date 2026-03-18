@@ -207,4 +207,10 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 			.map(profileSkillMapper::toDomain)
 			.toList();
 	}
+
+	@Override
+	public Page<Profile> searchProfilesBySkillNameInProfileIds(List<String> keywords, List<Long> profileIds, Pageable pageable) {
+		Page<ProfileEntity> page = profileRepository.searchProfilesBySkillNamesInProfileIds(keywords, profileIds, pageable);
+		return page.map(profileMapper::toDomain);
+	}
 }

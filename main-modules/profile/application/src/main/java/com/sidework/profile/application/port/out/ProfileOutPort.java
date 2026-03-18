@@ -35,6 +35,7 @@ public interface ProfileOutPort
 	boolean existsByIdAndUserId(Long profileId,Long userId);
 	boolean existsById(Long profileId);
 	Page<Profile> searchProfilesBySkillName(List<String> keywords, Pageable pageable);
+	Page<Profile> searchProfilesBySkillNameInProfileIds(List<String> keywords, List<Long> profileIds, Pageable pageable);
 	List<ProfileSkill> getProfileSkillsByProfileIds(List<Long> profileIds);
 
 
