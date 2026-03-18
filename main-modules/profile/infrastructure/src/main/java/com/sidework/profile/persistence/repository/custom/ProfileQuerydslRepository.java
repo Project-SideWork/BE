@@ -9,5 +9,7 @@ import com.sidework.profile.persistence.entity.ProfileEntity;
 
 public interface ProfileQuerydslRepository {
 	Page<ProfileEntity> searchProfilesBySkillNames(List<String> keywords, Pageable pageable);
+
+	Page<ProfileEntity> searchProfilesBySkillNamesInProfileIds(List<String> keywords, List<Long> profileIds, Pageable pageable);
 }
 
