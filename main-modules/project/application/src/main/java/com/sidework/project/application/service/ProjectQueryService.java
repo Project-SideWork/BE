@@ -119,6 +119,17 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         return buildProjectListPageResponse(userId, page);
     }
 
+	@Override
+	public PageResponse<List<ProjectListResponse>> queryLikedProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable) {
+		List<Long> likedProjectIds = projectLikeQueryUseCase.findLikedProjectIds(userId);
+		if (likedProjectIds == null || likedProjectIds.isEmpty()) {
+			return PageResponse.of(List.of(), pageable.getPageNumber(), pageable.getPageSize(), 0, 0);
+		}
+
+		Page<Project> page = projectRepository.searchInProjectIds(keyword, skillIds, likedProjectIds, pageable);
+		return buildProjectListPageResponse(userId, page);
+	}
+
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {
         List<Project> projects = page.getContent();
         if (projects.isEmpty()) {
