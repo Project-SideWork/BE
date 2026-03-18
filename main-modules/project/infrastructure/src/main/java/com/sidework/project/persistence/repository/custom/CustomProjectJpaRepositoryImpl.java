@@ -56,6 +56,42 @@ public class CustomProjectJpaRepositoryImpl implements CustomProjectJpaRepositor
         );
     }
 
+	@Override
+	public Page<ProjectEntity> searchByKeywordAndSkillIdsInProjectIdsQuerydsl(ProjectSearchCondition condition, Pageable pageable) {
+		QProjectEntity project = QProjectEntity.projectEntity;
+
+		JPAQuery<ProjectEntity> contentQuery = queryFactory
+			.selectFrom(project)
+			.where(
+				projectIdIn(condition.getProjectIds()),
+				keywordContains(condition.getKeyword()),
+				skillExists(condition.getSkillIds(), condition.getSkillCount())
+			)
+			.orderBy(project.id.desc())
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize());
+
+		List<ProjectEntity> content = contentQuery.fetch();
+
+		JPAQuery<Long> countQuery = queryFactory
+			.select(project.count())
+			.from(project)
+			.where(
+				projectIdIn(condition.getProjectIds()),
+				keywordContains(condition.getKeyword()),
+				skillExists(condition.getSkillIds(), condition.getSkillCount())
+			);
+
+		return PageableExecutionUtils.getPage(
+			content,
+			pageable,
+			() -> {
+				Long total = countQuery.fetchOne();
+				return total == null ? 0L : total;
+			}
+		);
+	}
+
     private BooleanExpression keywordContains(String keyword) {
 
         QProjectEntity project = QProjectEntity.projectEntity;
@@ -88,5 +124,13 @@ public class CustomProjectJpaRepositoryImpl implements CustomProjectJpaRepositor
             .having(prs.skillId.countDistinct().eq(skillCount))
             .exists();
     }
+
+	private BooleanExpression projectIdIn(List<Long> projectIds) {
+		if (projectIds == null || projectIds.isEmpty()) {
+			return null;
+		}
+		QProjectEntity project = QProjectEntity.projectEntity;
+		return project.id.in(projectIds);
+	}
 
 }
