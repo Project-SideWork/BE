@@ -5,5 +5,7 @@ import java.util.Map;
 
 public interface ProfileLikeQueryUseCase {
 	Map<Long, Boolean> isLikedByProfileIds(Long userId, List<Long> profileIds);
+
+	List<Long> findLikedProfileIds(Long userId);
 }
 

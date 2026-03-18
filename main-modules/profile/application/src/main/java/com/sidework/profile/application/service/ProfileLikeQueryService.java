@@ -22,5 +22,10 @@ public class ProfileLikeQueryService implements ProfileLikeQueryUseCase {
 	public Map<Long, Boolean> isLikedByProfileIds(Long userId, List<Long> profileIds) {
 		return profileLikeOutPort.getLikes(userId, profileIds);
 	}
+
+	@Override
+	public List<Long> findLikedProfileIds(Long userId) {
+		return profileLikeOutPort.findLikedProfileIds(userId);
+	}
 }
 
