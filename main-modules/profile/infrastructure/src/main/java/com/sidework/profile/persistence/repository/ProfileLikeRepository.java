@@ -22,5 +22,8 @@ public interface ProfileLikeRepository extends JpaRepository<ProfileLikeEntity, 
 		@Param("userId") Long userId,
 		@Param("profileIds") List<Long> profileIds
 	);
+
+	@Query("SELECT pl.profileId FROM ProfileLikeEntity pl WHERE pl.userId = :userId")
+	List<Long> findProfileIdsByUserId(@Param("userId") Long userId);
 }
 
