@@ -50,4 +50,9 @@ public class ProjectLikePersistenceAdapter implements ProjectLikeOutPort {
 		return projectIds.stream()
 			.collect(Collectors.toMap(id->id, projectIdSet::contains));
 	}
+
+	@Override
+	public List<Long> findLikedProjectIds(Long userId) {
+		return projectLikeRepository.findProjectIdsByUserId(userId);
+	}
 }

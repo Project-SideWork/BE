@@ -10,4 +10,5 @@ public interface ProjectLikeOutPort {
 	void unlike(ProjectLike like);
 	boolean isLiked(Long userId, Long projectId);
 	Map<Long, Boolean> getLikes(Long userId, List<Long> projectIds);
+	List<Long> findLikedProjectIds(Long userId);
 }
