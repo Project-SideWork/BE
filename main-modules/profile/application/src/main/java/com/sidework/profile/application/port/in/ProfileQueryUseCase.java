@@ -11,5 +11,5 @@ import com.sidework.profile.application.adapter.UserProfileResponse;
 public interface ProfileQueryUseCase {
 	UserProfileResponse getProfileByUserId(Long userId);
 	boolean existsByIdAndUserId(Long profileId,Long userId);
-	PageResponse<List<UserProfileListResponse>> getUserProfileList(String keyword, Pageable pageable);
+	PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, String keyword, Pageable pageable);
 }

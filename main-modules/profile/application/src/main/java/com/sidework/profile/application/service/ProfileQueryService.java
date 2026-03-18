@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sidework.profile.application.adapter.UserProfileResponse;
 import com.sidework.profile.application.port.in.ProfileQueryUseCase;
+import com.sidework.profile.application.port.in.ProfileLikeQueryUseCase;
 import com.sidework.profile.application.port.out.PortfolioOutPort;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.application.port.out.RoleOutPort;
@@ -57,6 +58,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	private final ProjectRequiredSkillQueryService requiredSkillUseCase;
 	private final RegionQueryUseCase regionQueryUseCase;
 	private final SchoolQueryUseCase schoolQueryUseCase;
+	private final ProfileLikeQueryUseCase profileLikeQueryUseCase;
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long userId) {
@@ -129,7 +131,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	}
 
 	@Override
-	public PageResponse<List<UserProfileListResponse>> getUserProfileList(String keyword, Pageable pageable) {
+	public PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, String keyword, Pageable pageable) {
 		Page<Profile> page = profileRepository.searchProfilesBySkillName(List.of(keyword), pageable);
 		List<Profile> profiles = page.getContent();
 		if (profiles.isEmpty()) {
@@ -142,9 +144,10 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(userIds);
 		Map<Long, List<ProfileSkill>> skillsByProfileId = loadProfileSkillsByProfileId(profileIds);
 		Map<Long, Skill> skillMap = loadSkillMap(skillsByProfileId);
+		Map<Long, Boolean> likedByProfileId = profileLikeQueryUseCase.isLikedByProfileIds(viewerUserId, profileIds);
 
 		List<UserProfileListResponse> contents = profiles.stream()
-			.map(profile -> toUserProfileListResponse(profile, userIdToName, skillsByProfileId, skillMap))
+			.map(profile -> toUserProfileListResponse(profile, userIdToName, skillsByProfileId, skillMap, likedByProfileId))
 			.toList();
 
 		return toPageResponse(contents, page);
@@ -199,7 +202,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		Profile profile,
 		Map<Long, String> userIdToName,
 		Map<Long, List<ProfileSkill>> skillsByProfileId,
-		Map<Long, Skill> skillMap
+		Map<Long, Skill> skillMap,
+		Map<Long, Boolean> likedByProfileId
 	) {
 		Long profileId = profile.getId();
 		Long userId = profile.getUserId();
@@ -216,7 +220,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			userIdToName.get(userId),
 			profile.getSelfIntroduction(),
 			skillInfos,
-			false
+			likedByProfileId.getOrDefault(profileId, false)
 		);
 	}
 
