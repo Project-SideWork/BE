@@ -1,0 +1,26 @@
+package com.sidework.profile.persistence.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.sidework.profile.persistence.entity.ProfileLikeEntity;
+
+@Repository
+public interface ProfileLikeRepository extends JpaRepository<ProfileLikeEntity, Long> {
+	boolean existsByUserIdAndProfileId(Long userId, Long profileId);
+
+	@Modifying
+	void deleteByUserIdAndProfileId(Long userId, Long profileId);
+
+	@Query("SELECT pl.profileId FROM ProfileLikeEntity pl WHERE pl.userId = :userId AND pl.profileId IN :profileIds")
+	List<Long> findProfileIdsByUserIdAndProfileIdIn(
+		@Param("userId") Long userId,
+		@Param("profileIds") List<Long> profileIds
+	);
+}
+
