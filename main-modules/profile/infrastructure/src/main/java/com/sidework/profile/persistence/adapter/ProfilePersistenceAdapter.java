@@ -186,6 +186,12 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	}
 
 	@Override
+	public boolean existsById(Long profileId) {
+		if (profileId == null) return false;
+		return profileRepository.existsById(profileId);
+	}
+
+	@Override
 	public Page<Profile> searchProfilesBySkillName(List<String> keywords, Pageable pageable) {
 		Page<ProfileEntity> page = profileRepository.searchProfilesBySkillNames(keywords, pageable);
 		return page.map(profileMapper::toDomain);

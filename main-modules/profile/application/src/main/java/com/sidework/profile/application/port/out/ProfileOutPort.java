@@ -33,6 +33,7 @@ public interface ProfileOutPort
 	boolean existsProjectPortfolioByPortfolioIdAndProfileIdNot(Long portfolioId, Long profileId);
 	List<Long> findPortfolioIdsReferencedByOtherProfiles(Long excludeProfileId, List<Long> portfolioIds);
 	boolean existsByIdAndUserId(Long profileId,Long userId);
+	boolean existsById(Long profileId);
 	Page<Profile> searchProfilesBySkillName(List<String> keywords, Pageable pageable);
 	List<ProfileSkill> getProfileSkillsByProfileIds(List<Long> profileIds);
 
