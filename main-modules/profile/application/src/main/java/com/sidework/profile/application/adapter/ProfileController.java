@@ -71,4 +71,14 @@ public class ProfileController implements ProfileControllerDocs {
 		profileLikeCommandUseCase.like(user.getId(), profileId);
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
+
+	@GetMapping("/likes")
+	public ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getLikedUserProfiles(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
+		@PageableDefault(size = 20) Pageable pageable,
+		@RequestParam(name = "keyword", required = false, defaultValue = "") String keyword) {
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getLikedUserProfileList(user.getId(), keyword, pageable)));
+	}
+
+
 }
