@@ -49,5 +49,10 @@ public class ProfileLikePersistenceAdapter implements ProfileLikeOutPort {
 		return profileIds.stream()
 			.collect(Collectors.toMap(id -> id, profileIdSet::contains));
 	}
+
+	@Override
+	public List<Long> findLikedProfileIds(Long userId) {
+		return profileLikeRepository.findProfileIdsByUserId(userId);
+	}
 }
 

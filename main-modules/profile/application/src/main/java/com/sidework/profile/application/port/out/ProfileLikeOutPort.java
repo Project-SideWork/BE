@@ -10,5 +10,7 @@ public interface ProfileLikeOutPort {
 	void unlike(ProfileLike like);
 	boolean isLiked(Long userId, Long profileId);
 	Map<Long, Boolean> getLikes(Long userId, List<Long> profileIds);
+
+	List<Long> findLikedProfileIds(Long userId);
 }
 
