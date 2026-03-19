@@ -31,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/profiles")
 @RequiredArgsConstructor
 public class ProfileController implements ProfileControllerDocs {
-	private final ProfileQueryUseCase queryService;
 	private final ProfileCommandUseCase commandService;
 	private final ProfileQueryUseCase profileQueryUseCase;
 	private final ProfileLikeCommandUseCase profileLikeCommandUseCase;
@@ -39,7 +38,7 @@ public class ProfileController implements ProfileControllerDocs {
 	@GetMapping
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
 		@AuthenticationPrincipal AuthenticatedUserDetails user) {
-		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getProfileByUserId(user.getId())));
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(user.getId())));
 	}
 
 	@PutMapping
@@ -61,7 +60,7 @@ public class ProfileController implements ProfileControllerDocs {
 
 	@GetMapping("/{userId}")
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(@PathVariable("userId") Long userId) {
-		return ResponseEntity.ok(ApiResponse.onSuccess(queryService.getProfileByUserId(userId)));
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(userId)));
 	}
 
 	@PostMapping("/{profileId}/like")
