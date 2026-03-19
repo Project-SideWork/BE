@@ -91,7 +91,23 @@ public interface ProfileControllerDocs {
 
     @Operation(description = "프로필 목록 조회")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
     })
     ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getUserProfiles(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
@@ -109,7 +125,23 @@ public interface ProfileControllerDocs {
 
     @Operation(description = "프로필 좋아요")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
     })
     ResponseEntity<ApiResponse<Void>> likeUser(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
@@ -118,7 +150,23 @@ public interface ProfileControllerDocs {
 
     @Operation(description = "좋아요한 프로필 목록 조회")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
     })
     ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getLikedUserProfiles(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
