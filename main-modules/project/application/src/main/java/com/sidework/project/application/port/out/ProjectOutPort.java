@@ -20,5 +20,6 @@ public interface ProjectOutPort {
     Page<Project> search(String keyword, Pageable pageable);
     Page<Project> search(String keyword, List<Long> skillIds, Pageable pageable);
     Page<Project> searchInProjectIds(String keyword, List<Long> skillIds, List<Long> projectIds, Pageable pageable);
+    Page<Project> searchLiked(String keyword, List<Long> skillIds, Long userId, Pageable pageable);
     Map<Long, List<ProjectRecruitPosition>> getProjectRecruitPositionsByProjectIds(List<Long> projectIds);
 }
