@@ -54,9 +54,9 @@ public class ProfileController implements ProfileControllerDocs {
 	public ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getUserProfiles(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PageableDefault(size = 20) Pageable pageable,
-		@RequestParam(name = "keyword", required = false, defaultValue = "") String keyword){
+		@RequestParam(name = "skillIds", required = false) List<Long> skillIds){
 
-		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProfileList(user.getId(), keyword, pageable)));
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProfileList(user.getId(), skillIds, pageable)));
 	}
 
 	@GetMapping("/{userId}")
@@ -76,8 +76,8 @@ public class ProfileController implements ProfileControllerDocs {
 	public ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getLikedUserProfiles(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PageableDefault(size = 20) Pageable pageable,
-		@RequestParam(name = "keyword", required = false, defaultValue = "") String keyword) {
-		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getLikedUserProfileList(user.getId(), keyword, pageable)));
+		@RequestParam(name = "skillIds", required = false) List<Long> skillIds) {
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getLikedUserProfileList(user.getId(), skillIds, pageable)));
 	}
 
 

@@ -34,8 +34,8 @@ public interface ProfileOutPort
 	List<Long> findPortfolioIdsReferencedByOtherProfiles(Long excludeProfileId, List<Long> portfolioIds);
 	boolean existsByIdAndUserId(Long profileId,Long userId);
 	boolean existsById(Long profileId);
-	Page<Profile> searchProfilesBySkillName(List<String> keywords, Pageable pageable);
-	Page<Profile> searchProfilesBySkillNameInProfileIds(List<String> keywords, List<Long> profileIds, Pageable pageable);
+	Page<Profile> searchProfilesBySkillName(List<Long> skillIds, Pageable pageable);
+	Page<Profile> searchLikedProfilesBySkillName(Long userId, List<Long> skillIds, Pageable pageable);
 	List<ProfileSkill> getProfileSkillsByProfileIds(List<Long> profileIds);
 
 

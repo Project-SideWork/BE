@@ -192,8 +192,8 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	}
 
 	@Override
-	public Page<Profile> searchProfilesBySkillName(List<String> keywords, Pageable pageable) {
-		Page<ProfileEntity> page = profileRepository.searchProfilesBySkillNames(keywords, pageable);
+	public Page<Profile> searchProfilesBySkillName(List<Long> skillIds, Pageable pageable) {
+		Page<ProfileEntity> page = profileRepository.searchProfilesBySkillIds(skillIds, pageable);
 		return page.map(profileMapper::toDomain);
 	}
 
@@ -209,8 +209,8 @@ public class ProfilePersistenceAdapter implements ProfileOutPort
 	}
 
 	@Override
-	public Page<Profile> searchProfilesBySkillNameInProfileIds(List<String> keywords, List<Long> profileIds, Pageable pageable) {
-		Page<ProfileEntity> page = profileRepository.searchProfilesBySkillNamesInProfileIds(keywords, profileIds, pageable);
+	public Page<Profile> searchLikedProfilesBySkillName(Long userId, List<Long> skillIds, Pageable pageable) {
+		Page<ProfileEntity> page = profileRepository.searchLikedProfilesBySkillIds(userId, skillIds, pageable);
 		return page.map(profileMapper::toDomain);
 	}
 }

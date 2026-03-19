@@ -11,8 +11,8 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sidework.profile.persistence.entity.ProfileEntity;
 import com.sidework.profile.persistence.entity.QProfileEntity;
+import com.sidework.profile.persistence.entity.QProfileLikeEntity;
 import com.sidework.profile.persistence.entity.QProfileSkillEntity;
-import com.sidework.skill.persistence.entity.QSkillEntity;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,19 +22,17 @@ public class ProfileQuerydslRepositoryImpl implements ProfileQuerydslRepository 
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Page<ProfileEntity> searchProfilesBySkillNames(List<String> keywords, Pageable pageable) {
+	public Page<ProfileEntity> searchProfilesBySkillIds(List<Long> skillIds, Pageable pageable) {
 		QProfileEntity profile = QProfileEntity.profileEntity;
 		QProfileSkillEntity profileSkill = QProfileSkillEntity.profileSkillEntity;
-		QSkillEntity skill = QSkillEntity.skillEntity;
 
-		BooleanExpression predicate = skillNameContainsAny(skill, keywords);
+		BooleanExpression predicate = skillIdIn(profileSkill, skillIds);
 
 		JPAQuery<ProfileEntity> contentQuery = queryFactory
 			.select(profile)
 			.distinct()
 			.from(profile)
 			.leftJoin(profileSkill).on(profileSkill.profileId.eq(profile.id))
-			.leftJoin(skill).on(skill.id.eq(profileSkill.skillId))
 			.where(predicate)
 			.orderBy(profile.id.desc())
 			.offset(pageable.getOffset())
@@ -46,7 +44,6 @@ public class ProfileQuerydslRepositoryImpl implements ProfileQuerydslRepository 
 			.select(profile.id.countDistinct())
 			.from(profile)
 			.leftJoin(profileSkill).on(profileSkill.profileId.eq(profile.id))
-			.leftJoin(skill).on(skill.id.eq(profileSkill.skillId))
 			.where(predicate);
 
 		return PageableExecutionUtils.getPage(
@@ -60,23 +57,23 @@ public class ProfileQuerydslRepositoryImpl implements ProfileQuerydslRepository 
 	}
 
 	@Override
-	public Page<ProfileEntity> searchProfilesBySkillNamesInProfileIds(List<String> keywords, List<Long> profileIds, Pageable pageable) {
+	public Page<ProfileEntity> searchLikedProfilesBySkillIds(Long userId, List<Long> skillIds, Pageable pageable) {
 		QProfileEntity profile = QProfileEntity.profileEntity;
+		QProfileLikeEntity profileLike = QProfileLikeEntity.profileLikeEntity;
 		QProfileSkillEntity profileSkill = QProfileSkillEntity.profileSkillEntity;
-		QSkillEntity skill = QSkillEntity.skillEntity;
 
-		BooleanExpression predicate = skillNameContainsAny(skill, keywords);
+		BooleanExpression predicate = skillIdIn(profileSkill, skillIds);
 
 		JPAQuery<ProfileEntity> contentQuery = queryFactory
 			.select(profile)
 			.distinct()
 			.from(profile)
-			.leftJoin(profileSkill).on(profileSkill.profileId.eq(profile.id))
-			.leftJoin(skill).on(skill.id.eq(profileSkill.skillId))
-			.where(
-				profileIdIn(profileIds),
-				predicate
+			.join(profileLike).on(
+				profileLike.profileId.eq(profile.id)
+					.and(profileLike.userId.eq(userId))
 			)
+			.leftJoin(profileSkill).on(profileSkill.profileId.eq(profile.id))
+			.where(predicate)
 			.orderBy(profile.id.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize());
@@ -86,12 +83,12 @@ public class ProfileQuerydslRepositoryImpl implements ProfileQuerydslRepository 
 		JPAQuery<Long> countQuery = queryFactory
 			.select(profile.id.countDistinct())
 			.from(profile)
+			.join(profileLike).on(
+				profileLike.profileId.eq(profile.id)
+					.and(profileLike.userId.eq(userId))
+			)
 			.leftJoin(profileSkill).on(profileSkill.profileId.eq(profile.id))
-			.leftJoin(skill).on(skill.id.eq(profileSkill.skillId))
-			.where(
-				profileIdIn(profileIds),
-				predicate
-			);
+			.where(predicate);
 
 		return PageableExecutionUtils.getPage(
 			content,
@@ -103,27 +100,12 @@ public class ProfileQuerydslRepositoryImpl implements ProfileQuerydslRepository 
 		);
 	}
 
-	private BooleanExpression skillNameContainsAny(QSkillEntity skill, List<String> keywords) {
-		if (keywords == null || keywords.isEmpty()) {
+	private BooleanExpression skillIdIn(QProfileSkillEntity profileSkill, List<Long> skillIds) {
+		if (skillIds == null || skillIds.isEmpty()) {
 			return null;
 		}
-		BooleanExpression expr = null;
-		for (String kw : keywords) {
-			if (kw == null || kw.isBlank()) {
-				continue;
-			}
-			BooleanExpression one = skill.name.containsIgnoreCase(kw.trim());
-			expr = (expr == null) ? one : expr.or(one);
-		}
-		return expr;
+		return profileSkill.skillId.in(skillIds);
 	}
 
-	private BooleanExpression profileIdIn(List<Long> profileIds) {
-		if (profileIds == null || profileIds.isEmpty()) {
-			return null;
-		}
-		QProfileEntity profile = QProfileEntity.profileEntity;
-		return profile.id.in(profileIds);
-	}
 }
 

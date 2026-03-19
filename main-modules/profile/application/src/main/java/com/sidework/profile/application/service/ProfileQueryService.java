@@ -131,8 +131,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	}
 
 	@Override
-	public PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, String keyword, Pageable pageable) {
-		Page<Profile> page = profileRepository.searchProfilesBySkillName(List.of(keyword), pageable);
+	public PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable) {
+		Page<Profile> page = profileRepository.searchProfilesBySkillName(skillIds, pageable);
 		List<Profile> profiles = page.getContent();
 		if (profiles.isEmpty()) {
 			return toPageResponse(List.of(), page);
@@ -154,13 +154,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	}
 
 	@Override
-	public PageResponse<List<UserProfileListResponse>> getLikedUserProfileList(Long viewerUserId, String keyword, Pageable pageable) {
-		List<Long> likedProfileIds = profileLikeQueryUseCase.findLikedProfileIds(viewerUserId);
-		if (likedProfileIds == null || likedProfileIds.isEmpty()) {
-			return PageResponse.of(List.of(), pageable.getPageNumber(), pageable.getPageSize(), 0, 0);
-		}
-
-		Page<Profile> page = profileRepository.searchProfilesBySkillNameInProfileIds(List.of(keyword), likedProfileIds, pageable);
+	public PageResponse<List<UserProfileListResponse>> getLikedUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable) {
+		Page<Profile> page = profileRepository.searchLikedProfilesBySkillName(viewerUserId, skillIds, pageable);
 		List<Profile> profiles = page.getContent();
 		if (profiles.isEmpty()) {
 			return toPageResponse(List.of(), page);

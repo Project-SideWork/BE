@@ -112,7 +112,7 @@ public interface ProfileControllerDocs {
     ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getUserProfiles(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PageableDefault(size = 20) Pageable pageable,
-        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
     );
 
     @Operation(description = "사용자 프로필 조회")
@@ -171,6 +171,6 @@ public interface ProfileControllerDocs {
     ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getLikedUserProfiles(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PageableDefault(size = 20) Pageable pageable,
-        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
     );
 }

@@ -8,8 +8,7 @@ import org.springframework.data.domain.Pageable;
 import com.sidework.profile.persistence.entity.ProfileEntity;
 
 public interface ProfileQuerydslRepository {
-	Page<ProfileEntity> searchProfilesBySkillNames(List<String> keywords, Pageable pageable);
-
-	Page<ProfileEntity> searchProfilesBySkillNamesInProfileIds(List<String> keywords, List<Long> profileIds, Pageable pageable);
+	Page<ProfileEntity> searchProfilesBySkillIds(List<Long> skillIds, Pageable pageable);
+	Page<ProfileEntity> searchLikedProfilesBySkillIds(Long userId, List<Long> skillIds, Pageable pageable);
 }
 
