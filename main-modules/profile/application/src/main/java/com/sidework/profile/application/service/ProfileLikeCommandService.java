@@ -29,10 +29,6 @@ public class ProfileLikeCommandService implements ProfileLikeCommandUseCase {
 		}
 
 		ProfileLike like = ProfileLike.create(userId, profileId);
-		if (profileLikeRepository.isLiked(userId, profileId)) {
-			profileLikeRepository.unlike(like);
-		} else {
-			profileLikeRepository.like(like);
-		}
+		profileLikeRepository.like(like);
 	}
 }

@@ -15,7 +15,17 @@ public interface ProfileLikeRepository extends JpaRepository<ProfileLikeEntity, 
 	boolean existsByUserIdAndProfileId(Long userId, Long profileId);
 
 	@Modifying
-	void deleteByUserIdAndProfileId(Long userId, Long profileId);
+	int deleteByUserIdAndProfileId(Long userId, Long profileId);
+
+	@Modifying
+	@Query(
+		value = """
+			INSERT IGNORE INTO profile_likes (user_id, profile_id, created_at, updated_at)
+			VALUES (:userId, :profileId, NOW(), NOW())
+			""",
+		nativeQuery = true
+	)
+	int insertIgnore(@Param("userId") Long userId, @Param("profileId") Long profileId);
 
 	@Query("SELECT pl.profileId FROM ProfileLikeEntity pl WHERE pl.userId = :userId AND pl.profileId IN :profileIds")
 	List<Long> findProfileIdsByUserIdAndProfileIdIn(

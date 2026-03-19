@@ -24,7 +24,11 @@ public class ProfileLikePersistenceAdapter implements ProfileLikeOutPort {
 
 	@Override
 	public void like(ProfileLike like) {
-		profileLikeRepository.save(profileLikeMapper.toEntity(like));
+		// atomic toggle: DELETE first, then INSERT IGNORE if nothing deleted
+		int deleted = profileLikeRepository.deleteByUserIdAndProfileId(like.getUserId(), like.getProfileId());
+		if (deleted == 0) {
+			profileLikeRepository.insertIgnore(like.getUserId(), like.getProfileId());
+		}
 	}
 
 	@Override
