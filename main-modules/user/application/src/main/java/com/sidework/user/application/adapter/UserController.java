@@ -1,5 +1,6 @@
 package com.sidework.user.application.adapter;
 
+import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.user.application.docs.UserControllerDocs;
 import com.sidework.user.application.port.in.SignUpCommand;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,4 +34,8 @@ public class UserController implements UserControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
     }
 
+    @GetMapping("/github")
+    public ResponseEntity<ApiResponse<String>> getMyGithubToken(@AuthenticationPrincipal AuthenticatedUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryGithubToken(user.getId())));
+    }
 }
