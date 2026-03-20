@@ -5,15 +5,17 @@ import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.profile.application.adapter.ProfileController;
 import com.sidework.profile.application.adapter.UserProfileResponse;
+import com.sidework.profile.application.adapter.UserProfileListResponse;
 import com.sidework.profile.application.exception.ProfileNotFoundException;
 import com.sidework.profile.application.port.in.ProfileCommandUseCase;
+import com.sidework.profile.application.port.in.ProfileLikeCommandUseCase;
 import com.sidework.profile.application.port.in.ProfileQueryUseCase;
 import com.sidework.profile.application.port.in.ProfileUpdateCommand;
+import com.sidework.common.response.PageResponse;
 import com.sidework.profile.domain.PortfolioType;
 import com.sidework.profile.domain.SchoolStateType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -48,6 +50,9 @@ class ProfileControllerTest {
 
 	@MockitoBean
 	private ProfileCommandUseCase profileCommandUseCase;
+
+	@MockitoBean
+	private ProfileLikeCommandUseCase profileLikeCommandUseCase;
 
 	private AuthenticatedUserDetails authenticatedUserDetails = new AuthenticatedUserDetails(
 		1L, "test@test.com", "홍길동", "password");
@@ -130,6 +135,60 @@ class ProfileControllerTest {
 		verify(profileCommandUseCase).update(1L, command);
 	}
 
+	@Test
+	void 프로필_좋아요_요청시_성공하면_200을_반환한다() throws Exception {
+		// given
+		Long profileId = 2L;
+
+		doNothing().when(profileLikeCommandUseCase).like(1L, profileId);
+
+		// when & then
+		mockMvc.perform(post("/api/v1/profiles/{profileId}/like", profileId)
+				.with(user(authenticatedUserDetails))
+				.with(csrf()))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true));
+
+		verify(profileLikeCommandUseCase).like(1L, profileId);
+	}
+
+	@Test
+	void 프로필_좋아요_목록_조회시_성공하면_liked를_반환한다() throws Exception {
+		// given
+		Long userId = authenticatedUserDetails.getId();
+		List<Long> skillIds = List.of(1L, 2L);
+
+		UserProfileListResponse item = new UserProfileListResponse(
+			10L,           // userId
+			"테스트유저",
+			null,          // description
+			List.of(),     // skills
+			true           // liked
+		);
+		PageResponse<List<UserProfileListResponse>> pageResponse = PageResponse.of(
+			List.of(item),
+			0,
+			20,
+			1,
+			1
+		);
+
+		when(profileQueryUseCase.getLikedUserProfileList(eq(userId), eq(skillIds), any()))
+			.thenReturn(pageResponse);
+
+		// when & then
+		mockMvc.perform(get("/api/v1/profiles/likes")
+				.with(user(authenticatedUserDetails))
+				.param("skillIds", "1", "2"))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.result.content[0].liked").value(true));
+
+		verify(profileQueryUseCase).getLikedUserProfileList(eq(userId), eq(skillIds), any());
+	}
+
 	private ProfileUpdateCommand createProfileUpdateCommand() {
 		return new ProfileUpdateCommand(
 			"test@test.com", // email
@@ -169,7 +228,6 @@ class ProfileControllerTest {
 			"홍길동",
 			"길동이",
 			25,
-			"010-1234-5678",
 			1L,
 			null,
 			null,
@@ -189,7 +247,6 @@ class ProfileControllerTest {
 			"홍길동",
 			"길동이",
 			25,
-			"010-1234-5678",
 			null,
 			null,
 			null,
