@@ -131,58 +131,44 @@ public class ProfileQueryService implements ProfileQueryUseCase
 	@Override
 	public PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable) {
 		Page<Profile> page = profileRepository.searchProfilesBySkillName(skillIds, pageable);
-		List<Profile> profiles = page.getContent();
-		if (profiles.isEmpty()) {
-			return toPageResponse(List.of(), page);
-		}
 
-		List<Long> profileIds = collectProfileIds(profiles);
-		List<Long> userIds = collectDistinctUserIds(profiles);
-
-		Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(userIds);
-		Map<Long, List<ProfileSkill>> skillsByProfileId = loadProfileSkillsByProfileId(profileIds);
-		Map<Long, Skill> skillMap = loadSkillMap(skillsByProfileId);
-		Map<Long, Boolean> likedByProfileId = profileLikeQueryUseCase.isLikedByProfileIds(viewerUserId, profileIds);
-
-		List<UserProfileListResponse> contents = profiles.stream()
-			.map(profile -> toUserProfileListResponse(profile, userIdToName, skillsByProfileId, skillMap, likedByProfileId))
-			.toList();
-
-		return toPageResponse(contents, page);
+		return buildProfileListResponse(viewerUserId, page, true);
 	}
 
 	@Override
 	public PageResponse<List<UserProfileListResponse>> getLikedUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable) {
 		Page<Profile> page = profileRepository.searchLikedProfilesBySkillName(viewerUserId, skillIds, pageable);
+		return buildProfileListResponse(viewerUserId, page, false);
+	}
+
+	private PageResponse<List<UserProfileListResponse>> buildProfileListResponse(Long viewerUserId, Page<Profile> page, boolean loadLike) {
 		List<Profile> profiles = page.getContent();
 		if (profiles.isEmpty()) {
-			return toPageResponse(List.of(), page);
+			return PageResponse.from(page, List.of());
 		}
-
 		List<Long> profileIds = collectProfileIds(profiles);
 		List<Long> userIds = collectDistinctUserIds(profiles);
 
 		Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(userIds);
 		Map<Long, List<ProfileSkill>> skillsByProfileId = loadProfileSkillsByProfileId(profileIds);
 		Map<Long, Skill> skillMap = loadSkillMap(skillsByProfileId);
-		Map<Long, Boolean> likedByProfileId = profileLikeQueryUseCase.isLikedByProfileIds(viewerUserId, profileIds);
+		Map<Long, Boolean> likedByProfileId =
+			loadLike ? profileLikeQueryUseCase.isLikedByProfileIds(viewerUserId, profileIds)
+				: profileIds.stream()
+				.collect(Collectors.toMap(id -> id, id -> true));
 
 		List<UserProfileListResponse> contents = profiles.stream()
-			.map(profile -> toUserProfileListResponse(profile, userIdToName, skillsByProfileId, skillMap, likedByProfileId))
+			.map(profile -> toUserProfileListResponse(
+				profile,
+				userIdToName,
+				skillsByProfileId,
+				skillMap,
+				likedByProfileId
+			))
 			.toList();
-
-		return toPageResponse(contents, page);
+		return PageResponse.from(page, contents);
 	}
 
-	private PageResponse<List<UserProfileListResponse>> toPageResponse(List<UserProfileListResponse> contents, Page<?> page) {
-		return PageResponse.of(
-			contents,
-			page.getNumber(),
-			page.getSize(),
-			page.getTotalElements(),
-			page.getTotalPages()
-		);
-	}
 
 	private List<Long> collectProfileIds(List<Profile> profiles) {
 		return profiles.stream()
