@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.sidework.common.exception.InvalidCommandException;
+import com.sidework.common.util.AesEncryptor;
 import com.sidework.user.application.port.in.UserQueryUseCase;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserQueryService implements UserQueryUseCase {
     private final UserOutPort userRepository;
+    private final AesEncryptor encryptor;
 
     @Override
     public boolean checkEmailExists(String email) {
@@ -39,6 +42,13 @@ public class UserQueryService implements UserQueryUseCase {
     @Override
     public void validateExists(Long id) {
         userRepository.findById(id);
+    }
+
+    @Override
+    public String queryGithubToken(Long id) {
+        if(id == null) throw new InvalidCommandException("사용자 ID는 필수값입니다.");
+        String rawTokenValue = userRepository.findGithubAccessToken(id);
+        return encryptor.decrypt(rawTokenValue);
     }
 
     @Override
