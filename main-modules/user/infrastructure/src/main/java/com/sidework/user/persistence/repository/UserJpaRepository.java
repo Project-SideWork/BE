@@ -22,4 +22,7 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByTelAndIdNot(@Param("tel") String tel, @Param("excludeUserId") Long excludeUserId);
 
     UserEntity findByEmail(String email);
+
+    @Query("SELECT e.githubAccessToken FROM UserEntity e WHERE e.id = :id")
+    String findGithubAccessTokenById(@Param("id")Long id);
 }
