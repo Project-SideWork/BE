@@ -69,4 +69,9 @@ public class UserPersistenceAdapter implements UserOutPort {
         List<UserEntity> users = repo.findAllById(ids);
         return users.stream().map(mapper::toDomain).toList();
     }
+
+    @Override
+    public String findGithubAccessToken(Long userId) {
+        return repo.findGithubAccessTokenById(userId);
+    }
 }
