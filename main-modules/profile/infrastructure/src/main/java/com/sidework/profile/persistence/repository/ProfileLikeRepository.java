@@ -15,7 +15,13 @@ public interface ProfileLikeRepository extends JpaRepository<ProfileLikeEntity, 
 	boolean existsByUserIdAndProfileId(Long userId, Long profileId);
 
 	@Modifying
-	int deleteByUserIdAndProfileId(Long userId, Long profileId);
+	@Query("""
+    DELETE FROM ProfileLikeEntity pl
+    WHERE pl.userId = :userId
+      AND pl.profileId = :profileId
+""")
+
+	int deleteByUserIdAndProfileId(@Param("userId") Long userId, @Param("profileId") Long profileId);
 
 	@Modifying
 	@Query(

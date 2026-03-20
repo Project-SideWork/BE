@@ -24,7 +24,6 @@ public class ProjectLikePersistenceAdapter implements ProjectLikeOutPort {
 
 	@Override
 	public void like(ProjectLike like) {
-		// atomic toggle: DELETE first, then INSERT IGNORE if nothing deleted
 		int deleted = projectLikeRepository.deleteByUserIdAndProjectId(like.getUserId(), like.getProjectId());
 		if (deleted == 0) {
 			projectLikeRepository.insertIgnore(like.getUserId(), like.getProjectId());
