@@ -15,9 +15,27 @@ public interface ProjectLikeRepository extends JpaRepository<ProjectLikeEntity, 
 	boolean existsByUserIdAndProjectId(Long userId, Long projectId);
 
 	@Modifying
-	void deleteByUserIdAndProjectId(Long userId, Long projectId);
+	@Query("""
+    DELETE FROM ProjectLikeEntity pl
+    WHERE pl.userId = :userId
+      AND pl.projectId = :projectId
+""")
+	int deleteByUserIdAndProjectId(@Param("userId") Long userId, @Param("projectId") Long projectId);
+
+	@Modifying
+	@Query(
+		value = """
+			INSERT IGNORE INTO project_likes (user_id, project_id, created_at, updated_at)
+			VALUES (:userId, :projectId, NOW(), NOW())
+			""",
+		nativeQuery = true
+	)
+	int insertIgnore(@Param("userId") Long userId, @Param("projectId") Long projectId);
 
 	@Query("SELECT pl.projectId FROM ProjectLikeEntity pl WHERE pl.userId = :userId AND pl.projectId IN :projectIds")
 	List<Long> findProjectIdsByUserIdAndProjectIdIn(@Param("userId") Long userId, @Param("projectIds") List<Long> projectIds);
+
+	@Query("SELECT pl.projectId FROM ProjectLikeEntity pl WHERE pl.userId = :userId")
+	List<Long> findProjectIdsByUserId(@Param("userId") Long userId);
 
 }

@@ -1,5 +1,6 @@
 package com.sidework.common.response;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public record PageResponse<T>(
@@ -15,5 +16,15 @@ public record PageResponse<T>(
 
     public static <T> PageResponse<T> empty(Pageable pageable) {
         return new PageResponse<>(null, pageable.getPageNumber() + 1, pageable.getPageSize(), 0, 0);
+    }
+
+    public static <T> PageResponse<T> from(Page<?> page, T content) {
+        return new PageResponse<>(
+            content,
+            page.getNumber() + 1,
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages()
+        );
     }
 }

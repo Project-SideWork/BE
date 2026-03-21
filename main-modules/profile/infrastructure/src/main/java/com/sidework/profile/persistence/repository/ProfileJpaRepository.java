@@ -1,13 +1,15 @@
 package com.sidework.profile.persistence.repository;
 
 import com.sidework.profile.persistence.entity.ProfileEntity;
+import com.sidework.profile.persistence.repository.custom.ProfileQuerydslRepository;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface ProfileJpaRepository extends JpaRepository<ProfileEntity, Long> {
+public interface ProfileJpaRepository extends JpaRepository<ProfileEntity, Long>, ProfileQuerydslRepository {
 	Optional<ProfileEntity> findByUserId(Long userId);
 	boolean existsByUserId(Long userId);
 	boolean existsByIdAndUserId(Long profileId, Long userId);

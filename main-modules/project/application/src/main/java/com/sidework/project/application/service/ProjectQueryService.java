@@ -44,7 +44,6 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     private final ProjectLikeQueryUseCase projectLikeQueryUseCase;
 
 
-
     @Override
     public Project queryById(Long projectId) {
         return projectRepository.findById(projectId);
@@ -119,15 +118,16 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         return buildProjectListPageResponse(userId, page);
     }
 
+	@Override
+	public PageResponse<List<ProjectListResponse>> queryLikedProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable) {
+		Page<Project> page = projectRepository.searchLiked(keyword, skillIds, userId, pageable);
+		return buildProjectListPageResponse(userId, page);
+	}
+
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {
         List<Project> projects = page.getContent();
         if (projects.isEmpty()) {
-            return PageResponse.of(
-                List.of(),
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages());
+            return PageResponse.from(page, List.of());
         }
         List<Long> projectIds = projects.stream()
             .map(Project::getId)
@@ -136,12 +136,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         ListBatchData batch = loadListBatchData(userId, projectIds);
         List<ProjectListResponse> contents = buildListResponses(projects, batch);
 
-        return PageResponse.of(
-            contents,
-            page.getNumber(),
-            page.getSize(),
-            page.getTotalElements(),
-            page.getTotalPages());
+        return PageResponse.from(page, contents);
     }
 
     private ListBatchData loadListBatchData(Long userId, List<Long> projectIds) {
@@ -192,21 +187,6 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     ) {}
 
         private ProjectListResponse toProjectListResponse(Project project, List<ProjectRecruitPosition> positions, List<String> requiredStacks, String creatorName, boolean isLikedProject) {
-        // Integer remainingDays=null;
-        // if(!project.getStatus().equals(RECRUITING))
-        // {
-        //     remainingDays = Optional.ofNullable(project.getEndDt())
-        //         .map(end -> (int) ChronoUnit.DAYS.between(LocalDate.now(), end))
-        //         .orElse(null);
-        // }
-        //
-        //
-        // int durationMonths = 0;
-        // if (project.getStartDt() != null && project.getEndDt() != null) {
-        //     durationMonths = Math.max(0,
-        //         (int) ChronoUnit.MONTHS.between(project.getStartDt(), project.getEndDt())
-        //     );
-        // }
 
         List<RecruitPositionResponse> recruitPositions = buildRecruitPositions(positions);
         return ProjectListResponse.of(

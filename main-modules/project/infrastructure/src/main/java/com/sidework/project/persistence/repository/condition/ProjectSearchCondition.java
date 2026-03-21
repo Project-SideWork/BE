@@ -12,5 +12,6 @@ public class ProjectSearchCondition {
 	private String keyword;
 	private List<Long> skillIds;
 	private Long skillCount;
+	private List<Long> projectIds;
 
 }

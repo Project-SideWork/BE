@@ -269,6 +269,80 @@ class ProjectQueryServiceTest {
         verify(projectRepository).search(keyword, skillIds, pageable);
     }
 
+    @Test
+    void queryLikedProjectList_프로젝트가_있으면_배치_조회_후_PageResponse_반환한다() {
+        Long userId = 1L;
+        String keyword = "테스트";
+        List<Long> skillIds = List.of(1L, 2L);
+        Pageable pageable = PageRequest.of(0, 20);
+
+        Project project1 = createProject(1L);
+        Project project2 = createProject(2L);
+        Page<Project> page = new PageImpl<>(List.of(project1, project2), pageable, 2);
+
+        List<ProjectRecruitPosition> positions1 = List.of(
+            ProjectRecruitPosition.builder()
+                .projectId(1L)
+                .role(ProjectRole.BACKEND)
+                .headCount(1)
+                .currentCount(0)
+                .level(SkillLevel.JUNIOR)
+                .build()
+        );
+
+        when(projectRepository.searchLiked(keyword, skillIds, userId, pageable)).thenReturn(page);
+        when(projectRepository.getProjectRecruitPositionsByProjectIds(List.of(1L, 2L)))
+            .thenReturn(Map.of(1L, positions1, 2L, List.of()));
+        when(projectRequiredQueryUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
+            .thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
+        when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L, 2L)))
+            .thenReturn(Map.of(1L, 10L, 2L, 10L));
+        when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
+            .thenReturn(Map.of(10L, "테스트유저"));
+        when(projectLikeQueryUseCase.isLikedByProjectIds(userId, List.of(1L, 2L)))
+            .thenReturn(Map.of(1L, true, 2L, false));
+
+        PageResponse<List<ProjectListResponse>> result =
+            queryService.queryLikedProjectList(userId, keyword, skillIds, pageable);
+
+        assertNotNull(result.content());
+        assertEquals(2, result.content().size());
+        assertEquals(2, result.totalElements());
+        assertEquals(1, result.totalPages());
+
+        ProjectListResponse first = result.content().get(0);
+        assertEquals(1L, first.projectId());
+        assertEquals("테스트 프로젝트", first.title());
+        assertEquals(List.of("Java", "Spring"), first.requiredStacks());
+        assertEquals("테스트유저", first.creatorName());
+        assertTrue(first.liked());
+
+        ProjectListResponse second = result.content().get(1);
+        assertEquals(2L, second.projectId());
+        assertFalse(second.liked());
+    }
+
+    @Test
+    void queryLikedProjectList_프로젝트가_없으면_빈_페이지_반환한다() {
+        Long userId = 1L;
+        String keyword = "테스트";
+        List<Long> skillIds = List.of(1L, 2L);
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Project> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(projectRepository.searchLiked(keyword, skillIds, userId, pageable)).thenReturn(emptyPage);
+
+        PageResponse<List<ProjectListResponse>> result =
+            queryService.queryLikedProjectList(userId, keyword, skillIds, pageable);
+
+        assertNotNull(result.content());
+        assertTrue(result.content().isEmpty());
+        assertEquals(1, result.page());
+        assertEquals(20, result.size());
+        assertEquals(0, result.totalElements());
+        assertEquals(0, result.totalPages());
+    }
+
     private Project createProject(Long id) {
         return Project.builder()
             .id(id)

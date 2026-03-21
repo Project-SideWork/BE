@@ -22,4 +22,9 @@ public class ProjectLikeQueryService implements ProjectLikeQueryUseCase {
 	public Map<Long, Boolean> isLikedByProjectIds(Long userId, List<Long> projectIds) {
 		return projectLikeOutPort.getLikes(userId, projectIds);
 	}
+
+	@Override
+	public List<Long> findLikedProjectIds(Long userId) {
+		return projectLikeOutPort.findLikedProjectIds(userId);
+	}
 }
