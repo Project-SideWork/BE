@@ -3,6 +3,7 @@ package com.sidework.user.application.adapter;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.user.application.docs.UserControllerDocs;
+import com.sidework.user.application.port.in.GithubInfoResponse;
 import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.application.port.in.UserCommandUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;
@@ -35,7 +36,7 @@ public class UserController implements UserControllerDocs {
     }
 
     @GetMapping("/github")
-    public ResponseEntity<ApiResponse<String>> getMyGithubToken(@AuthenticationPrincipal AuthenticatedUserDetails user) {
+    public ResponseEntity<ApiResponse<GithubInfoResponse>> getMyGithubToken(@AuthenticationPrincipal AuthenticatedUserDetails user) {
         return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryGithubToken(user.getId())));
     }
 }

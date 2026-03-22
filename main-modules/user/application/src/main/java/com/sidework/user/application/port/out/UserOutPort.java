@@ -15,5 +15,5 @@ public interface UserOutPort {
     User findById(Long id);
     User findByEmail(String email);
     List<User> findAllByUserIdIn(List<Long> ids);
-    String findGithubAccessToken(Long userId);
+    GithubInfoDto findGithubInfoProjection(Long userId);
 }

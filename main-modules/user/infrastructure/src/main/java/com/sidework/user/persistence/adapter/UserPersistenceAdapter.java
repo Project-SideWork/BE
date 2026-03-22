@@ -2,6 +2,7 @@ package com.sidework.user.persistence.adapter;
 
 import java.util.List;
 
+import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import com.sidework.user.persistence.entity.UserEntity;
@@ -71,7 +72,7 @@ public class UserPersistenceAdapter implements UserOutPort {
     }
 
     @Override
-    public String findGithubAccessToken(Long userId) {
-        return repo.findGithubAccessTokenById(userId);
+    public GithubInfoDto findGithubInfoProjection(Long userId) {
+        return repo.findGithubInfoById(userId);
     }
 }
