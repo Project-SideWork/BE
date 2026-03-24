@@ -1,6 +1,7 @@
 package com.sidework.profile.application.service;
 
 import com.sidework.profile.application.adapter.UserProfileListResponse;
+import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
@@ -88,6 +89,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			profile.getSelfIntroduction(),
 			residenceText,
 			projectCounts,
+			buildScoreInfo(userId),
 			buildRoleInfos(profile.getId()),
 			buildSchoolInfos(profile.getId()),
 			buildSkillInfos(profile.getId()),
@@ -120,6 +122,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			null,
 			null,
 			projectCounts,
+			buildScoreInfo(user.getId()),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
@@ -378,6 +381,15 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			return null;
 		}
 		return regionQueryUseCase.getRegion(subRegionId);
+	}
+
+	private Double buildScoreInfo(Long userId)
+	{
+		return calculateReviewScore(projectQueryUseCase.queryStatSummaryByProjectId(userId));
+	}
+
+	private Double calculateReviewScore(ProjectUserReviewStatSummary stat) {
+		return stat.score() / stat.count();
 	}
 
 
