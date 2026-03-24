@@ -44,6 +44,7 @@ public enum ErrorStatus implements BaseStatusCode {
     PROJECT_NOT_ACCEPTED(HttpStatus.BAD_REQUEST, "PROJECT_012", "해당 프로젝트의 승인된 멤버가 아닙니다."),
     PROJECT_SELF_REVIEW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PROJECT_013", "자기 자신에 대한 평가는 불가능합니다."),
     PROJECT_USER_ALREADY_REVIEWED(HttpStatus.CONFLICT, "PROJECT_014", "이미 평가한 팀원입니다."),
+    PROJECT_USER_REVIEW_STAT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_015", "해당 사용자의 프로젝트 평점이 존재하지 않습니다."),
 
     // PROFILE
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROFILE_001", "해당 프로필을 찾을 수 없습니다."),
