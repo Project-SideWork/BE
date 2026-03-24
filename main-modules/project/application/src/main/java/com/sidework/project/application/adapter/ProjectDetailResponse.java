@@ -26,10 +26,11 @@ public record ProjectDetailResponse(
 		Long userId,
 		Long profileId,
 		ProjectRole role,
-		ApplyStatus status
+		ApplyStatus status,
+		Double score
 	) {
-		public static ProjectMemberResponse of(Long userId, Long profileId, ProjectRole role, ApplyStatus status) {
-			return new ProjectMemberResponse(userId, profileId, role, status);
+		public static ProjectMemberResponse of(Long userId, Long profileId, ProjectRole role, ApplyStatus status,Double score) {
+			return new ProjectMemberResponse(userId, profileId, role, status, score);
 		}
 	}
 

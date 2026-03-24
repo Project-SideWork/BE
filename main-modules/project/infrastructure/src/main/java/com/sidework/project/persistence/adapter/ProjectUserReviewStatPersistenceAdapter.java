@@ -45,5 +45,12 @@ public class ProjectUserReviewStatPersistenceAdapter implements ProjectUserRevie
 		}
 
 	}
+
+	@Override
+	public List<ProjectUserReviewStat> getAllReviewStatsByUserIds(List<Long> userIds) {
+		return repository.findAllByUserIdIn(userIds).stream()
+			.map(mapper::toDomain)
+			.toList();
+	}
 }
 
