@@ -1,8 +1,10 @@
 package com.sidework.project.application.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,11 +22,13 @@ import com.sidework.project.application.port.in.ProjectUserReviewCommandUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.application.port.out.ProjectUserReviewOutPort;
+import com.sidework.project.application.port.out.ProjectUserReviewStatOutPort;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.project.domain.ProjectUser;
 import com.sidework.project.domain.ProjectUserReview;
+import com.sidework.project.domain.ProjectUserReviewStat;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +40,7 @@ public class ProjectUserReviewCommandService implements ProjectUserReviewCommand
 	private final ProjectOutPort projectOutPort;
 	private final ProjectUserOutPort projectUserOutPort;
 	private final ProjectUserReviewOutPort projectUserReviewOutPort;
+	private final ProjectUserReviewStatOutPort projectUserReviewStatOutPort;
 
 	@Override
 	public void create(Long reviewerUserId, Long projectId, ProjectUserReviewCommand command) {
@@ -65,6 +70,7 @@ public class ProjectUserReviewCommandService implements ProjectUserReviewCommand
 		} catch (DataIntegrityViolationException e) {
 			throw new ProjectUserAlreadyReviewedException();
 		}
+		saveReviewStats(reviews);
 	}
 
 	private void validateProject(Long projectId) {
@@ -122,6 +128,35 @@ public class ProjectUserReviewCommandService implements ProjectUserReviewCommand
 		if (reviewee.getStatus() != ApplyStatus.ACCEPTED) {
 			throw new ProjectUserNotAcceptedException(revieweeUserId);
 		}
+	}
+
+	private void saveReviewStats(List<ProjectUserReview> reviews) {
+
+		Map<Long, ProjectUserReviewStat> deltaByUserId = new HashMap<>();
+
+		for (ProjectUserReview review : reviews) {
+			Long userId = review.getRevieweeUserId();
+			double score = calculateAverageScore(review);
+
+			deltaByUserId.put(
+				userId,
+				ProjectUserReviewStat.create(userId, score, 1L)
+			);
+		}
+
+		projectUserReviewStatOutPort.addAllReviewStats(
+			new ArrayList<>(deltaByUserId.values())
+		);
+	}
+
+	private double calculateAverageScore(ProjectUserReview review) {
+		int totalScore =
+			review.getResponsibility()
+				+ review.getCommunication()
+				+ review.getCollaboration()
+				+ review.getProblemSolving();
+
+		return totalScore / 4.0;
 	}
 
 
