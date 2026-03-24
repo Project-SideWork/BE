@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
@@ -131,6 +132,12 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 		Page<Project> page = projectRepository.searchLiked(keyword, skillIds, userId, pageable);
 		return buildProjectListPageResponse(userId, page);
 	}
+
+    @Override
+    public ProjectUserReviewStatSummary queryStatSummaryByProjectId(Long userId) {
+        ProjectUserReviewStat stat = projectUserReviewStatRepository.getReviewStatByUserId(userId);
+        return ProjectUserReviewStatSummary.of(stat);
+    }
 
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {
         List<Project> projects = page.getContent();

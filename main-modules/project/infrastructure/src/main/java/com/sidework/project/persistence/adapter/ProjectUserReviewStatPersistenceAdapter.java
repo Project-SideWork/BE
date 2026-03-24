@@ -5,8 +5,10 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
+import com.sidework.project.application.exception.ProjectUserReviewStatNotFoundException;
 import com.sidework.project.application.port.out.ProjectUserReviewStatOutPort;
 import com.sidework.project.domain.ProjectUserReviewStat;
+import com.sidework.project.persistence.entity.ProjectUserReviewStatEntity;
 import com.sidework.project.persistence.mapper.ProjectUserReviewStatMapper;
 import com.sidework.project.persistence.repository.ProjectUserReviewStatJpaRepository;
 
@@ -51,6 +53,13 @@ public class ProjectUserReviewStatPersistenceAdapter implements ProjectUserRevie
 		return repository.findAllByUserIdIn(userIds).stream()
 			.map(mapper::toDomain)
 			.toList();
+	}
+
+	@Override
+	public ProjectUserReviewStat getReviewStatByUserId(Long userId) {
+		ProjectUserReviewStatEntity entity = repository.findByUserId(userId)
+			.orElseThrow(()-> new ProjectUserReviewStatNotFoundException(userId));
+		return mapper.toDomain(entity);
 	}
 }
 

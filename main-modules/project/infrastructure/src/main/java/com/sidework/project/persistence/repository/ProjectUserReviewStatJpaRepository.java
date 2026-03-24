@@ -1,6 +1,7 @@
 package com.sidework.project.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,6 +27,8 @@ public interface ProjectUserReviewStatJpaRepository extends JpaRepository<Projec
 	);
 
 	List<ProjectUserReviewStatEntity> findAllByUserIdIn(List<Long> userIds);
+
+	Optional<ProjectUserReviewStatEntity> findByUserId(Long userId);
 
 }
 

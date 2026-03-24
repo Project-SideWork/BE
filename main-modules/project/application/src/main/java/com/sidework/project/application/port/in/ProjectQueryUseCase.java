@@ -3,6 +3,7 @@ package com.sidework.project.application.port.in;
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRecruitPosition;
 import com.sidework.project.domain.ProjectRole;
@@ -20,4 +21,5 @@ public interface ProjectQueryUseCase {
     PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, Pageable pageable);
     PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable);
 	PageResponse<List<ProjectListResponse>> queryLikedProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable);
+    ProjectUserReviewStatSummary queryStatSummaryByProjectId(Long userId);
 }
