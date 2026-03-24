@@ -1,0 +1,10 @@
+package com.sidework.project.application.port.out;
+
+import java.util.List;
+
+import com.sidework.project.domain.ProjectUserReviewStat;
+
+public interface ProjectUserReviewStatOutPort {
+	void addAllReviewStats(List<ProjectUserReviewStat> stats);
+}
+
