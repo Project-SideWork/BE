@@ -43,6 +43,7 @@ public class UserQueryServiceTest {
     @Test
     void queryGithubToken는_깃허브Id와_복호화된_액세스_토큰을_조회한다() {
         Long id = 1L;
+        when(repo.existsById(id)).thenReturn(true);
         when(repo.findGithubInfoProjection(id)).thenReturn(new GithubInfoDto(1L, "accesstoken"));
         when(encryptor.decrypt("accesstoken")).thenReturn("decoded");
 
@@ -51,6 +52,7 @@ public class UserQueryServiceTest {
         assertNotEquals("accesstoken", res.rawGithubToken());
         assertEquals(1L, res.githubId());
 
+        verify(repo).existsById(id);
         verify(repo).findGithubInfoProjection(id);
     }
 
