@@ -426,12 +426,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 
 	private Double buildScoreInfo(Long userId)
 	{
-		try {
-			ProjectUserReviewStatSummary stat = projectQueryUseCase.queryStatSummaryByUserId(userId);
-			return stat == null ? null : calculateReviewScore(stat);
-		} catch (ProjectUserReviewStatNotFoundException e) {
-			return null;
-		}
+		ProjectUserReviewStatSummary stat = projectQueryUseCase.queryStatSummaryByUserId(userId);
+		return stat == null ? null : calculateReviewScore(stat);
 	}
 
 	private List<UserProfileResponse.ProjectReviewInfo> buildReviewInfos(
