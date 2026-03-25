@@ -25,5 +25,5 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
     UserEntity findByEmail(String email);
 
     @Query("SELECT new com.sidework.user.application.port.out.GithubInfoDto(e.githubId, e.githubAccessToken) FROM UserEntity e WHERE e.id = :id")
-    GithubInfoDto findGithubInfoById(@Param("id")Long id);
+    GithubInfoDto findGithubInfoById(@Param("id") Long id);
 }

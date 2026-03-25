@@ -73,6 +73,7 @@ public class UserPersistenceAdapter implements UserOutPort {
 
     @Override
     public GithubInfoDto findGithubInfoProjection(Long userId) {
+        if(!repo.existsById(userId)) throw new UserNotFoundException(userId);
         return repo.findGithubInfoById(userId);
     }
 }

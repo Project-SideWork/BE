@@ -117,13 +117,26 @@ public class UserPersistenceAdapterTest {
 
     @Test
     void findGithubInfoProjection로_사용자의_깃허브ID와_암호화된_깃허브_토큰을_조회한다() {
+        when(repo.existsById(1L)).thenReturn(true);
         when(repo.findGithubInfoById(1L)).thenReturn(new GithubInfoDto(1L, "encoded"));
-        GithubInfoDto res = repo.findGithubInfoById(1L);
+        GithubInfoDto res = adapter.findGithubInfoProjection(1L);
 
         assertNotNull(res.githubId());
         assertNotNull(res.githubAccessToken());
 
         verify(repo).findGithubInfoById(1L);
+    }
+
+    @Test
+    void findGithubInfoProjection에_전달된_id가_존재하지_않는_사용자의_것이면_UserNotFoundException을_던진다() {
+        when(repo.existsById(1L)).thenReturn(false);
+
+        assertThrows(
+                UserNotFoundException.class,
+                () -> adapter.findGithubInfoProjection(1L)
+        );
+
+        verify(repo).existsById(1L);
     }
 
     private SignUpCommand createCommand(){
