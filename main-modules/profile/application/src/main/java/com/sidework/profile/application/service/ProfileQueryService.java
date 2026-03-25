@@ -1,6 +1,7 @@
 package com.sidework.profile.application.service;
 
 import com.sidework.profile.application.adapter.UserProfileListResponse;
+import com.sidework.profile.application.dto.ProjectContext;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.dto.ProjectUserReviewSummary;
 import com.sidework.project.domain.ProjectRole;
@@ -70,39 +71,13 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		List<Project> projects = projectQueryUseCase.queryByUserId(userId);
 		int projectCounts = countCompletedProjects(projects);
 
-		List<Long> projectIds = projects.stream().map(Project::getId).toList();
-		List<ProjectUserReviewSummary> reviews = projectQueryUseCase.queryReviewSummaryByProjectIds(userId,projectIds);
-
-		Map<Long, String> projectIdToTitle = projects.stream()
-			.collect(Collectors.toMap(Project::getId, Project::getTitle));
-
+		ProjectContext ctx = loadProjectContext(userId, projects);
 
 		Profile profile = profileRepository.getProfileByUserId(userId);
 		if (profile == null) {
-			return buildResponseWhenNoProfile(user, projects, projectCounts, reviews, projectIdToTitle);
+			return buildResponseWhenNoProfile(user, projectCounts, ctx);
 		}
-		Map<Long, List<String>> skillNamesByProjectId = requiredSkillUseCase.queryNamesByProjectIds(projectIds);
-		Map<Long, List<ProjectRole>> rolesByProjectId = projectQueryUseCase.queryUserRolesByProjects(userId, projectIds);
-
-		String residenceText = buildResidenceText(user.getResidenceRegionId());
-		return new UserProfileResponse(
-			user.getId(),
-			user.getEmail(),
-			user.getName(),
-			user.getNickname(),
-			user.getAge(),
-			profile.getId(),
-			profile.getSelfIntroduction(),
-			residenceText,
-			projectCounts,
-			buildScoreInfo(userId),
-			buildRoleInfos(profile.getId()),
-			buildSchoolInfos(profile.getId()),
-			buildSkillInfos(profile.getId()),
-			buildPortfolioInfos(profile.getId()),
-			buildProjectInfos(projects, skillNamesByProjectId, rolesByProjectId),
-			buildReviewInfos(reviews,projectIdToTitle)
-		);
+		return buildProfileResponse(user, profile, projectCounts, ctx);
 	}
 
 	@Override
@@ -110,36 +85,6 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		return profileRepository.existsByIdAndUserId(profileId, userId);
 	}
 
-	private UserProfileResponse buildResponseWhenNoProfile(
-		User user,
-		List<Project> projects,
-		int projectCounts,
-		List<ProjectUserReviewSummary> reviews,
-		Map<Long, String> projectIdToTitle
-	) {
-		List<Long> projectIds = projects.stream().map(Project::getId).toList();
-		Map<Long, List<String>> skillNamesByProjectId = requiredSkillUseCase.queryNamesByProjectIds(projectIds);
-		Map<Long, List<ProjectRole>> rolesByProjectId = projectQueryUseCase.queryUserRolesByProjects(user.getId(), projectIds);
-
-		return new UserProfileResponse(
-			user.getId(),
-			user.getEmail(),
-			user.getName(),
-			user.getNickname(),
-			user.getAge(),
-			null,
-			null,
-			null,
-			projectCounts,
-			buildScoreInfo(user.getId()),
-			new ArrayList<>(),
-			new ArrayList<>(),
-			new ArrayList<>(),
-			new ArrayList<>(),
-			buildProjectInfos(projects, skillNamesByProjectId, rolesByProjectId),
-			buildReviewInfos(reviews,projectIdToTitle)
-		);
-	}
 
 	@Override
 	public PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable) {
@@ -153,6 +98,87 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		Page<Profile> page = profileRepository.searchLikedProfilesBySkillName(viewerUserId, skillIds, pageable);
 		return buildProfileListResponse(viewerUserId, page, false);
 	}
+
+	private UserProfileResponse buildProfileResponse(
+		User user,
+		Profile profile,
+		int projectCounts,
+		ProjectContext ctx
+	) {
+		return new UserProfileResponse(
+			user.getId(),
+			user.getEmail(),
+			user.getName(),
+			user.getNickname(),
+			user.getAge(),
+			profile.getId(),
+			profile.getSelfIntroduction(),
+			buildResidenceText(user.getResidenceRegionId()),
+			projectCounts,
+			buildScoreInfo(user.getId()),
+			buildRoleInfos(profile.getId()),
+			buildSchoolInfos(profile.getId()),
+			buildSkillInfos(profile.getId()),
+			buildPortfolioInfos(profile.getId()),
+			buildProjectInfos(ctx.projects(), ctx.skillNamesByProjectId(), ctx.rolesByProjectId()),
+			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle())
+		);
+	}
+
+
+	private UserProfileResponse buildResponseWhenNoProfile(
+		User user,
+		int projectCounts,
+		ProjectContext ctx
+	) {
+		return new UserProfileResponse(
+			user.getId(),
+			user.getEmail(),
+			user.getName(),
+			user.getNickname(),
+			user.getAge(),
+			null,
+			null,
+			null,
+			projectCounts,
+			buildScoreInfo(user.getId()),
+			List.of(),
+			List.of(),
+			List.of(),
+			List.of(),
+			buildProjectInfos(ctx.projects(), ctx.skillNamesByProjectId(), ctx.rolesByProjectId()),
+			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle())
+		);
+	}
+
+	private ProjectContext loadProjectContext(Long userId, List<Project> projects) {
+
+		List<Long> projectIds = projects.stream()
+			.map(Project::getId)
+			.toList();
+
+		Map<Long, String> projectIdToTitle = projects.stream()
+			.collect(Collectors.toMap(Project::getId, Project::getTitle));
+
+		List<ProjectUserReviewSummary> reviews =
+			projectQueryUseCase.queryReviewSummaryByProjectIds(userId, projectIds);
+
+		Map<Long, List<String>> skillNamesByProjectId =
+			requiredSkillUseCase.queryNamesByProjectIds(projectIds);
+
+		Map<Long, List<ProjectRole>> rolesByProjectId =
+			projectQueryUseCase.queryUserRolesByProjects(userId, projectIds);
+
+		return new ProjectContext(
+			projects,
+			projectIds,
+			projectIdToTitle,
+			reviews,
+			skillNamesByProjectId,
+			rolesByProjectId
+		);
+	}
+
 
 	private PageResponse<List<UserProfileListResponse>> buildProfileListResponse(Long viewerUserId, Page<Profile> page, boolean loadLike) {
 		List<Profile> profiles = page.getContent();
