@@ -4,6 +4,7 @@ import com.sidework.profile.application.adapter.UserProfileListResponse;
 import com.sidework.profile.application.dto.ProjectContext;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.dto.ProjectUserReviewSummary;
+import com.sidework.project.application.exception.ProjectUserReviewStatNotFoundException;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
@@ -425,7 +426,12 @@ public class ProfileQueryService implements ProfileQueryUseCase
 
 	private Double buildScoreInfo(Long userId)
 	{
-		return calculateReviewScore(projectQueryUseCase.queryStatSummaryByUserId(userId));
+		try {
+			ProjectUserReviewStatSummary stat = projectQueryUseCase.queryStatSummaryByUserId(userId);
+			return stat == null ? null : calculateReviewScore(stat);
+		} catch (ProjectUserReviewStatNotFoundException e) {
+			return null;
+		}
 	}
 
 	private List<UserProfileResponse.ProjectReviewInfo> buildReviewInfos(
