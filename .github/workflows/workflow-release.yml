@@ -2,7 +2,7 @@ name: CI / CD
 
 on:
   push:
-    branches: [ feat/#60-user-github-accesstoken-api ]
+    branches: [ main ]
 
 jobs:
   CI:
