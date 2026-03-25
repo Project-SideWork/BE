@@ -27,7 +27,7 @@ public class CookieUtil {
         cookie.setPath("/");
         cookie.setMaxAge(COOKIE_EXPIRE_TIME);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);  // HTTPS 요청에만 secure 설정
+        cookie.setSecure(false);  // HTTPS 요청에만 secure 설정
         cookie.setAttribute("SameSite", "Strict");
         return cookie;
     }
@@ -85,9 +85,9 @@ public class CookieUtil {
         Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(maxAge);
         cookie.setPath("/");
-        // cookie.setDomain("");
+        cookie.setDomain("");
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
     }
@@ -101,7 +101,7 @@ public class CookieUtil {
                     cookie.setValue("");
                     cookie.setPath("/");
                     cookie.setMaxAge(0);
-                    cookie.setSecure(true);
+                    cookie.setSecure(false);
                     cookie.setAttribute("SameSite", "None");
                     response.addCookie(cookie);
                 }
