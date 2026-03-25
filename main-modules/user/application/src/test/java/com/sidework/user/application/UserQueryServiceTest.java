@@ -69,6 +69,8 @@ public class UserQueryServiceTest {
     void queryGithubToken는_조회한_결과_중_하나라도_null이면_GithubInfoNotFoundException을_던진다() {
         Long first = 1L;
         Long second = 2L;
+        when(repo.existsById(first)).thenReturn(true);
+        when(repo.existsById(second)).thenReturn(true);
         when(repo.findGithubInfoProjection(first)).thenReturn(new GithubInfoDto(1L, null));
         when(repo.findGithubInfoProjection(second)).thenReturn(new GithubInfoDto(null, "accesstoken"));
 
