@@ -1,5 +1,9 @@
 package com.sidework.user.application;
 
+import com.sidework.common.exception.InvalidCommandException;
+import com.sidework.common.util.AesEncryptor;
+import com.sidework.user.application.port.in.GithubInfoResponse;
+import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.application.service.UserQueryService;
 import org.junit.jupiter.api.Test;
@@ -8,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +20,9 @@ import static org.mockito.Mockito.when;
 public class UserQueryServiceTest {
     @Mock
     private UserOutPort repo;
+
+    @Mock
+    private AesEncryptor encryptor;
 
     @InjectMocks
     private UserQueryService service;
@@ -29,5 +36,28 @@ public class UserQueryServiceTest {
 
         assertTrue(res);
         verify(repo).existsByEmail(email);
+    }
+
+    @Test
+    void queryGithubToken는_깃허브Id와_복호화된_액세스_토큰을_조회한다() {
+        Long id = 1L;
+        when(repo.findGithubInfoProjection(id)).thenReturn(new GithubInfoDto(1L, "accesstoken"));
+        when(encryptor.decrypt("accesstoken")).thenReturn("decoded");
+
+        GithubInfoResponse res = service.queryGithubToken(id);
+
+        assertNotEquals("accesstoken", res.rawGithubToken());
+        assertEquals(1L, res.githubId());
+
+        verify(repo).findGithubInfoProjection(id);
+    }
+
+    @Test
+    void queryGithubToken는_전달받은_id가_null이면_InvalidCommandException을_던진다() {
+        Long id = null;
+        assertThrows(
+                InvalidCommandException.class,
+                () -> service.queryGithubToken(id)
+        );
     }
 }

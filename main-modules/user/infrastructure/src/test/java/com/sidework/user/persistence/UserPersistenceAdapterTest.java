@@ -1,6 +1,7 @@
 package com.sidework.user.persistence;
 
 import com.sidework.user.application.port.in.SignUpCommand;
+import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import com.sidework.user.persistence.adapter.UserPersistenceAdapter;
@@ -114,6 +115,17 @@ public class UserPersistenceAdapterTest {
         verify(repo).findById(2L);
     }
 
+    @Test
+    void findGithubInfoProjection로_사용자의_깃허브ID와_암호화된_깃허브_토큰을_조회한다() {
+        when(repo.findGithubInfoById(1L)).thenReturn(new GithubInfoDto(1L, "encoded"));
+        GithubInfoDto res = repo.findGithubInfoById(1L);
+
+        assertNotNull(res.githubId());
+        assertNotNull(res.githubAccessToken());
+
+        verify(repo).findGithubInfoById(1L);
+    }
+
     private SignUpCommand createCommand(){
         return new SignUpCommand(
                 "test@test.com",
@@ -140,6 +152,7 @@ public class UserPersistenceAdapterTest {
     private UserEntity createUserEntity(Long id){
         return new UserEntity(
                 id,
+                1L, "token",
                 "test@test.com",
                 "테스트",
                 "테스트1",
