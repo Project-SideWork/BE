@@ -24,7 +24,7 @@ public interface ProjectQueryUseCase {
     PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, Pageable pageable);
     PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable);
 	PageResponse<List<ProjectListResponse>> queryLikedProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable);
-    ProjectUserReviewStatSummary queryStatSummaryByProjectId(Long userId);
+    ProjectUserReviewStatSummary queryStatSummaryByUserId(Long userId);
     List<ProjectUserReviewSummary> queryReviewSummaryByProjectIds(Long userId, List<Long> projectIds);
     Map<Long, Double> queryAverageReviewScoresByUserIds(List<Long> userIds);
 }

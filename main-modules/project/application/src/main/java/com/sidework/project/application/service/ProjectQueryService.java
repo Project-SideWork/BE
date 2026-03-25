@@ -138,7 +138,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 	}
 
     @Override
-    public ProjectUserReviewStatSummary queryStatSummaryByProjectId(Long userId) {
+    public ProjectUserReviewStatSummary queryStatSummaryByUserId(Long userId) {
         ProjectUserReviewStat stat = projectUserReviewStatRepository.getReviewStatByUserId(userId);
         return ProjectUserReviewStatSummary.of(stat);
     }
