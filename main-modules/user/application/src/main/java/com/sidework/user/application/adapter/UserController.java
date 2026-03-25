@@ -12,7 +12,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +35,7 @@ public class UserController implements UserControllerDocs {
     }
 
     @GetMapping("/github")
-    public ResponseEntity<ApiResponse<GithubInfoResponse>> getMyGithubToken(@AuthenticationPrincipal AuthenticatedUserDetails user) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryGithubToken(user.getId())));
+    public GithubInfoResponse getMyGithubToken(@RequestHeader ("X-User-Id") Long userId) {
+        return queryService.queryGithubToken(userId);
     }
 }
