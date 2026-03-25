@@ -87,7 +87,7 @@ class ProfileQueryServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		lenient().when(projectQueryUseCase.queryStatSummaryByProjectId(anyLong()))
+		lenient().when(projectQueryUseCase.queryStatSummaryByUserId(anyLong()))
 			.thenReturn(new ProjectUserReviewStatSummary(8.0, 2L));
 		lenient().when(projectQueryUseCase.queryReviewSummaryByProjectIds(anyLong(), anyList()))
 			.thenReturn(List.of());
