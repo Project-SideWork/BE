@@ -191,6 +191,7 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(userIds);
 		Map<Long, List<ProfileSkill>> skillsByProfileId = loadProfileSkillsByProfileId(profileIds);
 		Map<Long, Skill> skillMap = loadSkillMap(skillsByProfileId);
+		Map<Long, Double> averageScoreByUserId = projectQueryUseCase.queryAverageReviewScoresByUserIds(userIds);
 		Map<Long, Boolean> likedByProfileId =
 			loadLike ? profileLikeQueryUseCase.isLikedByProfileIds(viewerUserId, profileIds)
 				: profileIds.stream()
@@ -202,7 +203,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 				userIdToName,
 				skillsByProfileId,
 				skillMap,
-				likedByProfileId
+				likedByProfileId,
+				averageScoreByUserId
 			))
 			.toList();
 		return PageResponse.from(page, contents);
@@ -249,7 +251,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		Map<Long, String> userIdToName,
 		Map<Long, List<ProfileSkill>> skillsByProfileId,
 		Map<Long, Skill> skillMap,
-		Map<Long, Boolean> likedByProfileId
+		Map<Long, Boolean> likedByProfileId,
+		Map<Long, Double> averageScoreByUserId
 	) {
 		Long profileId = profile.getId();
 		Long userId = profile.getUserId();
@@ -266,7 +269,8 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			userIdToName.get(userId),
 			profile.getSelfIntroduction(),
 			skillInfos,
-			likedByProfileId.getOrDefault(profileId, false)
+			likedByProfileId.getOrDefault(profileId, false),
+			averageScoreByUserId.get(userId)
 		);
 	}
 

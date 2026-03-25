@@ -342,6 +342,18 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         ) / 4.0;
     }
 
+    @Override
+    public Map<Long, Double> queryAverageReviewScoresByUserIds(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
+        }
+        return projectUserReviewStatRepository.getAllReviewStatsByUserIds(userIds).stream()
+            .collect(Collectors.toMap(
+                ProjectUserReviewStat::getUserId,
+                stat -> stat.getRatingScore() / stat.getRatingCount()
+            ));
+    }
+
 
 
 }
