@@ -17,4 +17,5 @@ public interface ProjectUserOutPort {
 	Optional<ProjectUser> findByProjectIdAndUserIdAndRole(Long projectId, Long userId, ProjectRole role);
 	List<ProjectUser> findAllByProjectId(Long projectId);
 	Map<Long, Long> findOwnerUserIdByProjectIds(List<Long> projectIds);
+	Optional<ProjectUser> findAcceptedByProjectIdAndUserId(Long projectId, Long userId);
 }

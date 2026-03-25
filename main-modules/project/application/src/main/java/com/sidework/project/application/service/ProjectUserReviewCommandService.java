@@ -76,16 +76,19 @@ public class ProjectUserReviewCommandService implements ProjectUserReviewCommand
 	private void validateProject(Long projectId) {
 		Project project = projectOutPort.findById(projectId);
 
+
 		if (project == null || project.getStatus() != ProjectStatus.FINISHED) {
 			throw new ProjectNotFinishedException(projectId);
 		}
 	}
 
 	private void validateReviewer(Long projectId, Long reviewerUserId) {
-		ProjectUser reviewer = projectUserOutPort.findByProjectIdAndUserId(projectId, reviewerUserId)
+		projectUserOutPort.findByProjectIdAndUserId(projectId, reviewerUserId)
 			.orElseThrow(() -> new ProjectUserNotFoundException(reviewerUserId));
 
-		if (reviewer.getStatus() != ApplyStatus.ACCEPTED) {
+		boolean hasAccepted = projectUserOutPort.findAcceptedByProjectIdAndUserId(projectId, reviewerUserId)
+			.isPresent();
+		if (!hasAccepted) {
 			throw new ProjectUserNotAcceptedException(reviewerUserId);
 		}
 	}

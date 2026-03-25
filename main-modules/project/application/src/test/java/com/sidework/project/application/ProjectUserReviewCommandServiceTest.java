@@ -59,6 +59,7 @@ class ProjectUserReviewCommandServiceTest {
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
 		when(projectUserOutPort.findByProjectIdAndUserId(projectId, reviewerUserId)).thenReturn(Optional.of(reviewer));
+		when(projectUserOutPort.findAcceptedByProjectIdAndUserId(projectId, reviewerUserId)).thenReturn(Optional.of(reviewer));
 		when(projectUserOutPort.findAllByProjectId(projectId)).thenReturn(List.of(reviewer, reviewee));
 
 		ProjectUserReviewCommand command = new ProjectUserReviewCommand(
@@ -98,6 +99,7 @@ class ProjectUserReviewCommandServiceTest {
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
 		when(projectUserOutPort.findByProjectIdAndUserId(projectId, userId)).thenReturn(Optional.of(member));
+		when(projectUserOutPort.findAcceptedByProjectIdAndUserId(projectId, userId)).thenReturn(Optional.of(member));
 		when(projectUserOutPort.findAllByProjectId(projectId)).thenReturn(List.of(member));
 
 		ProjectUserReviewCommand command = new ProjectUserReviewCommand(
@@ -118,6 +120,7 @@ class ProjectUserReviewCommandServiceTest {
 
 		when(projectOutPort.findById(projectId)).thenReturn(project);
 		when(projectUserOutPort.findByProjectIdAndUserId(projectId, reviewerUserId)).thenReturn(Optional.of(reviewer));
+		when(projectUserOutPort.findAcceptedByProjectIdAndUserId(projectId, reviewerUserId)).thenReturn(Optional.of(reviewer));
 		when(projectUserOutPort.findAllByProjectId(projectId)).thenReturn(List.of(reviewer, reviewee));
 		doThrow(new DataIntegrityViolationException("duplicate"))
 			.when(projectUserReviewOutPort).saveAll(anyList());
