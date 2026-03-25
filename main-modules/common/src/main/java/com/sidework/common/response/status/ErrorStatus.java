@@ -40,7 +40,7 @@ public enum ErrorStatus implements BaseStatusCode {
     PROJECT_USER_NOT_FOUND(HttpStatus.FORBIDDEN, "PROJECT_008", "해당 프로젝트의 유저/소유자가 아닙니다."),
     PROJECT_APPLY_ALREADY_PROCESSED(HttpStatus.CONFLICT, "PROJECT_009", "이미 처리된 지원입니다."),
     PROJECT_HAS_NO_MEMBERS(HttpStatus.INTERNAL_SERVER_ERROR, "PROJECT_010", "해당 프로젝트에 멤버가 존재하지 않습니다."),
-    PROJECT_NOT_FINISHED(HttpStatus.BAD_REQUEST, "PROJECT_011", "해당 프로젝트가 종료되지 않았습니다"),
+    PROJECT_NOT_FINISHED(HttpStatus.BAD_REQUEST, "PROJECT_011", "해당 프로젝트가 종료되지 않았습니다."),
     PROJECT_NOT_ACCEPTED(HttpStatus.BAD_REQUEST, "PROJECT_012", "해당 프로젝트의 승인된 멤버가 아닙니다."),
     PROJECT_SELF_REVIEW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PROJECT_013", "자기 자신에 대한 평가는 불가능합니다."),
     PROJECT_USER_ALREADY_REVIEWED(HttpStatus.CONFLICT, "PROJECT_014", "이미 평가한 팀원입니다."),
