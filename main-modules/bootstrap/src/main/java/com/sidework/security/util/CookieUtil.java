@@ -28,7 +28,7 @@ public class CookieUtil {
         cookie.setMaxAge(COOKIE_EXPIRE_TIME);
         cookie.setHttpOnly(true);
         cookie.setSecure(false);  // HTTPS 요청에만 secure 설정
-        cookie.setAttribute("SameSite", "Strict");
+        cookie.setAttribute("SameSite", "Lax");
         return cookie;
     }
 
