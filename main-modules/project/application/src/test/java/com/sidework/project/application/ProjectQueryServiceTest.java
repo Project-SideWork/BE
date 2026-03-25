@@ -9,7 +9,10 @@ import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
+import com.sidework.project.application.port.out.ProjectUserReviewOutPort;
+import com.sidework.project.application.port.out.ProjectUserReviewStatOutPort;
 import com.sidework.project.application.service.ProjectQueryService;
+import com.sidework.project.domain.ProjectUserReviewStat;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
@@ -32,10 +35,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,6 +67,12 @@ class ProjectQueryServiceTest {
 
     @Mock
     private ProjectLikeQueryUseCase projectLikeQueryUseCase;
+
+    @Mock
+    private ProjectUserReviewStatOutPort projectUserReviewStatRepository;
+
+    @Mock
+    private ProjectUserReviewOutPort projectUserReviewOutPort;
 
     @InjectMocks
     private ProjectQueryService queryService;
@@ -127,6 +138,11 @@ class ProjectQueryServiceTest {
         when(projectRecruitPositionRepository.getProjectRecruitPositions(projectId)).thenReturn(positions);
         when(projectRequiredQueryUseCase.queryNamesByProjectId(projectId)).thenReturn(requiredStacks);
         when(projectPreferredSkillQueryUseCase.queryNamesByProjectId(projectId)).thenReturn(preferredStacks);
+        when(projectUserReviewStatRepository.getAllReviewStatsByUserIds(anyList()))
+            .thenReturn(List.of(
+                ProjectUserReviewStat.builder().userId(1L).ratingScore(18.0).ratingCount(4L).build(),
+                ProjectUserReviewStat.builder().userId(2L).ratingScore(8.0).ratingCount(2L).build()
+            ));
 
         ProjectDetailResponse result = queryService.queryProjectDetail(projectId);
 
@@ -134,6 +150,11 @@ class ProjectQueryServiceTest {
         assertEquals(projectId, result.id());
         assertEquals(project.getTitle(), result.title());
         assertEquals(2, result.teamMembers().size());
+        List<ProjectDetailResponse.ProjectMemberResponse> membersSorted = result.teamMembers().stream()
+            .sorted(Comparator.comparing(ProjectDetailResponse.ProjectMemberResponse::userId))
+            .toList();
+        assertEquals(4.5, membersSorted.get(0).score());
+        assertEquals(4.0, membersSorted.get(1).score());
         assertEquals(1, result.recruitPositions().size());
         assertEquals(ProjectRole.BACKEND, result.recruitPositions().get(0).role());
         assertEquals(1, result.recruitPositions().get(0).headCount());
@@ -341,6 +362,26 @@ class ProjectQueryServiceTest {
         assertEquals(20, result.size());
         assertEquals(0, result.totalElements());
         assertEquals(0, result.totalPages());
+    }
+
+    @Test
+    void queryAverageReviewScoresByUserIds_스탯이_있으면_userId별_평균을_반환한다() {
+        when(projectUserReviewStatRepository.getAllReviewStatsByUserIds(List.of(1L, 2L)))
+            .thenReturn(List.of(
+                ProjectUserReviewStat.builder().userId(1L).ratingScore(9.0).ratingCount(3L).build(),
+                ProjectUserReviewStat.builder().userId(2L).ratingScore(5.0).ratingCount(1L).build()
+            ));
+
+        Map<Long, Double> result = queryService.queryAverageReviewScoresByUserIds(List.of(1L, 2L));
+
+        assertEquals(2, result.size());
+        assertEquals(3.0, result.get(1L));
+        assertEquals(5.0, result.get(2L));
+    }
+
+    @Test
+    void queryAverageReviewScoresByUserIds_userIds가_비어있으면_빈_맵을_반환한다() {
+        assertTrue(queryService.queryAverageReviewScoresByUserIds(List.of()).isEmpty());
     }
 
     private Project createProject(Long id) {

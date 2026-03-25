@@ -18,6 +18,7 @@ import com.sidework.profile.domain.ProjectPortfolio;
 import com.sidework.profile.domain.Role;
 import com.sidework.school.domain.School;
 import com.sidework.profile.domain.SchoolStateType;
+import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
@@ -32,6 +33,7 @@ import com.sidework.user.domain.UserType;
 import com.sidework.common.response.PageResponse;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,6 +85,14 @@ class ProfileQueryServiceTest {
 	@InjectMocks
 	private ProfileQueryService service;
 
+	@BeforeEach
+	void setUp() {
+		lenient().when(projectQueryUseCase.queryStatSummaryByProjectId(anyLong()))
+			.thenReturn(new ProjectUserReviewStatSummary(8.0, 2L));
+		lenient().when(projectQueryUseCase.queryReviewSummaryByProjectIds(anyLong(), anyList()))
+			.thenReturn(List.of());
+	}
+
 	@Test
 	void 프로필_목록_조회시_liked를_반환한다() {
 		// given
@@ -113,6 +124,9 @@ class ProfileQueryServiceTest {
 		when(profileLikeQueryUseCase.isLikedByProfileIds(eq(viewerUserId), anyList()))
 			.thenReturn(Map.of(10L, true, 20L, false));
 
+		when(projectQueryUseCase.queryAverageReviewScoresByUserIds(anyList()))
+			.thenReturn(Map.of(1L, 4.5, 2L, 3.0));
+
 		// when
 		PageResponse<List<UserProfileListResponse>> res = service.getUserProfileList(viewerUserId, skillIds, pageable);
 
@@ -127,6 +141,8 @@ class ProfileQueryServiceTest {
 		assertEquals(2, res.content().size());
 		assertTrue(res.content().get(0).liked());
 		assertFalse(res.content().get(1).liked());
+		assertEquals(4.5, res.content().get(0).score());
+		assertEquals(3.0, res.content().get(1).score());
 	}
 
 	@Test
@@ -180,6 +196,9 @@ class ProfileQueryServiceTest {
 				Skill.builder().id(12L).name("Spring").build()
 			));
 
+		when(projectQueryUseCase.queryAverageReviewScoresByUserIds(anyList()))
+			.thenReturn(Map.of(1L, 5.0, 2L, 4.0));
+
 		// when
 		PageResponse<List<UserProfileListResponse>> res = service.getLikedUserProfileList(viewerUserId, skillIds, pageable);
 
@@ -193,6 +212,8 @@ class ProfileQueryServiceTest {
 		assertEquals(2, res.content().size());
 		assertTrue(res.content().get(0).liked());
 		assertTrue(res.content().get(1).liked());
+		assertEquals(5.0, res.content().get(0).score());
+		assertEquals(4.0, res.content().get(1).score());
 	}
 
 	@Test
