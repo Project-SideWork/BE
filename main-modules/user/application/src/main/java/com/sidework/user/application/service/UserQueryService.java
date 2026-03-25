@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.util.AesEncryptor;
+import com.sidework.user.application.exception.GithubInfoNotFoundException;
+import com.sidework.user.application.exception.UserNotFoundException;
 import com.sidework.user.application.port.in.GithubInfoResponse;
 import com.sidework.user.application.port.in.UserQueryUseCase;
 import com.sidework.user.application.port.out.GithubInfoDto;
@@ -49,7 +51,15 @@ public class UserQueryService implements UserQueryUseCase {
     @Override
     public GithubInfoResponse queryGithubToken(Long id) {
         if(id == null) throw new InvalidCommandException("사용자 ID는 필수값입니다.");
+        if(!userRepository.existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
+
         GithubInfoDto githubInfo = userRepository.findGithubInfoProjection(id);
+        if(githubInfo.githubId() == null || githubInfo.githubAccessToken() == null) {
+            throw new GithubInfoNotFoundException();
+        }
+
         return new GithubInfoResponse(githubInfo.githubId(), encryptor.decrypt(githubInfo.githubAccessToken()));
     }
 

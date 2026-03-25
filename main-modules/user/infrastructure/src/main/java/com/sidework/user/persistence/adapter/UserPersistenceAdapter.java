@@ -6,7 +6,7 @@ import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import com.sidework.user.persistence.entity.UserEntity;
-import com.sidework.user.persistence.exception.UserNotFoundException;
+import com.sidework.user.application.exception.UserNotFoundException;
 import com.sidework.user.persistence.mapper.UserMapper;
 import com.sidework.user.persistence.repository.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +21,11 @@ public class UserPersistenceAdapter implements UserOutPort {
     @Override
     public void save(User user) {
         repo.save(mapper.toEntity(user));
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return repo.existsById(id);
     }
 
     @Override
@@ -73,7 +78,6 @@ public class UserPersistenceAdapter implements UserOutPort {
 
     @Override
     public GithubInfoDto findGithubInfoProjection(Long userId) {
-        if(!repo.existsById(userId)) throw new UserNotFoundException(userId);
         return repo.findGithubInfoById(userId);
     }
 }

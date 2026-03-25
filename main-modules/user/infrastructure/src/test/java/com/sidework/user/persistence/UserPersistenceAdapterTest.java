@@ -6,7 +6,7 @@ import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import com.sidework.user.persistence.adapter.UserPersistenceAdapter;
 import com.sidework.user.persistence.entity.UserEntity;
-import com.sidework.user.persistence.exception.UserNotFoundException;
+import com.sidework.user.application.exception.UserNotFoundException;
 import com.sidework.user.persistence.mapper.UserMapper;
 import com.sidework.user.persistence.repository.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,18 +125,6 @@ public class UserPersistenceAdapterTest {
         assertNotNull(res.githubAccessToken());
 
         verify(repo).findGithubInfoById(1L);
-    }
-
-    @Test
-    void findGithubInfoProjection에_전달된_id가_존재하지_않는_사용자의_것이면_UserNotFoundException을_던진다() {
-        when(repo.existsById(1L)).thenReturn(false);
-
-        assertThrows(
-                UserNotFoundException.class,
-                () -> adapter.findGithubInfoProjection(1L)
-        );
-
-        verify(repo).existsById(1L);
     }
 
     private SignUpCommand createCommand(){

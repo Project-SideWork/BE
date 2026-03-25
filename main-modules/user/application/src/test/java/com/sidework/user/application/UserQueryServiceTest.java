@@ -2,6 +2,8 @@ package com.sidework.user.application;
 
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.util.AesEncryptor;
+import com.sidework.user.application.exception.GithubInfoNotFoundException;
+import com.sidework.user.application.exception.UserNotFoundException;
 import com.sidework.user.application.port.in.GithubInfoResponse;
 import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.application.port.out.UserOutPort;
@@ -59,5 +61,35 @@ public class UserQueryServiceTest {
                 InvalidCommandException.class,
                 () -> service.queryGithubToken(id)
         );
+    }
+
+    @Test
+    void queryGithubToken는_조회한_결과_중_하나라도_null이면_GithubInfoNotFoundException을_던진다() {
+        Long first = 1L;
+        Long second = 2L;
+        when(repo.findGithubInfoProjection(first)).thenReturn(new GithubInfoDto(1L, null));
+        when(repo.findGithubInfoProjection(second)).thenReturn(new GithubInfoDto(null, "accesstoken"));
+
+        assertThrows(
+                GithubInfoNotFoundException.class,
+                () -> service.queryGithubToken(first)
+        );
+
+        assertThrows(
+                GithubInfoNotFoundException.class,
+                () -> service.queryGithubToken(second)
+        );
+    }
+
+    @Test
+    void queryGithubToken에_전달된_id가_존재하지_않는_사용자의_것이면_UserNotFoundException을_던진다() {
+        when(repo.existsById(1L)).thenReturn(false);
+
+        assertThrows(
+                UserNotFoundException.class,
+                () -> service.queryGithubToken(1L)
+        );
+
+        verify(repo).existsById(1L);
     }
 }
