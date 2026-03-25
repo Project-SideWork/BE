@@ -5,12 +5,12 @@ import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record ProjectUserReviewCommand(
-	@NotNull
-	List<@Valid Review> reviews
+	@NotEmpty List<@Valid Review> reviews
 ) {
 	public record Review(
 		@NotNull Long revieweeUserId,
