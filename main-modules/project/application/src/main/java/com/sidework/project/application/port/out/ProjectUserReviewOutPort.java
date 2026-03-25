@@ -7,5 +7,6 @@ import com.sidework.project.domain.ProjectUserReview;
 public interface ProjectUserReviewOutPort {
 	boolean exists(Long projectId, Long reviewerUserId, Long revieweeUserId);
 	void saveAll(List<ProjectUserReview> review);
+	List<ProjectUserReview> getReviewsByUserIdAndProjectIds(Long userId, List<Long> projectIds);
 
 }

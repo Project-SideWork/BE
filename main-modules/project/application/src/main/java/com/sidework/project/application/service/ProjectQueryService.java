@@ -11,6 +11,7 @@ import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
+import com.sidework.project.application.dto.ProjectUserReviewSummary;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
@@ -19,11 +20,13 @@ import com.sidework.project.application.adapter.ProjectDetailResponse.RecruitPos
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
+import com.sidework.project.application.port.out.ProjectUserReviewOutPort;
 import com.sidework.project.application.port.out.ProjectUserReviewStatOutPort;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRecruitPosition;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
+import com.sidework.project.domain.ProjectUserReview;
 import com.sidework.project.domain.ProjectUserReviewStat;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillQueryUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredQueryUseCase;
@@ -44,6 +47,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     private final ProjectUserOutPort projectUserRepository;
     private final ProjectRecruitPositionOutPort projectRecruitPositionRepository;
     private final ProjectUserReviewStatOutPort projectUserReviewStatRepository;
+    private final ProjectUserReviewOutPort projectUserReviewOutPort;
 
     private final ProjectPreferredSkillQueryUseCase projectPreferredSkillQueryUseCase;
     private final ProjectRequiredQueryUseCase projectRequiredQueryUseCase;
@@ -137,6 +141,34 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     public ProjectUserReviewStatSummary queryStatSummaryByProjectId(Long userId) {
         ProjectUserReviewStat stat = projectUserReviewStatRepository.getReviewStatByUserId(userId);
         return ProjectUserReviewStatSummary.of(stat);
+    }
+
+    @Override
+    public List<ProjectUserReviewSummary> queryReviewSummaryByProjectIds(Long userId, List<Long> projectIds) {
+        List<ProjectUserReview> reviews = projectUserReviewOutPort.getReviewsByUserIdAndProjectIds(userId,projectIds);
+        if(reviews == null || reviews.isEmpty()) {
+            return List.of();
+        }
+        List<Long> userIds = reviews.stream()
+            .map(ProjectUserReview::getReviewerUserId)
+            .distinct()
+            .toList();
+
+        Map<Long, String> userNames = userQueryUseCase.findNamesByUserIds(userIds);
+
+        return reviews.stream()
+            .map(review -> {
+                double score = calculateScore(review);
+                String reviewerName =
+                    userNames.getOrDefault(review.getReviewerUserId(), "unknown");
+
+                return ProjectUserReviewSummary.of(
+                    review,
+                    reviewerName,
+                    score
+                );
+            })
+            .toList();
     }
 
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {
@@ -299,6 +331,15 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         if (a.getRole() == ProjectRole.OWNER) return a;
         if (b.getRole() == ProjectRole.OWNER) return b;
         return a;
+    }
+
+    private double calculateScore(ProjectUserReview review) {
+        return (
+            review.getResponsibility()
+                + review.getCommunication()
+                + review.getCollaboration()
+                + review.getProblemSolving()
+        ) / 4.0;
     }
 
 

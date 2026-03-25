@@ -1,5 +1,6 @@
 package com.sidework.project.persistence.adapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -33,5 +34,16 @@ public class ProjectUserReviewPersistenceAdapter implements ProjectUserReviewOut
 			.map(mapper::toEntity)
 			.toList();
 		repository.saveAll(entities);
+	}
+
+	@Override
+	public List<ProjectUserReview> getReviewsByUserIdAndProjectIds(Long userId, List<Long> projectIds) {
+		List<ProjectUserReviewEntity> entities = repository.findAllByProjectIdsAndRevieweeUserId(projectIds, userId);
+		if (entities == null || entities.isEmpty()) {
+			return new ArrayList<>();
+		}
+		return entities.stream()
+			.map(mapper::toDomain)
+			.toList();
 	}
 }
