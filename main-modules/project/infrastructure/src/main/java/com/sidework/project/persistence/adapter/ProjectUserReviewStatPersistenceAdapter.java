@@ -57,9 +57,9 @@ public class ProjectUserReviewStatPersistenceAdapter implements ProjectUserRevie
 
 	@Override
 	public ProjectUserReviewStat getReviewStatByUserId(Long userId) {
-		ProjectUserReviewStatEntity entity = repository.findByUserId(userId)
+		return repository.findByUserId(userId)
+			.map(mapper::toDomain)
 			.orElse(null);
-		return mapper.toDomain(entity);
 	}
 }
 
