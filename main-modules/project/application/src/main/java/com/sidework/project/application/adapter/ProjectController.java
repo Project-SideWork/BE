@@ -93,7 +93,7 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(projectId)));
     }
 
-    @GetMapping("/list")
+    @GetMapping()
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PageableDefault(size = 20) Pageable pageable,
@@ -106,7 +106,7 @@ public class ProjectController implements ProjectControllerDocs {
         );
     }
 
-    @PostMapping("/{projectId}/like")
+    @PostMapping("/{projectId}/likes")
     public ResponseEntity<ApiResponse<Void>> likeProject(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("projectId") Long projectId) {
@@ -114,7 +114,7 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
     }
 
-    @GetMapping("/likes")
+    @GetMapping("/me/likes")
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getLikedProjectList(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PageableDefault(size = 20) Pageable pageable,
