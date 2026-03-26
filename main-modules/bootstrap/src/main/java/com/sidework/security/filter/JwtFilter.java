@@ -152,8 +152,9 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
+            Long userId = jwtUtil.getUserId(refreshToken);
             String email = jwtUtil.getEmail(refreshToken);
-            String reissuedAccess = jwtUtil.createAccess(email);
+            String reissuedAccess = jwtUtil.createAccess(userId, email);
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json");
