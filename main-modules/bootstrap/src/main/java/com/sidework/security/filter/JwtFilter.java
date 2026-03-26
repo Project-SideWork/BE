@@ -110,8 +110,8 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             String email = jwtUtil.getEmail(accessToken);
-            log.debug("id" + jwtUtil.getUserId(accessToken));
-            log.debug("email" + email);
+            log.info("id" + jwtUtil.getUserId(accessToken));
+            log.info("email" + email);
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             UsernamePasswordAuthenticationToken authentication =
