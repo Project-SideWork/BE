@@ -10,6 +10,7 @@ import com.sidework.user.application.port.in.UserQueryUseCase;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController implements UserControllerDocs {
     private final UserCommandUseCase commandService;
     private final UserQueryUseCase queryService;
@@ -36,6 +38,7 @@ public class UserController implements UserControllerDocs {
 
     @GetMapping("/github")
     public GithubInfoResponse getMyGithubToken(@RequestHeader ("X-User-Id") Long userId) {
+        log.info("API CALLED WITH USERID" + userId);
         return queryService.queryGithubToken(userId);
     }
 }

@@ -126,10 +126,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 .anyMatch(pattern -> pathMatcher.match(pattern, uri));
     }
 
-    private boolean isInternalApi(String uri) {
-        return uri.startsWith("/api/v1/users/github");
-    }
-
     private void handleTokenReissue(
             HttpServletResponse response,
             String refreshToken
