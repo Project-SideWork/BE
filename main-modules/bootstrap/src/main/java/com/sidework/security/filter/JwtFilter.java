@@ -64,6 +64,21 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Doctalk에서는 FeignClient로
+        if (isInternalApi(requestUri)) {
+            String authHeader = request.getHeader("Authorization");
+
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                accessToken = authHeader.substring(7);
+            } else {
+                accessToken = null;
+            }
+
+        } else {
+            // 🔥 기존 쿠키 방식 유지
+            accessToken = CookieUtil.getAccessTokenFromRequest(request);
+        }
+
 
         boolean isReissueRequest = pathMatcher.match(TOKEN_REISSUE_API, requestUri)
                 && "POST".equals(request.getMethod());
@@ -95,6 +110,8 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             String email = jwtUtil.getEmail(accessToken);
+            log.debug("id" + jwtUtil.getUserId(accessToken));
+            log.debug("email" + email);
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             UsernamePasswordAuthenticationToken authentication =
@@ -123,6 +140,10 @@ public class JwtFilter extends OncePerRequestFilter {
     private boolean isAllowedPath(String uri) {
         return ALLOW_ORIGINS.stream()
                 .anyMatch(pattern -> pathMatcher.match(pattern, uri));
+    }
+
+    private boolean isInternalApi(String uri) {
+        return uri.startsWith("/api/v1/users/github");
     }
 
     private void handleTokenReissue(
