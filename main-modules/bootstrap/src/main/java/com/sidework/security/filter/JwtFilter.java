@@ -64,22 +64,6 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Doctalk에서는 FeignClient로
-        if (isInternalApi(requestUri)) {
-            String authHeader = request.getHeader("Authorization");
-
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                accessToken = authHeader.substring(7);
-            } else {
-                accessToken = null;
-            }
-
-        } else {
-            // 🔥 기존 쿠키 방식 유지
-            accessToken = CookieUtil.getAccessTokenFromRequest(request);
-        }
-
-
         boolean isReissueRequest = pathMatcher.match(TOKEN_REISSUE_API, requestUri)
                 && "POST".equals(request.getMethod());
 
