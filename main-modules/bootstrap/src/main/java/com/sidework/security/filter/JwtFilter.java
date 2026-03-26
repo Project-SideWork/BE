@@ -97,6 +97,8 @@ public class JwtFilter extends OncePerRequestFilter {
             log.info("id" + jwtUtil.getUserId(accessToken));
             log.info("email" + email);
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            log.info("userDetails" + userDetails.getUsername());
+            log.info("userDetails" + userDetails.getAuthorities());
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
@@ -104,8 +106,13 @@ public class JwtFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities()
                     );
+            log.info("authentication" + authentication.getName());
+
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            log.info("after set detail");
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("authentication");
 
         } catch (ExpiredJwtException e) {
             log.debug("JWT 토큰 만료됨");
