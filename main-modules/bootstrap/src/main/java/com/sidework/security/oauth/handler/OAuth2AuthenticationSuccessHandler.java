@@ -83,7 +83,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) {
 
-        String targetUrl = "http://growp.publicvm.com";
+        String targetUrl = "http://growp.publicvm.com/api/health";
 
         log.info("targetUrl: {}", targetUrl);
 
