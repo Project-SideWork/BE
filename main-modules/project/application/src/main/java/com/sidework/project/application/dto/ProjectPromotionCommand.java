@@ -11,5 +11,5 @@ public record ProjectPromotionCommand(
 	@NotEmpty
 	List<Long> usedSkillIds,
 
-	String demoURL
+	String demoUrl
 ) {}

@@ -14,5 +14,5 @@ public class ProjectPromotion {
 	private Long id;
 	private Long projectId;
 	private String description;
-	private String demoURL;
+	private String demoUrl;
 }
