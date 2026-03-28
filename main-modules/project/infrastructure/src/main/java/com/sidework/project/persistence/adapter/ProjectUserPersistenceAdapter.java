@@ -1,6 +1,7 @@
 package com.sidework.project.persistence.adapter;
 
 import com.sidework.project.application.port.out.ProjectUserOutPort;
+import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
 import com.sidework.project.persistence.entity.ProjectUserEntity;
@@ -76,4 +77,11 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
         return rows.stream()
             .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1], (a, b) -> a));
     }
+
+    @Override
+    public Optional<ProjectUser> findAcceptedByProjectIdAndUserId(Long projectId, Long userId) {
+        return repo.findFirstByProjectIdAndUserIdAndStatus(projectId, userId, ApplyStatus.ACCEPTED)
+            .map(mapper::toDomain);
+    }
+
 }
