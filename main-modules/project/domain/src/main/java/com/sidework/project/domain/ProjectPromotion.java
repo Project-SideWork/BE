@@ -13,6 +13,16 @@ public class ProjectPromotion {
 
 	private Long id;
 	private Long projectId;
+	private Long userId;
 	private String description;
 	private String demoUrl;
+
+	public static ProjectPromotion create(Long projectId, Long userId, String description, String demoUrl ) {
+		return ProjectPromotion.builder()
+			.projectId(projectId)
+			.userId(userId)
+			.description(description)
+			.demoUrl(demoUrl)
+			.build();
+	}
 }

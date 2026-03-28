@@ -22,6 +22,9 @@ public class ProjectPromotionEntity extends BaseEntity {
 	@Column(name = "project_id", nullable = false)
 	private Long projectId;
 
+	@Column(name = "user_id", nullable = false)
+	private Long userId;
+
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String description;
 
