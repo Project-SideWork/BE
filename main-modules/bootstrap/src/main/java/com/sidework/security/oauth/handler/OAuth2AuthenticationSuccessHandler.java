@@ -63,10 +63,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
             Long githubId = Long.parseLong(Objects.requireNonNull(principal).getUserInfo().getId());
             String githubAccessToken = client.getAccessToken().getTokenValue();
+            String login = (String) oauthToken.getPrincipal().getAttributes().get("login");
             String email = jwtUtil.getEmail(accessToken);
 
             User user = userRepository.findByEmail(email);
-            user.addGithubInfo(githubId, encryptor.encrypt(githubAccessToken));
+            user.addGithubInfo(githubId, login, encryptor.encrypt(githubAccessToken));
             userRepository.save(user);
         }
 

@@ -60,7 +60,7 @@ public class UserQueryService implements UserQueryUseCase {
             throw new GithubInfoNotFoundException();
         }
 
-        return new GithubInfoResponse(githubInfo.githubId(), encryptor.decrypt(githubInfo.githubAccessToken()));
+        return new GithubInfoResponse(githubInfo.githubId(), githubInfo.githubLoginName(), encryptor.decrypt(githubInfo.githubAccessToken()));
     }
 
     @Override

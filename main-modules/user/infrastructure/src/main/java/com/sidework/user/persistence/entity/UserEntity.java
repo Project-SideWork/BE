@@ -22,6 +22,9 @@ public class UserEntity extends BaseEntity {
     @Column(name = "github_id", nullable = true)
     private Long githubId;
 
+    @Column(name = "github_login_name", nullable = true)
+    private String githubLoginName;
+
     @Column(name = "github_access_token", nullable = true)
     private String githubAccessToken;
 
