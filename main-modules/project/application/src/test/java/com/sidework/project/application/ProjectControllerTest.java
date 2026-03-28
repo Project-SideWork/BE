@@ -12,6 +12,7 @@ import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
+import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.*;
 import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
@@ -72,6 +73,9 @@ public class ProjectControllerTest {
 
     @MockitoBean
     private ProjectLikeQueryUseCase projectLikeQueryUseCase;
+
+    @MockitoBean
+    private ProjectUserReviewCommandUseCase projectUserReviewCommandUseCase;
 
     @MockitoBean
     private ProjectOutPort repo;
@@ -702,7 +706,7 @@ public class ProjectControllerTest {
             java.time.LocalDate.of(2025, 3, 31),
             MeetingType.HYBRID,
             ProjectStatus.RECRUITING,
-            List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED)),
+            List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED, 4.5)),
             List.of(ProjectDetailResponse.RecruitPositionResponse.of(ProjectRole.BACKEND, 1, 0, SkillLevel.JUNIOR)),
             List.of("Java", "Spring"),
             List.of("Redis")
@@ -772,7 +776,7 @@ public class ProjectControllerTest {
             any()
         )).thenReturn(pageResponse);
 
-        mockMvc.perform(get("/api/v1/projects/list")
+        mockMvc.perform(get("/api/v1/projects")
                 .with(user(authenticatedUserDetails))
                 .param("keyword", keyword)
                 .param("skillIds", "1", "2"))
@@ -789,7 +793,7 @@ public class ProjectControllerTest {
 
         doNothing().when(projectLikeCommandUseCase).like(authenticatedUserDetails.getId(), projectId);
 
-        mockMvc.perform(post("/api/v1/projects/{projectId}/like", projectId)
+        mockMvc.perform(post("/api/v1/projects/{projectId}/likes", projectId)
                 .with(user(authenticatedUserDetails))
                 .with(csrf()))
             .andDo(print())
@@ -826,7 +830,7 @@ public class ProjectControllerTest {
             any()
         )).thenReturn(pageResponse);
 
-        mockMvc.perform(get("/api/v1/projects/likes")
+        mockMvc.perform(get("/api/v1/projects/me/likes")
                 .with(user(authenticatedUserDetails))
                 .param("keyword", keyword)
                 .param("skillIds", "1", "2"))
@@ -836,6 +840,58 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.result.content[0].liked").value(true));
 
         verify(projectQueryUseCase).queryLikedProjectList(eq(userId), eq(keyword), eq(skillIds), any());
+    }
+
+    @Test
+    void 동료평가_요청시_성공하면_200을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectUserReviewCommand command = new ProjectUserReviewCommand(
+            List.of(new ProjectUserReviewCommand.Review(
+                2L,
+                5, 5, 4, 5,
+                "수고했습니다"
+            ))
+        );
+
+        doNothing().when(projectUserReviewCommandUseCase)
+            .create(anyLong(), eq(projectId), any(ProjectUserReviewCommand.class));
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/reviews", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true));
+
+        verify(projectUserReviewCommandUseCase).create(eq(1L), eq(projectId), any(ProjectUserReviewCommand.class));
+    }
+
+    @Test
+    void 동료평가_요청시_항목_점수가_범위를_벗어나면_400을_반환한다() throws Exception {
+        Long projectId = 1L;
+        String body = """
+            {
+              "reviews": [
+                {
+                  "revieweeUserId": 2,
+                  "responsibility": 0,
+                  "communication": 5,
+                  "collaboration": 5,
+                  "problemSolving": 5
+                }
+              ]
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/reviews", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
     }
 
     private ProjectCommand createCommand(ProjectStatus status) {

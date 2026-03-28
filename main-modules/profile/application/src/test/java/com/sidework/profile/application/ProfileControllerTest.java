@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -65,7 +66,7 @@ class ProfileControllerTest {
 		when(profileQueryUseCase.getProfileByUserId(userId)).thenReturn(response);
 
 		// when & then
-		mockMvc.perform(get("/api/v1/profiles")
+		mockMvc.perform(get("/api/v1/profiles/me")
 				.with(user(authenticatedUserDetails))
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
@@ -86,13 +87,13 @@ class ProfileControllerTest {
 		when(profileQueryUseCase.getProfileByUserId(userId)).thenReturn(response);
 
 		// when & then
-		mockMvc.perform(get("/api/v1/profiles")
+		mockMvc.perform(get("/api/v1/profiles/me")
 				.with(user(authenticatedUserDetails))
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.isSuccess").value(true))
-			.andExpect(jsonPath("$.result.profileId").isEmpty());
+			.andExpect(jsonPath("$.result.profileId").value(nullValue()));
 
 		verify(profileQueryUseCase).getProfileByUserId(userId);
 	}
@@ -103,7 +104,7 @@ class ProfileControllerTest {
 		ProfileUpdateCommand command = createProfileUpdateCommand();
 
 		// when & then
-		mockMvc.perform(put("/api/v1/profiles")
+		mockMvc.perform(put("/api/v1/profiles/me")
 				.with(user(authenticatedUserDetails))
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
@@ -124,7 +125,7 @@ class ProfileControllerTest {
 			.update(1L, command);
 
 		// when & then
-		mockMvc.perform(put("/api/v1/profiles")
+		mockMvc.perform(put("/api/v1/profiles/me")
 				.with(user(authenticatedUserDetails))
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +144,7 @@ class ProfileControllerTest {
 		doNothing().when(profileLikeCommandUseCase).like(1L, profileId);
 
 		// when & then
-		mockMvc.perform(post("/api/v1/profiles/{profileId}/like", profileId)
+		mockMvc.perform(post("/api/v1/profiles/{profileId}/likes", profileId)
 				.with(user(authenticatedUserDetails))
 				.with(csrf()))
 			.andDo(print())
@@ -164,7 +165,8 @@ class ProfileControllerTest {
 			"테스트유저",
 			null,          // description
 			List.of(),     // skills
-			true           // liked
+			true,          // liked
+			4.5            // score
 		);
 		PageResponse<List<UserProfileListResponse>> pageResponse = PageResponse.of(
 			List.of(item),
@@ -178,7 +180,7 @@ class ProfileControllerTest {
 			.thenReturn(pageResponse);
 
 		// when & then
-		mockMvc.perform(get("/api/v1/profiles/likes")
+		mockMvc.perform(get("/api/v1/profiles/me/likes")
 				.with(user(authenticatedUserDetails))
 				.param("skillIds", "1", "2"))
 			.andDo(print())
@@ -232,6 +234,8 @@ class ProfileControllerTest {
 			null,
 			null,
 			0,
+			4.0,
+			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
@@ -251,6 +255,8 @@ class ProfileControllerTest {
 			null,
 			null,
 			0,
+			null,
+			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),

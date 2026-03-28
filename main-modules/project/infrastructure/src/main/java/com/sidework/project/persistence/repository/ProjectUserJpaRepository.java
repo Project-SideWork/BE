@@ -1,5 +1,6 @@
 package com.sidework.project.persistence.repository;
 
+import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.persistence.entity.ProjectUserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,4 +44,6 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
         WHERE pu.projectId IN :projectIds AND pu.role = :role
         """)
     List<Object[]> findOwnerProjectIdAndUserIdByProjectIdIn(@Param("projectIds") List<Long> projectIds, @Param("role") ProjectRole role);
+
+    Optional<ProjectUserEntity> findFirstByProjectIdAndUserIdAndStatus(Long projectId, Long userId, ApplyStatus status);
 }

@@ -21,11 +21,13 @@ public record UserProfileResponse(
 	String selfIntroduction,
 	String residence,
 	Integer projectCounts,
+	Double score,
 	List<RoleInfo> roles, //직군 정보
 	List<SchoolInfo> schools, // 학교 장보
 	List<SkillInfo> skills, //기술 스택
 	List<PortfolioInfo> portfolios, // 포폴 정보
-	List<ProjectInfo> projects // 프로젝트 정보
+	List<ProjectInfo> projects, // 프로젝트 정보
+	List<ProjectReviewInfo> reviews // 프로젝트 리뷰 정보
 ) {
 	public record RoleInfo(
 		Long roleId,
@@ -66,5 +68,13 @@ public record UserProfileResponse(
 		ProjectStatus status,
 		List<String> projectStacks,
 		List<ProjectRole> role
+	) {}
+
+	public record ProjectReviewInfo(
+		Long projectId,
+		String title,
+		String reviewer,
+		String comment,
+		Double score
 	) {}
 }

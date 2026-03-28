@@ -3,6 +3,7 @@ package com.sidework.project.application.adapter;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
+import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
@@ -11,6 +12,7 @@ import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.in.ProjectLikeCommandUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.docs.ProjectControllerDocs;
+import com.sidework.project.application.port.in.ProjectUserReviewCommandUseCase;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +34,7 @@ public class ProjectController implements ProjectControllerDocs {
     private final ProjectApplyCommandUseCase applyCommandService;
     private final ProjectQueryUseCase queryService;
     private final ProjectLikeCommandUseCase likeCommandService;
+    private final ProjectUserReviewCommandUseCase reviewService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> postNewProject(
@@ -90,7 +93,7 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(projectId)));
     }
 
-    @GetMapping("/list")
+    @GetMapping()
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PageableDefault(size = 20) Pageable pageable,
@@ -103,7 +106,7 @@ public class ProjectController implements ProjectControllerDocs {
         );
     }
 
-    @PostMapping("/{projectId}/like")
+    @PostMapping("/{projectId}/likes")
     public ResponseEntity<ApiResponse<Void>> likeProject(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("projectId") Long projectId) {
@@ -111,7 +114,7 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
     }
 
-    @GetMapping("/likes")
+    @GetMapping("/me/likes")
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getLikedProjectList(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PageableDefault(size = 20) Pageable pageable,
@@ -123,6 +126,16 @@ public class ProjectController implements ProjectControllerDocs {
                 queryService.queryLikedProjectList(user.getId(), keyword, skillIds, pageable)
             )
         );
+    }
+
+    @PostMapping("/{projectId}/reviews")
+    public ResponseEntity<ApiResponse<Void>> createMemberReview(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PathVariable("projectId") Long projectId,
+        @Validated @RequestBody ProjectUserReviewCommand command
+    ) {
+        reviewService.create(user.getId(), projectId, command);
+        return ResponseEntity.ok(ApiResponse.onSuccessVoid());
     }
 
 

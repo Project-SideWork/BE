@@ -35,13 +35,13 @@ public class ProfileController implements ProfileControllerDocs {
 	private final ProfileQueryUseCase profileQueryUseCase;
 	private final ProfileLikeCommandUseCase profileLikeCommandUseCase;
 
-	@GetMapping
+	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
 		@AuthenticationPrincipal AuthenticatedUserDetails user) {
 		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(user.getId())));
 	}
 
-	@PutMapping
+	@PutMapping("/me")
 	public ResponseEntity<ApiResponse<Void>> updateUserProfile(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@RequestBody ProfileUpdateCommand profileUpdateCommand) {
@@ -49,7 +49,7 @@ public class ProfileController implements ProfileControllerDocs {
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
 	}
 
-	@GetMapping("/list")
+	@GetMapping()
 	public ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getUserProfiles(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PageableDefault(size = 20) Pageable pageable,
@@ -63,7 +63,7 @@ public class ProfileController implements ProfileControllerDocs {
 		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(userId)));
 	}
 
-	@PostMapping("/{profileId}/like")
+	@PostMapping("/{profileId}/likes")
 	public ResponseEntity<ApiResponse<Void>> likeUser(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PathVariable("profileId") Long profileId) {
@@ -71,7 +71,7 @@ public class ProfileController implements ProfileControllerDocs {
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 
-	@GetMapping("/likes")
+	@GetMapping("/me/likes")
 	public ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getLikedUserProfiles(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PageableDefault(size = 20) Pageable pageable,
