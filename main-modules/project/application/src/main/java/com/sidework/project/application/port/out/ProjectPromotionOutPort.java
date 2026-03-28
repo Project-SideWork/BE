@@ -6,5 +6,5 @@ import com.sidework.project.domain.ProjectPromotion;
 
 public interface ProjectPromotionOutPort {
 	boolean existsRecentPromotion(Long projectId, Long userId, Instant from);
-	void save(ProjectPromotion projectPromotion);
+	Long save(ProjectPromotion projectPromotion);
 }

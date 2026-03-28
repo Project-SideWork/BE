@@ -24,7 +24,7 @@ public class ProjectPromotionPersistenceAdapter implements ProjectPromotionOutPo
 	}
 
 	@Override
-	public void save(ProjectPromotion projectPromotion) {
-		projectPromotionJpaRepository.save(mapper.toEntity(projectPromotion));
+	public Long save(ProjectPromotion projectPromotion) {
+		return projectPromotionJpaRepository.save(mapper.toEntity(projectPromotion)).getId();
 	}
 }

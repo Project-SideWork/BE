@@ -15,6 +15,7 @@ import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectPromotionOutPort;
 import com.sidework.project.domain.ProjectPromotion;
 import com.sidework.project.domain.ProjectStatus;
+import com.sidework.skill.application.service.ProjectPromotionSkillCommandService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,13 +26,16 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 	private final ProjectOutPort projectRepository;
 	private final ProjectPromotionOutPort projectPromotionRepository;
 
+	private final ProjectPromotionSkillCommandService promotionSkillCommandService;
+
 
 	@Override
 	public void create(Long userId, Long projectId, ProjectPromotionCommand command) {
 		checkProjectExists(projectId);
 		checkCanCreateProjectPromotion(projectId, userId);
 		ProjectPromotion promotion = ProjectPromotion.create(projectId, userId, command.description(), command.demoUrl());
-		projectPromotionRepository.save(promotion);
+		Long promotionId = projectPromotionRepository.save(promotion);
+		promotionSkillCommandService.create(promotionId, command.usedSkillIds());
 
 	}
 
