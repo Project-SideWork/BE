@@ -93,6 +93,7 @@ public class User {
 
     public void addGithubInfo(Long githubId, String githubLoginName, String encodedToken) {
         this.githubId = githubId;
+        this.githubLoginName = githubLoginName;
         this.githubAccessToken = encodedToken;
     }
 }
