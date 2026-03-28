@@ -1,6 +1,7 @@
 package com.sidework.project.persistence.repository;
 
 import com.sidework.project.application.dto.ProjectTitleDto;
+import com.sidework.project.domain.ProjectStatus;
 import com.sidework.project.persistence.entity.ProjectEntity;
 import com.sidework.project.persistence.repository.custom.CustomProjectJpaRepository;
 
@@ -34,4 +35,11 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Long>
 		"""
 	)
 	Page<ProjectEntity> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+	@Query("""
+    SELECT p.status
+    FROM ProjectEntity p
+    WHERE p.id = :projectId
+""")
+	ProjectStatus findStatusById(@Param("projectId") Long projectId);
 }

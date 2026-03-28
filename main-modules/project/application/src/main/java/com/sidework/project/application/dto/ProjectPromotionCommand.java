@@ -8,7 +8,6 @@ public record ProjectPromotionCommand(
 	@NotEmpty
 	String description,
 
-	@NotEmpty
 	List<Long> usedSkillIds,
 
 	String demoUrl
