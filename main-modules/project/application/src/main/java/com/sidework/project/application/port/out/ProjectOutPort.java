@@ -3,6 +3,7 @@ package com.sidework.project.application.port.out;
 import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRecruitPosition;
+import com.sidework.project.domain.ProjectStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -22,4 +23,5 @@ public interface ProjectOutPort {
     Page<Project> searchInProjectIds(String keyword, List<Long> skillIds, List<Long> projectIds, Pageable pageable);
     Page<Project> searchLiked(String keyword, List<Long> skillIds, Long userId, Pageable pageable);
     Map<Long, List<ProjectRecruitPosition>> getProjectRecruitPositionsByProjectIds(List<Long> projectIds);
+    ProjectStatus getProjectStatus(Long projectId);
 }

@@ -5,6 +5,7 @@ import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.domain.Project;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.domain.ProjectRecruitPosition;
+import com.sidework.project.domain.ProjectStatus;
 import com.sidework.project.persistence.entity.ProjectEntity;
 import com.sidework.project.persistence.entity.ProjectRecruitPositionEntity;
 import com.sidework.project.persistence.mapper.ProjectMapper;
@@ -128,4 +129,10 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
             .map(recruitMapper::toDomain)
             .collect(Collectors.groupingBy(ProjectRecruitPosition::getProjectId));
     }
+
+	@Override
+	public ProjectStatus getProjectStatus(Long projectId) {
+		if(projectId == null) return null;
+		return repo.findStatusById(projectId);
+	}
 }
