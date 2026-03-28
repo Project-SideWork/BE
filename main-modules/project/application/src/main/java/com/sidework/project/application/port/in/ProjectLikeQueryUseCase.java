@@ -6,4 +6,6 @@ import java.util.Map;
 public interface ProjectLikeQueryUseCase {
 	Map<Long, Boolean> isLikedByProjectIds(Long userId, List<Long> projectIds);
 
+	List<Long> findLikedProjectIds(Long userId);
+
 }

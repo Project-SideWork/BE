@@ -10,6 +10,7 @@ dependencies {
     implementation project(':main-modules:common')
     implementation project(':main-modules:profile:profile-domain')
     implementation project(':main-modules:profile:profile-application')
+    implementation project(':main-modules:skill:skill-infrastructure')
 
     implementation libs.spring.boot.starter.jpa
     implementation libs.spring.boot.starter.security
@@ -26,6 +27,20 @@ dependencies {
 
     testImplementation libs.spring.boot.starter.test
     testImplementation libs.database.h2
+
+    implementation libs.querydsl.jpa
+
+    annotationProcessor(libs.querydsl.apt) {
+        artifact {
+            classifier = "jakarta"
+        }
+    }
+
+    testAnnotationProcessor(libs.querydsl.apt) {
+        artifact {
+            classifier = "jakarta"
+        }
+    }
 }
 
 repositories {

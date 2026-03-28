@@ -224,4 +224,31 @@ public interface ProjectControllerDocs {
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("projectId") Long projectId
     );
+
+    @Operation(description = "좋아요한 프로젝트 목록 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getLikedProjectList(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PageableDefault(size = 20) Pageable pageable,
+        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
+    );
 }

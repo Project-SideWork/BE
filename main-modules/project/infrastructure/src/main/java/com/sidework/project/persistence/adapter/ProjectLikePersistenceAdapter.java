@@ -24,7 +24,10 @@ public class ProjectLikePersistenceAdapter implements ProjectLikeOutPort {
 
 	@Override
 	public void like(ProjectLike like) {
-		projectLikeRepository.save(projectLikeMapper.toEntity(like));
+		int deleted = projectLikeRepository.deleteByUserIdAndProjectId(like.getUserId(), like.getProjectId());
+		if (deleted == 0) {
+			projectLikeRepository.insertIgnore(like.getUserId(), like.getProjectId());
+		}
 	}
 
 	@Override
@@ -49,5 +52,10 @@ public class ProjectLikePersistenceAdapter implements ProjectLikeOutPort {
 
 		return projectIds.stream()
 			.collect(Collectors.toMap(id->id, projectIdSet::contains));
+	}
+
+	@Override
+	public List<Long> findLikedProjectIds(Long userId) {
+		return projectLikeRepository.findProjectIdsByUserId(userId);
 	}
 }

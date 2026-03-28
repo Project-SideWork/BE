@@ -95,8 +95,7 @@ public class ProjectController implements ProjectControllerDocs {
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
-            @RequestParam(name = "skillIds", required = false) List<Long> skillIds
-    ) {
+            @RequestParam(name = "skillIds", required = false) List<Long> skillIds) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 queryService.queryProjectList(user.getId(), keyword, skillIds, pageable)
@@ -111,5 +110,20 @@ public class ProjectController implements ProjectControllerDocs {
         likeCommandService.like(user.getId(), projectId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
     }
+
+    @GetMapping("/likes")
+    public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getLikedProjectList(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PageableDefault(size = 20) Pageable pageable,
+        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds){
+
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                queryService.queryLikedProjectList(user.getId(), keyword, skillIds, pageable)
+            )
+        );
+    }
+
 
 }

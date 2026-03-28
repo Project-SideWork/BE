@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface ProfileSkillJpaRepository extends JpaRepository<ProfileSkillEntity, Long> {
 	List<ProfileSkillEntity> findByProfileId(Long profileId);
+	List<ProfileSkillEntity> findByProfileIdIn(List<Long> profileIds);
 
 	@Modifying
 	@Query("DELETE FROM ProfileSkillEntity e WHERE e.profileId = :profileId")

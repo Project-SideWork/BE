@@ -12,4 +12,13 @@ public interface CustomProjectJpaRepository {
     Page<ProjectEntity> searchByKeywordAndSkillIdsQuerydsl(
         ProjectSearchCondition condition,
         Pageable pageable);
+
+	Page<ProjectEntity> searchByKeywordAndSkillIdsInProjectIdsQuerydsl(
+		ProjectSearchCondition condition,
+		Pageable pageable);
+
+	Page<ProjectEntity> searchLikedByKeywordAndSkillIdsQuerydsl(
+		Long userId,
+		ProjectSearchCondition condition,
+		Pageable pageable);
 }

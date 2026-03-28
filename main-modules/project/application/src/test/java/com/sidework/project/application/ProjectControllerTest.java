@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -780,6 +781,61 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.isSuccess").value(true))
             .andExpect(jsonPath("$.result.content[0].projectId").value(1))
             .andExpect(jsonPath("$.result.content[0].title").value("테스트 프로젝트"));
+    }
+
+    @Test
+    void 프로젝트_좋아요_요청시_성공하면_200을_반환한다() throws Exception {
+        Long projectId = 1L;
+
+        doNothing().when(projectLikeCommandUseCase).like(authenticatedUserDetails.getId(), projectId);
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/like", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true));
+
+        verify(projectLikeCommandUseCase).like(authenticatedUserDetails.getId(), projectId);
+    }
+
+    @Test
+    void 프로젝트_좋아요_목록_조회시_성공하면_liked를_반환한다() throws Exception {
+        Long userId = authenticatedUserDetails.getId();
+        String keyword = "테스트";
+        List<Long> skillIds = List.of(1L, 2L);
+
+        ProjectListResponse listItem = ProjectListResponse.of(
+            1L,
+            "테스트 프로젝트",
+            "설명",
+            ProjectStatus.RECRUITING,
+            true,
+            List.of(),
+            List.of("Java"),
+            "테스트유저"
+        );
+
+        PageResponse<List<ProjectListResponse>> pageResponse =
+            PageResponse.of(List.of(listItem), 0, 20, 1, 1);
+
+        when(projectQueryUseCase.queryLikedProjectList(
+            eq(userId),
+            eq(keyword),
+            eq(skillIds),
+            any()
+        )).thenReturn(pageResponse);
+
+        mockMvc.perform(get("/api/v1/projects/likes")
+                .with(user(authenticatedUserDetails))
+                .param("keyword", keyword)
+                .param("skillIds", "1", "2"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true))
+            .andExpect(jsonPath("$.result.content[0].liked").value(true));
+
+        verify(projectQueryUseCase).queryLikedProjectList(eq(userId), eq(keyword), eq(skillIds), any());
     }
 
     private ProjectCommand createCommand(ProjectStatus status) {

@@ -27,11 +27,6 @@ public class ProjectLikeCommandService implements ProjectLikeCommandUseCase {
 		userRepository.validateExists(userId);
 
 		ProjectLike like = ProjectLike.create(userId, projectId);
-		if(projectLikeRepository.isLiked(userId, projectId)) {
-			projectLikeRepository.unlike(like);
-		}
-		else {
-			projectLikeRepository.like(like);
-		}
+		projectLikeRepository.like(like);
 	}
 }
