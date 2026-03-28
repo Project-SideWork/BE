@@ -38,6 +38,6 @@ public class UserController implements UserControllerDocs {
 
     @GetMapping("/github")
     public GithubInfoResponse getMyGithubToken(@RequestHeader("X-User-Id") Long userId) {
-        return queryService.queryGithubToken(userId);
+        return queryService.queryGithubInformation(userId);
     }
 }

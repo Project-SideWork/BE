@@ -49,7 +49,7 @@ public class UserQueryService implements UserQueryUseCase {
     }
 
     @Override
-    public GithubInfoResponse queryGithubToken(Long id) {
+    public GithubInfoResponse queryGithubInformation(Long id) {
         if(id == null) throw new InvalidCommandException("사용자 ID는 필수값입니다.");
         if(!userRepository.existsById(id)) {
             throw new UserNotFoundException(id);

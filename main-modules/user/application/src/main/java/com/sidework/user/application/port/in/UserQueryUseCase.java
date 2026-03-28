@@ -12,5 +12,5 @@ public interface UserQueryUseCase {
     List<User> findByIdIn(List<Long> ids);
     Map<Long, String> findNamesByUserIds(List<Long> userIds);
     void validateExists(Long id);
-    GithubInfoResponse queryGithubToken(Long id);
+    GithubInfoResponse queryGithubInformation(Long id);
 }

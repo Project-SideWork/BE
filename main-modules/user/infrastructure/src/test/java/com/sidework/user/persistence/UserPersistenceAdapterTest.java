@@ -117,11 +117,11 @@ public class UserPersistenceAdapterTest {
 
     @Test
     void findGithubInfoProjection로_사용자의_깃허브ID와_암호화된_깃허브_토큰을_조회한다() {
-        when(repo.existsById(1L)).thenReturn(true);
-        when(repo.findGithubInfoById(1L)).thenReturn(new GithubInfoDto(1L, "encoded"));
+        when(repo.findGithubInfoById(1L)).thenReturn(new GithubInfoDto(1L, "test","encoded"));
         GithubInfoDto res = adapter.findGithubInfoProjection(1L);
 
         assertNotNull(res.githubId());
+        assertNotNull(res.githubLoginName());
         assertNotNull(res.githubAccessToken());
 
         verify(repo).findGithubInfoById(1L);
@@ -153,7 +153,7 @@ public class UserPersistenceAdapterTest {
     private UserEntity createUserEntity(Long id){
         return new UserEntity(
                 id,
-                1L, "token",
+                1L,"test", "token",
                 "test@test.com",
                 "테스트",
                 "테스트1",

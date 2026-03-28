@@ -162,20 +162,22 @@ public class UserControllerTest {
     }
 
     @Test
-    void 깃허브_정보_확인_성공시_200과_깃허브ID와_깃허브토큰을_반환한다() throws Exception {
+    void 깃허브_정보_확인_성공시_200과_깃허브정보를_반환한다() throws Exception {
         // given
         Long userId = 1L;
-        when(userQueryUseCase.queryGithubToken(userId)).thenReturn(new GithubInfoResponse(1L, "accesstoken"));
+        when(userQueryUseCase.queryGithubInformation(userId)).thenReturn(new GithubInfoResponse(1L, "test" ,"accesstoken"));
 
         // when & then
         mockMvc.perform(get("/api/v1/users/github")
-                        .with(user(authenticatedUserDetails)))
+                        .with(user(authenticatedUserDetails))
+                        .header("x-user-id", userId))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.githubId").value(1))
-                .andExpect(jsonPath("$.result.rawGithubToken").value("accesstoken"));
+                .andExpect(jsonPath("$.githubId").value(1))
+                .andExpect(jsonPath("$.githubLoginName").value("test"))
+                .andExpect(jsonPath("$.githubAccessToken").value("accesstoken"));
 
-        verify(userQueryUseCase).queryGithubToken(userId);
+        verify(userQueryUseCase).queryGithubInformation(userId);
     }
 
 
