@@ -1,5 +1,11 @@
 package com.sidework.user.application;
 
+import com.sidework.common.exception.InvalidCommandException;
+import com.sidework.common.util.AesEncryptor;
+import com.sidework.user.application.exception.GithubInfoNotFoundException;
+import com.sidework.user.application.exception.UserNotFoundException;
+import com.sidework.user.application.port.in.GithubInfoResponse;
+import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.application.service.UserQueryService;
 import org.junit.jupiter.api.Test;
@@ -8,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +22,9 @@ import static org.mockito.Mockito.when;
 public class UserQueryServiceTest {
     @Mock
     private UserOutPort repo;
+
+    @Mock
+    private AesEncryptor encryptor;
 
     @InjectMocks
     private UserQueryService service;
@@ -29,5 +38,62 @@ public class UserQueryServiceTest {
 
         assertTrue(res);
         verify(repo).existsByEmail(email);
+    }
+
+    @Test
+    void queryGithubInformation은_깃허브Id와_복호화된_액세스_토큰을_조회한다() {
+        Long id = 1L;
+        when(repo.existsById(id)).thenReturn(true);
+        when(repo.findGithubInfoProjection(id)).thenReturn(new GithubInfoDto(1L, "test","accesstoken"));
+        when(encryptor.decrypt("accesstoken")).thenReturn("decoded");
+
+        GithubInfoResponse res = service.queryGithubInformation(id);
+
+        assertNotEquals("accesstoken", res.githubAccessToken());
+        assertEquals(1L, res.githubId());
+
+        verify(repo).existsById(id);
+        verify(repo).findGithubInfoProjection(id);
+    }
+
+    @Test
+    void queryGithubInformation은_전달받은_id가_null이면_InvalidCommandException을_던진다() {
+        Long id = null;
+        assertThrows(
+                InvalidCommandException.class,
+                () -> service.queryGithubInformation(id)
+        );
+    }
+
+    @Test
+    void queryGithubInformation은_조회한_결과_중_하나라도_null이면_GithubInfoNotFoundException을_던진다() {
+        Long first = 1L;
+        Long second = 2L;
+        when(repo.existsById(first)).thenReturn(true);
+        when(repo.existsById(second)).thenReturn(true);
+        when(repo.findGithubInfoProjection(first)).thenReturn(new GithubInfoDto(1L,"test", null));
+        when(repo.findGithubInfoProjection(second)).thenReturn(new GithubInfoDto(null,"test", "accesstoken"));
+
+        assertThrows(
+                GithubInfoNotFoundException.class,
+                () -> service.queryGithubInformation(first)
+        );
+
+        assertThrows(
+                GithubInfoNotFoundException.class,
+                () -> service.queryGithubInformation(second)
+        );
+    }
+
+    @Test
+    void queryGithubInformation에_전달된_id가_존재하지_않는_사용자의_것이면_UserNotFoundException을_던진다() {
+        when(repo.existsById(1L)).thenReturn(false);
+
+        assertThrows(
+                UserNotFoundException.class,
+                () -> service.queryGithubInformation(1L)
+        );
+
+        verify(repo).existsById(1L);
     }
 }

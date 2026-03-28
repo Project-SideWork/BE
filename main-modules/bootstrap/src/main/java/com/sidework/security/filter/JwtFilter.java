@@ -42,7 +42,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/v1/regions/**",
             "/api/v1/users",
             "/login/oauth2/code/github",
-            "/oauth2/authorization/github"
+            "/oauth2/authorization/github",
+            "/api/v1/users/email"
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";
@@ -62,7 +63,6 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
 
         boolean isReissueRequest = pathMatcher.match(TOKEN_REISSUE_API, requestUri)
                 && "POST".equals(request.getMethod());
@@ -102,6 +102,7 @@ public class JwtFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities()
                     );
+
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -151,8 +152,9 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
+            Long userId = jwtUtil.getUserId(refreshToken);
             String email = jwtUtil.getEmail(refreshToken);
-            String reissuedAccess = jwtUtil.createAccess(email);
+            String reissuedAccess = jwtUtil.createAccess(userId, email);
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json");

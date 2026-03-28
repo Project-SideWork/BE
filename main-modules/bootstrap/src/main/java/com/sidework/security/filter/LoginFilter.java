@@ -58,10 +58,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
         AuthenticatedUserDetails userDetails = (AuthenticatedUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getId();
         String email = userDetails.getEmail();
         try {
-            String accessToken = jwtUtil.createAccess(email);
-            String refreshToken = jwtUtil.createRefresh(email);
+            String accessToken = jwtUtil.createAccess(userId, email);
+            String refreshToken = jwtUtil.createRefresh(userId, email);
             response.addCookie(cookieUtil.createCookie("access", accessToken));
             response.addCookie(cookieUtil.createCookie("refresh", refreshToken));
             response.setStatus(HttpStatus.OK.value());

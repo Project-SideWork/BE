@@ -2,6 +2,9 @@ package com.sidework.user.application;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sidework.common.auth.AuthenticatedUserDetails;
+import com.sidework.common.response.exception.ExceptionAdvice;
+import com.sidework.user.application.port.in.GithubInfoResponse;
 import com.sidework.user.application.port.in.SignUpCommand;
 import com.sidework.user.application.adapter.UserController;
 import com.sidework.user.application.port.in.UserCommandUseCase;
@@ -10,19 +13,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
-@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = UserTestApplication.class)
+@Import(TestSecurityConfig.class)
 public class UserControllerTest {
 
     @Autowired
@@ -36,6 +42,10 @@ public class UserControllerTest {
 
     @MockitoBean
     private UserQueryUseCase userQueryUseCase;
+
+    private final AuthenticatedUserDetails authenticatedUserDetails = new AuthenticatedUserDetails(
+            1L, "test@test.com", "테스터", "password");
+
 
     @Test
     void 회원가입_요청시_성공하면_201을_반환한다() throws Exception {
@@ -149,6 +159,33 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.result.isExist").value(false));
 
         verify(userQueryUseCase).checkEmailExists(email);
+    }
+
+    @Test
+    void 깃허브_정보_확인_성공시_200과_깃허브정보를_반환한다() throws Exception {
+        // given
+        Long userId = 1L;
+        when(userQueryUseCase.queryGithubInformation(userId)).thenReturn(new GithubInfoResponse(1L, "test" ,"accesstoken"));
+
+        // when & then
+        mockMvc.perform(get("/api/v1/users/github")
+                        .with(user(authenticatedUserDetails))
+                        .header("x-user-id", userId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.githubId").value(1))
+                .andExpect(jsonPath("$.githubLoginName").value("test"))
+                .andExpect(jsonPath("$.githubAccessToken").value("accesstoken"));
+
+        verify(userQueryUseCase).queryGithubInformation(userId);
+    }
+
+
+    @Test
+    void 깃허브_정보_조회시_유저정보가_없으면_401을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/users/github").with(anonymous()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 
     private SignUpCommand createCommand(){

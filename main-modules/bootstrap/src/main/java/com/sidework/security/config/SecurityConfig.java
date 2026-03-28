@@ -24,6 +24,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -78,6 +79,10 @@ public class SecurityConfig {
                                 "/v3/api-docs/**", "/api/v1/users/email" ,"/api/v1/users", "/api/v1/reissue",
                                 "/firebase-messaging-sw.js", "/fcm-test.html", "/health", "/oauth2/authorization/github").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/regions/**", "/login/oauth2/code/github").permitAll()
+                        .requestMatchers("/internal/**")
+                        .access(new WebExpressionAuthorizationManager(
+                                "hasIpAddress('10.0.2.41/32')"
+                        ))
                         .anyRequest().authenticated()
                 ).headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())

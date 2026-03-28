@@ -31,6 +31,11 @@ public class JwtUtil {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
+    public Long getUserId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .get("growpUserId", Long.class);
+    }
+
     public String getEmail(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .get("email", String.class);
@@ -54,20 +59,22 @@ public class JwtUtil {
         }
     }
 
-    public String createAccess(String email) {
+    public String createAccess(Long userId, String email) {
         return Jwts.builder()
                 .claim("category", "access")
                 .claim("email", email)
+                .claim("growpUserId", userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
                 .signWith(secretKey)
                 .compact();
     }
 
-    public String createRefresh(String email) {
+    public String createRefresh(Long userId, String email) {
         return Jwts.builder()
                 .claim("category", "refresh")
                 .claim("email", email)
+                .claim("growpUserId", userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(secretKey)

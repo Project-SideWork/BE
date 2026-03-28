@@ -1,5 +1,6 @@
 package com.sidework.user.persistence.repository;
 
+import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.persistence.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,7 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByTelAndIdNot(@Param("tel") String tel, @Param("excludeUserId") Long excludeUserId);
 
     UserEntity findByEmail(String email);
+
+    @Query("SELECT new com.sidework.user.application.port.out.GithubInfoDto(e.githubId, e.githubLoginName, e.githubAccessToken) FROM UserEntity e WHERE e.id = :id")
+    GithubInfoDto findGithubInfoById(@Param("id") Long id);
 }

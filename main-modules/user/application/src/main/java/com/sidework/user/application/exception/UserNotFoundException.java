@@ -1,4 +1,4 @@
-package com.sidework.user.persistence.exception;
+package com.sidework.user.application.exception;
 
 import com.sidework.common.response.exception.GlobalException;
 import com.sidework.common.response.status.ErrorStatus;

@@ -1,11 +1,12 @@
 package com.sidework.user.persistence;
 
 import com.sidework.user.application.port.in.SignUpCommand;
+import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import com.sidework.user.persistence.adapter.UserPersistenceAdapter;
 import com.sidework.user.persistence.entity.UserEntity;
-import com.sidework.user.persistence.exception.UserNotFoundException;
+import com.sidework.user.application.exception.UserNotFoundException;
 import com.sidework.user.persistence.mapper.UserMapper;
 import com.sidework.user.persistence.repository.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,6 +115,18 @@ public class UserPersistenceAdapterTest {
         verify(repo).findById(2L);
     }
 
+    @Test
+    void findGithubInfoProjection로_사용자의_깃허브ID와_암호화된_깃허브_토큰을_조회한다() {
+        when(repo.findGithubInfoById(1L)).thenReturn(new GithubInfoDto(1L, "test","encoded"));
+        GithubInfoDto res = adapter.findGithubInfoProjection(1L);
+
+        assertNotNull(res.githubId());
+        assertNotNull(res.githubLoginName());
+        assertNotNull(res.githubAccessToken());
+
+        verify(repo).findGithubInfoById(1L);
+    }
+
     private SignUpCommand createCommand(){
         return new SignUpCommand(
                 "test@test.com",
@@ -140,6 +153,7 @@ public class UserPersistenceAdapterTest {
     private UserEntity createUserEntity(Long id){
         return new UserEntity(
                 id,
+                1L,"test", "token",
                 "test@test.com",
                 "테스트",
                 "테스트1",

@@ -33,6 +33,8 @@ spring:
             scope:
               - read:user
               - user:email
+              - read:org
+              - repo
         provider:
           github:
             authorization-uri: https://github.com/login/oauth/authorize

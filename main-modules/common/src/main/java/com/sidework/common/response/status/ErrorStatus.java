@@ -28,6 +28,7 @@ public enum ErrorStatus implements BaseStatusCode {
     EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_003", "이미 사용 중인 이메일입니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_004", "이미 사용 중인 닉네임입니다."),
     TEL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER_005", "이미 사용 중인 전화번호입니다."),
+    GITHUB_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_006", "사용자의 깃허브 정보가 없습니다. 먼저 깃허브 계정을 연동해주세요."),
 
     // PROJECT
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_001", "해당 프로젝트를 찾을 수 없습니다."),
