@@ -3,7 +3,6 @@ package com.sidework.security.oauth.service;
 import com.sidework.security.oauth.exception.OAuth2AuthenticationProcessingException;
 import com.sidework.security.oauth.user.OAuth2UserInfo;
 import com.sidework.security.oauth.user.OAuth2UserInfoFactory;
-import com.sidework.user.application.port.out.UserOutPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-        private final UserOutPort userRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationProcessingException {
