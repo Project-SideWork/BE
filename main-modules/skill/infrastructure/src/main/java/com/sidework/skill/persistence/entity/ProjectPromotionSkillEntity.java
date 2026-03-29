@@ -22,6 +22,9 @@ public class ProjectPromotionSkillEntity {
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
+	@Column(name = "promotion_id", nullable = false)
+	private Long promotionId;
+
 	@Column(name = "skill_id", nullable = false)
 	private Long skillId;
 }
