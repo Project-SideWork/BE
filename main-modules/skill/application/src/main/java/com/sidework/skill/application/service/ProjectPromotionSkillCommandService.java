@@ -25,12 +25,15 @@ public class ProjectPromotionSkillCommandService implements ProjectPromotionSkil
 	private final ProjectPromotionSkillOutPort projectPromotionSkillRepository;
 
 	@Override
-	public void create(Long promotionId, List<Long> skillIds) {
-		List<ProjectPromotionSkill> domains = createPromotionSkills(promotionId, skillIds);
+	public void create(Long userId, Long promotionId, List<Long> skillIds) {
+		if (skillIds == null || skillIds.isEmpty()) {
+			return;
+		}
+		List<ProjectPromotionSkill> domains = createPromotionSkills(userId, promotionId, skillIds);
 		projectPromotionSkillRepository.saveAll(domains);
 	}
 
-	private List<ProjectPromotionSkill> createPromotionSkills(Long projectId, List<Long> skillIds) {
+	private List<ProjectPromotionSkill> createPromotionSkills(Long userId, Long promotionId, List<Long> skillIds) {
 		Set<Long> requested = new HashSet<>(skillIds);
 
 		Set<Long> activeSkillIds =
@@ -47,7 +50,8 @@ public class ProjectPromotionSkillCommandService implements ProjectPromotionSkil
 		}
 		return requested.stream()
 			.map(id -> ProjectPromotionSkill.builder()
-				.projectId(projectId)
+				.projectId(promotionId)
+				.userId(userId)
 				.skillId(id)
 				.build())
 			.toList();

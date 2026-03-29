@@ -14,5 +14,7 @@ public class ProjectPromotionSkill {
 
 	private Long projectId;
 
+	private Long userId;
+
 	private Long skillId;
 }
