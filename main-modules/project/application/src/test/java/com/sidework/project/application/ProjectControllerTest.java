@@ -12,7 +12,9 @@ import com.sidework.project.application.exception.ProjectNotRecruitingException;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
+import com.sidework.project.application.dto.ProjectPromotionCommand;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
+import com.sidework.project.application.exception.ProjectPromotionNotFoundException;
 import com.sidework.project.application.port.in.*;
 import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
@@ -76,6 +78,9 @@ public class ProjectControllerTest {
 
     @MockitoBean
     private ProjectUserReviewCommandUseCase projectUserReviewCommandUseCase;
+
+    @MockitoBean
+    private ProjectPromotionCommandUseCase projectPromotionCommandUseCase;
 
     @MockitoBean
     private ProjectOutPort repo;
@@ -892,6 +897,129 @@ public class ProjectControllerTest {
                 .content(body))
             .andDo(print())
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_홍보글_등록_성공시_201을_반환한다() throws Exception {
+        Long projectId = 10L;
+        ProjectPromotionCommand command = new ProjectPromotionCommand(
+            "홍보 설명",
+            List.of(1L, 2L),
+            "https://demo.example.com"
+        );
+        doNothing().when(projectPromotionCommandUseCase)
+            .create(anyLong(), eq(projectId), any(ProjectPromotionCommand.class));
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/promotions", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.isSuccess").value(true));
+
+        verify(projectPromotionCommandUseCase).create(eq(1L), eq(projectId), any(ProjectPromotionCommand.class));
+    }
+
+    @Test
+    void 프로젝트_홍보글_등록_시_description이_비어있으면_400을_반환한다() throws Exception {
+        Long projectId = 10L;
+        String body = """
+            {
+              "description": "",
+              "usedSkillIds": [1],
+              "demoUrl": null
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/promotions", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_홍보글_수정_성공시_200을_반환한다() throws Exception {
+        Long projectId = 10L;
+        Long promotionId = 20L;
+        ProjectPromotionCommand command = new ProjectPromotionCommand(
+            "수정된 홍보",
+            List.of(3L),
+            null
+        );
+        doNothing().when(projectPromotionCommandUseCase)
+            .update(anyLong(), eq(promotionId), eq(projectId), any(ProjectPromotionCommand.class));
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}/promotions/{promotionId}", projectId, promotionId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true));
+
+        verify(projectPromotionCommandUseCase).update(eq(1L), eq(promotionId), eq(projectId), any(ProjectPromotionCommand.class));
+    }
+
+    @Test
+    void 프로젝트_홍보글_수정_시_경로_프로젝트와_홍보_프로젝트가_다르면_400을_반환한다() throws Exception {
+        Long projectId = 10L;
+        Long promotionId = 20L;
+        ProjectPromotionCommand command = new ProjectPromotionCommand("설명", List.of(), null);
+
+        doThrow(new InvalidCommandException("요청 경로의 프로젝트와 홍보글이 속한 프로젝트가 일치하지 않습니다."))
+            .when(projectPromotionCommandUseCase)
+            .update(anyLong(), eq(promotionId), eq(projectId), any(ProjectPromotionCommand.class));
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}/promotions/{promotionId}", projectId, promotionId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_홍보글_수정_시_홍보를_찾을_수_없으면_404를_반환한다() throws Exception {
+        Long projectId = 10L;
+        Long promotionId = 99L;
+        ProjectPromotionCommand command = new ProjectPromotionCommand("설명", List.of(), null);
+
+        doThrow(new ProjectPromotionNotFoundException(promotionId, 1L))
+            .when(projectPromotionCommandUseCase)
+            .update(anyLong(), eq(promotionId), eq(projectId), any(ProjectPromotionCommand.class));
+
+        mockMvc.perform(patch("/api/v1/projects/{projectId}/promotions/{promotionId}", projectId, promotionId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+            .andDo(print())
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 프로젝트_홍보글_삭제_성공시_200을_반환한다() throws Exception {
+        Long projectId = 10L;
+        Long promotionId = 20L;
+
+        doNothing().when(projectPromotionCommandUseCase)
+            .delete(anyLong(), eq(promotionId), eq(projectId));
+
+        mockMvc.perform(delete("/api/v1/projects/{projectId}/promotions/{promotionId}", projectId, promotionId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true));
+
+        verify(projectPromotionCommandUseCase).delete(eq(1L), eq(promotionId), eq(projectId));
     }
 
     private ProjectCommand createCommand(ProjectStatus status) {
