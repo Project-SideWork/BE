@@ -69,6 +69,7 @@ public class ProjectPromotionPersistenceAdapter implements ProjectPromotionOutPo
 		Map<Long, List<String>> stacksByPromotionId = loadSkillNamesByPromotionIds(promotionIds);
 
 		return page.map(row -> new ProjectPromotionListResponse(
+			row.promotionId(),
 			row.projectId(),
 			row.title(),
 			row.promotionDescription(),
