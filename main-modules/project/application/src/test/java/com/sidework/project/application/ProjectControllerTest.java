@@ -19,6 +19,7 @@ import com.sidework.project.application.port.in.*;
 import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.adapter.ProjectPromotionListResponse;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.Project;
@@ -81,6 +82,9 @@ public class ProjectControllerTest {
 
     @MockitoBean
     private ProjectPromotionCommandUseCase projectPromotionCommandUseCase;
+
+    @MockitoBean
+    private ProjectPromotionQueryUseCase projectPromotionQueryUseCase;
 
     @MockitoBean
     private ProjectOutPort repo;
@@ -790,6 +794,43 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.isSuccess").value(true))
             .andExpect(jsonPath("$.result.content[0].projectId").value(1))
             .andExpect(jsonPath("$.result.content[0].title").value("테스트 프로젝트"));
+    }
+
+    @Test
+    void 프로젝트_홍보글_목록_조회시_키워드와_스킬필터를_적용해_200과_PageResponse를_반환한다() throws Exception {
+        String keyword = "홍보";
+        List<Long> skillIds = List.of(1L, 2L);
+
+        ProjectPromotionListResponse listItem = new ProjectPromotionListResponse(
+            10L,
+            "프로젝트 제목",
+            "홍보 본문 설명",
+            List.of("Java", "Spring")
+        );
+
+        PageResponse<List<ProjectPromotionListResponse>> pageResponse =
+            PageResponse.of(List.of(listItem), 0, 20, 1, 1);
+
+        when(projectPromotionQueryUseCase.queryProjectPromotionList(
+            eq(keyword),
+            eq(skillIds),
+            any()
+        )).thenReturn(pageResponse);
+
+        mockMvc.perform(get("/api/v1/projects/promotions")
+                .with(user(authenticatedUserDetails))
+                .param("keyword", keyword)
+                .param("skillIds", "1", "2"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true))
+            .andExpect(jsonPath("$.result.content[0].projectId").value(10))
+            .andExpect(jsonPath("$.result.content[0].title").value("프로젝트 제목"))
+            .andExpect(jsonPath("$.result.content[0].description").value("홍보 본문 설명"))
+            .andExpect(jsonPath("$.result.content[0].usedStacks[0]").value("Java"))
+            .andExpect(jsonPath("$.result.content[0].usedStacks[1]").value("Spring"));
+
+        verify(projectPromotionQueryUseCase).queryProjectPromotionList(eq(keyword), eq(skillIds), any());
     }
 
     @Test
