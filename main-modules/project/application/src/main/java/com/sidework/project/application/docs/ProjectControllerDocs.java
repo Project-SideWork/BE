@@ -5,6 +5,7 @@ import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.dto.ProjectPromotionCommand;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
@@ -312,5 +313,116 @@ public interface ProjectControllerDocs {
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("projectId") Long projectId,
             @Validated @RequestBody ProjectUserReviewCommand command
+    );
+
+    @Operation(description = "프로젝트 홍보글 등록")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "등록 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "검증 실패, 프로젝트 미종료, 최근 홍보 이력 등",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "400 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_400",
+                                              "message": "잘못된 요청입니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> postNewProjectPromotion(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId,
+            @Validated @RequestBody ProjectPromotionCommand command
+    );
+
+    @Operation(description = "프로젝트 홍보글 수정")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "검증 실패, 경로의 프로젝트와 홍보 대상 프로젝트 불일치 등",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "400 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_400",
+                                              "message": "잘못된 요청입니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "홍보글 없음 (본인 글 아님 등)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                            {
+                                              "code": "PROJECT_PROMOTION_001",
+                                              "message": "해당 프로젝트 홍보글을 찾을 수 없습니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> patchProjectPromotion(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId,
+            @PathVariable("promotionId") Long promotionId,
+            @Validated @RequestBody ProjectPromotionCommand command
+    );
+
+    @Operation(description = "프로젝트 홍보글 삭제")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "삭제 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "경로의 프로젝트와 홍보 대상 프로젝트 불일치",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "400 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_400",
+                                              "message": "잘못된 요청입니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "홍보글 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                            {
+                                              "code": "PROJECT_PROMOTION_001",
+                                              "message": "해당 프로젝트 홍보글을 찾을 수 없습니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> deleteProjectPromotion(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId,
+            @PathVariable("promotionId") Long promotionId
     );
 }
