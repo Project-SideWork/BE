@@ -26,4 +26,17 @@ public class ProjectPromotionSkillPersistenceAdapter implements ProjectPromotion
 			.toList();
 		repo.saveAll(entities);
 	}
+
+	@Override
+	public void deleteByPromotionIdAndSkillIdIn(Long promotionId, List<Long> skillIds) {
+		if (skillIds == null || skillIds.isEmpty()) {
+			return;
+		}
+		repo.deleteByPromotionIdAndSkillIdIn(promotionId, skillIds);
+	}
+
+	@Override
+	public List<Long> findAllSkillIdsByPromotionId(Long promotionId) {
+		return repo.findAllSkillIdsByPromotionId(promotionId);
+	}
 }

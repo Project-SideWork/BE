@@ -33,6 +33,22 @@ public class ProjectPromotionSkillCommandService implements ProjectPromotionSkil
 		projectPromotionSkillRepository.saveAll(domains);
 	}
 
+	@Override
+	public void update(Long userId, Long promotionId, Long projectId, List<Long> skillIds) {
+		List<Long> requested = skillIds == null ? List.of() : skillIds;
+
+		PromotionSkillChangeSet resolved = resolveSkillChanges(userId, promotionId, projectId, requested);
+
+		if (!resolved.toAdd().isEmpty()) {
+			projectPromotionSkillRepository.saveAll(resolved.toAdd());
+		}
+
+		if (!resolved.toRemoveIds().isEmpty()) {
+			projectPromotionSkillRepository.deleteByPromotionIdAndSkillIdIn(promotionId, resolved.toRemoveIds());
+		}
+
+	}
+
 	private List<ProjectPromotionSkill> createPromotionSkills(Long userId, Long promotionId, Long projectId, List<Long> skillIds) {
 		Set<Long> requested = new HashSet<>(skillIds);
 
@@ -56,5 +72,44 @@ public class ProjectPromotionSkillCommandService implements ProjectPromotionSkil
 				.skillId(id)
 				.build())
 			.toList();
+	}
+
+	private PromotionSkillChangeSet resolveSkillChanges(
+		Long userId,
+		Long promotionId,
+		Long projectId,
+		List<Long> skillIds
+	) {
+		Set<Long> originalIds = new HashSet<>(projectPromotionSkillRepository.findAllSkillIdsByPromotionId(promotionId));
+		Set<Long> requestedIds = new HashSet<>(skillIds);
+
+		Set<Long> activeSkillIds =
+			new HashSet<>(skillRepo.findActiveSkillsByIdIn(skillIds));
+
+		Set<Long> invalid = requestedIds.stream()
+			.filter(id -> !activeSkillIds.contains(id))
+			.collect(Collectors.toSet());
+
+		if (!invalid.isEmpty()) {
+			throw new InvalidCommandException(
+				"존재하지 않거나 비활성화된 우대 기술 id: " + invalid
+			);
+		}
+
+		List<ProjectPromotionSkill> toAdd = requestedIds.stream()
+			.filter(id -> !originalIds.contains(id))
+			.map(id -> ProjectPromotionSkill.builder()
+				.projectId(projectId)
+				.promotionId(promotionId)
+				.userId(userId)
+				.skillId(id)
+				.build())
+			.toList();
+
+		List<Long> toRemoveSkillIds = originalIds.stream()
+			.filter(id -> !requestedIds.contains(id))
+			.toList();
+
+		return new PromotionSkillChangeSet(toAdd, toRemoveSkillIds);
 	}
 }

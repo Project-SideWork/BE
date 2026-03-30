@@ -145,9 +145,20 @@ public class ProjectController implements ProjectControllerDocs {
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PathVariable("projectId") Long projectId,
         @Validated @RequestBody ProjectPromotionCommand command) {
-        
+
         promotionCommandService.create(user.getId(), projectId, command);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
+    }
+
+    @PatchMapping("/{projectId}/promotions/{promotionId}")
+    public ResponseEntity<ApiResponse<Void>> patchProjectPromotion(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PathVariable("projectId") Long projectId,
+        @PathVariable("promotionId") Long promotionId,
+        @Validated @RequestBody ProjectPromotionCommand command) {
+
+        promotionCommandService.update(user.getId(), promotionId, projectId, command);
+        return ResponseEntity.ok(ApiResponse.onSuccessVoid());
     }
 
 

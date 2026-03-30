@@ -10,6 +10,7 @@ import com.sidework.project.application.dto.ProjectPromotionCommand;
 import com.sidework.project.application.exception.AlreadyPromotedException;
 import com.sidework.project.application.exception.ProjectNotFinishedException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
+import com.sidework.project.application.exception.InvalidCommandException;
 import com.sidework.project.application.port.in.ProjectPromotionCommandUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectPromotionOutPort;
@@ -35,13 +36,25 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 		checkCanCreateProjectPromotion(projectId, userId);
 		ProjectPromotion promotion = ProjectPromotion.create(projectId, userId, command.description(), command.demoUrl());
 		Long promotionId = projectPromotionRepository.save(promotion);
-		promotionSkillCommandService.create(promotionId, command.usedSkillIds());
+		promotionSkillCommandService.create(userId, promotionId, projectId, command.usedSkillIds());
 
+	}
+
+	@Override
+	public void update(Long userId, Long promotionId, Long projectId, ProjectPromotionCommand command) {
+		ProjectPromotion promotion = checkPromotionExists(promotionId, userId);
+		if (!projectId.equals(promotion.getProjectId())) {
+			throw new InvalidCommandException("요청 경로의 프로젝트와 홍보글이 속한 프로젝트가 일치하지 않습니다.");
+		}
+
+		promotion.update(command.description(), command.demoUrl());
+		projectPromotionRepository.save(promotion);
+		promotionSkillCommandService.update(userId, promotionId, projectId, command.usedSkillIds());
 	}
 
 	private void checkCanCreateProjectPromotion(Long projectId, Long userId){
 		checkProjectEnded(projectId);
-		checkProjectPromotionExists(projectId, userId);
+		validateNoRecentPromotion(projectId, userId);
 	}
 
 	private void checkProjectEnded(Long projectId){
@@ -51,7 +64,7 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 		}
 	}
 
-	private void checkProjectPromotionExists(Long projectId, Long userId){
+	private void validateNoRecentPromotion(Long projectId, Long userId){
 		Instant limit = Instant.now().minus(24, ChronoUnit.HOURS);
 
 		boolean exists = projectPromotionRepository.existsRecentPromotion(projectId, userId,limit);
@@ -66,4 +79,9 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 			throw new ProjectNotFoundException(projectId);
 		}
 	}
+
+	private ProjectPromotion checkPromotionExists(Long promotionId, Long userId) {
+		return projectPromotionRepository.findByIdAndUserId(promotionId, userId);
+	}
+
 }

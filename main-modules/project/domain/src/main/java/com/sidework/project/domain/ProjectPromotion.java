@@ -25,4 +25,10 @@ public class ProjectPromotion {
 			.demoUrl(demoUrl)
 			.build();
 	}
+
+	public void update(String description, String demoUrl)
+	{
+		this.description = description;
+		this.demoUrl = demoUrl;
+	}
 }

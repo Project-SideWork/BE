@@ -48,6 +48,7 @@ public enum ErrorStatus implements BaseStatusCode {
 
     // PROJECT_PROMOTION
     PROJECT_PROMOTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "PROJECT_PROMOTION_001", "이미 최근에 홍보된 프로젝트입니다."),
+    PROJECT_PROMOTION_NOT_FOUND(HttpStatus.NOT_FOUND,"PROJECT_PROMOTION_001", "해당 프로젝트 홍보글을 찾을 수 없습니다." ),
 
     // PROFILE
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROFILE_001", "해당 프로필을 찾을 수 없습니다."),

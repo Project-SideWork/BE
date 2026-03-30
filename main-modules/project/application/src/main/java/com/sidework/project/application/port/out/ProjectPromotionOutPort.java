@@ -7,4 +7,6 @@ import com.sidework.project.domain.ProjectPromotion;
 public interface ProjectPromotionOutPort {
 	boolean existsRecentPromotion(Long projectId, Long userId, Instant from);
 	Long save(ProjectPromotion projectPromotion);
+	ProjectPromotion findByIdAndUserId(Long promotionId, Long userId);
+
 }
