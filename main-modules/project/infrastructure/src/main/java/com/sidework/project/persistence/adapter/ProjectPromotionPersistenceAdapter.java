@@ -35,4 +35,9 @@ public class ProjectPromotionPersistenceAdapter implements ProjectPromotionOutPo
 			.orElseThrow(() -> new ProjectPromotionNotFoundException(promotionId, userId));
 		return mapper.toDomain(entity);
 	}
+
+	@Override
+	public void deleteById(Long promotionId) {
+		projectPromotionJpaRepository.deleteById(promotionId);
+	}
 }

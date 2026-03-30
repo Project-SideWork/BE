@@ -161,5 +161,15 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.ok(ApiResponse.onSuccessVoid());
     }
 
+    @DeleteMapping("/{projectId}/promotions/{promotionId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProjectPromotion(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PathVariable("projectId") Long projectId,
+        @PathVariable("promotionId") Long promotionId) {
+
+        promotionCommandService.delete(user.getId(), promotionId, projectId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
 
 }

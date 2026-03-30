@@ -9,4 +9,5 @@ public interface ProjectPromotionOutPort {
 	Long save(ProjectPromotion projectPromotion);
 	ProjectPromotion findByIdAndUserId(Long promotionId, Long userId);
 
+	void deleteById(Long promotionId);
 }

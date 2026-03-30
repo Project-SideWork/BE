@@ -52,6 +52,15 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 		promotionSkillCommandService.update(userId, promotionId, projectId, command.usedSkillIds());
 	}
 
+	@Override
+	public void delete(Long userId, Long promotionId, Long projectId) {
+		ProjectPromotion promotion = checkPromotionExists(promotionId, userId);
+		if (!projectId.equals(promotion.getProjectId())) {
+			throw new InvalidCommandException("요청 경로의 프로젝트와 홍보글이 속한 프로젝트가 일치하지 않습니다.");
+		}
+		projectPromotionRepository.deleteById(promotionId);
+	}
+
 	private void checkCanCreateProjectPromotion(Long projectId, Long userId){
 		checkProjectEnded(projectId);
 		validateNoRecentPromotion(projectId, userId);
