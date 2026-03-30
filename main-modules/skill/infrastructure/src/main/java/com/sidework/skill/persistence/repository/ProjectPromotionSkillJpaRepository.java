@@ -25,4 +25,12 @@ public interface ProjectPromotionSkillJpaRepository extends JpaRepository<Projec
 		WHERE p.promotionId = :promotionId AND p.skillId IN :ids
 		""")
 	void deleteByPromotionIdAndSkillIdIn(@Param("promotionId") Long promotionId, @Param("ids") List<Long> ids);
+
+	@Query("""
+		SELECT p.promotionId, s.name
+		FROM ProjectPromotionSkillEntity p
+		JOIN SkillEntity s ON p.skillId = s.id
+		WHERE p.promotionId IN :promotionIds
+		""")
+	List<Object[]> findPromotionIdAndSkillNameByPromotionIdIn(@Param("promotionIds") List<Long> promotionIds);
 }

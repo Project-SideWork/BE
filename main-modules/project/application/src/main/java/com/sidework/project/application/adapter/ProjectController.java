@@ -12,6 +12,7 @@ import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.in.ProjectLikeCommandUseCase;
 import com.sidework.project.application.port.in.ProjectPromotionCommandUseCase;
+import com.sidework.project.application.port.in.ProjectPromotionQueryUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.docs.ProjectControllerDocs;
 import com.sidework.project.application.port.in.ProjectUserReviewCommandUseCase;
@@ -38,6 +39,7 @@ public class ProjectController implements ProjectControllerDocs {
     private final ProjectLikeCommandUseCase likeCommandService;
     private final ProjectUserReviewCommandUseCase reviewService;
     private final ProjectPromotionCommandUseCase promotionCommandService;
+    private final ProjectPromotionQueryUseCase promotionQueryService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> postNewProject(
@@ -169,6 +171,18 @@ public class ProjectController implements ProjectControllerDocs {
 
         promotionCommandService.delete(user.getId(), promotionId, projectId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
+    @GetMapping("/promotions")
+    public ResponseEntity<ApiResponse<PageResponse<List<ProjectPromotionListResponse>>>> getProjectPromotionList(
+        @PageableDefault(size = 20) Pageable pageable,
+        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds) {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                promotionQueryService.queryProjectPromotionList(keyword, skillIds, pageable)
+            )
+        );
     }
 
 

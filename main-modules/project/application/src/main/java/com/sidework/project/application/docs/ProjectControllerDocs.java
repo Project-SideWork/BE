@@ -5,6 +5,7 @@ import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.adapter.ProjectPromotionListResponse;
 import com.sidework.project.application.dto.ProjectPromotionCommand;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
@@ -214,6 +215,16 @@ public interface ProjectControllerDocs {
 
     ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PageableDefault(size = 20) Pageable pageable,
+        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
+    );
+
+    @Operation(description = "프로젝트 홍보글 목록 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+    })
+    ResponseEntity<ApiResponse<PageResponse<List<ProjectPromotionListResponse>>>> getProjectPromotionList(
         @PageableDefault(size = 20) Pageable pageable,
         @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
         @RequestParam(name = "skillIds", required = false) List<Long> skillIds

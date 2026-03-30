@@ -1,7 +1,12 @@
 package com.sidework.project.application.port.out;
 
 import java.time.Instant;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.sidework.project.application.adapter.ProjectPromotionListResponse;
 import com.sidework.project.domain.ProjectPromotion;
 
 public interface ProjectPromotionOutPort {
@@ -10,4 +15,6 @@ public interface ProjectPromotionOutPort {
 	ProjectPromotion findByIdAndUserId(Long promotionId, Long userId);
 
 	void deleteById(Long promotionId);
+
+	Page<ProjectPromotionListResponse> search(String keyword, List<Long> skillIds, Pageable pageable);
 }

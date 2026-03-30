@@ -8,8 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sidework.project.persistence.entity.ProjectPromotionEntity;
+import com.sidework.project.persistence.repository.custom.CustomProjectPromotionJpaRepository;
 
-public interface ProjectPromotionJpaRepository extends JpaRepository<ProjectPromotionEntity, Long> {
+public interface ProjectPromotionJpaRepository extends JpaRepository<ProjectPromotionEntity, Long>, CustomProjectPromotionJpaRepository {
 	@Query("""
         SELECT COUNT(p) > 0
         FROM ProjectPromotionEntity p
