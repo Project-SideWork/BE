@@ -3,6 +3,7 @@ package com.sidework.project.application.docs;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
+import com.sidework.project.application.adapter.MyProjectSummaryResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.adapter.ProjectPromotionListResponse;
@@ -220,16 +221,6 @@ public interface ProjectControllerDocs {
         @RequestParam(name = "skillIds", required = false) List<Long> skillIds
     );
 
-    @Operation(description = "프로젝트 홍보글 목록 조회")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
-    })
-    ResponseEntity<ApiResponse<PageResponse<List<ProjectPromotionListResponse>>>> getProjectPromotionList(
-        @PageableDefault(size = 20) Pageable pageable,
-        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
-        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
-    );
-
     @Operation(description = "프로젝트 좋아요")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공")
@@ -436,4 +427,23 @@ public interface ProjectControllerDocs {
             @PathVariable("projectId") Long projectId,
             @PathVariable("promotionId") Long promotionId
     );
+
+    @Operation(description = "프로젝트 홍보글 목록 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+    })
+    ResponseEntity<ApiResponse<PageResponse<List<ProjectPromotionListResponse>>>> getProjectPromotionList(
+        @PageableDefault(size = 20) Pageable pageable,
+        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
+    );
+
+    @Operation(description = "내 참여 프로젝트 요약 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+    })
+    ResponseEntity<ApiResponse<List<MyProjectSummaryResponse>>> getMyProjects(
+            @AuthenticationPrincipal AuthenticatedUserDetails user
+    );
+
 }
