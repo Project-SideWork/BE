@@ -15,6 +15,7 @@ import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.dto.ProjectPromotionCommand;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.exception.ProjectPromotionNotFoundException;
+import com.sidework.project.application.adapter.MyProjectSummaryResponse;
 import com.sidework.project.application.port.in.*;
 import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
@@ -802,6 +803,7 @@ public class ProjectControllerTest {
         List<Long> skillIds = List.of(1L, 2L);
 
         ProjectPromotionListResponse listItem = new ProjectPromotionListResponse(
+            100L,
             10L,
             "프로젝트 제목",
             "홍보 본문 설명",
@@ -831,6 +833,29 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.result.content[0].usedStacks[1]").value("Spring"));
 
         verify(projectPromotionQueryUseCase).queryProjectPromotionList(eq(keyword), eq(skillIds), any());
+    }
+
+    @Test
+    void 내가_참여한_프로젝트_요약_조회시_200과_목록을_반환한다() throws Exception {
+        Long userId = authenticatedUserDetails.getId();
+        List<MyProjectSummaryResponse> responses = List.of(
+            new MyProjectSummaryResponse(1L, "프로젝트1"),
+            new MyProjectSummaryResponse(2L, "프로젝트2")
+        );
+
+        when(projectQueryUseCase.queryMyProjectSummary(userId)).thenReturn(responses);
+
+        mockMvc.perform(get("/api/v1/projects/me")
+                .with(user(authenticatedUserDetails)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true))
+            .andExpect(jsonPath("$.result[0].projectId").value(1))
+            .andExpect(jsonPath("$.result[0].title").value("프로젝트1"))
+            .andExpect(jsonPath("$.result[1].projectId").value(2))
+            .andExpect(jsonPath("$.result[1].title").value("프로젝트2"));
+
+        verify(projectQueryUseCase).queryMyProjectSummary(userId);
     }
 
     @Test
