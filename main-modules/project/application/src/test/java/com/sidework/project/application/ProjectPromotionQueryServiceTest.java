@@ -36,7 +36,7 @@ class ProjectPromotionQueryServiceTest {
 		List<Long> skillIds = List.of(1L, 2L);
 		Pageable pageable = PageRequest.of(0, 20);
 		List<ProjectPromotionListResponse> rows = List.of(
-			new ProjectPromotionListResponse(1L, "제목", "설명", List.of("Java", "Spring"))
+			new ProjectPromotionListResponse(100L, 1L, "제목", "설명", List.of("Java", "Spring"))
 		);
 		Page<ProjectPromotionListResponse> page = new PageImpl<>(rows, pageable, 1L);
 		when(projectPromotionOutPort.search(eq(keyword), eq(skillIds), eq(pageable))).thenReturn(page);
@@ -45,6 +45,7 @@ class ProjectPromotionQueryServiceTest {
 			service.queryProjectPromotionList(keyword, skillIds, pageable);
 
 		assertEquals(1, result.content().size());
+		assertEquals(100L, result.content().get(0).promotionId());
 		assertEquals(1L, result.content().get(0).projectId());
 		assertEquals("제목", result.content().get(0).title());
 		assertEquals("설명", result.content().get(0).description());
