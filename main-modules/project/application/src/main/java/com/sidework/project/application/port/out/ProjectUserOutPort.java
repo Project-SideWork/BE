@@ -1,6 +1,7 @@
 package com.sidework.project.application.port.out;
 
 
+import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
 
@@ -18,4 +19,5 @@ public interface ProjectUserOutPort {
 	List<ProjectUser> findAllByProjectId(Long projectId);
 	Map<Long, Long> findOwnerUserIdByProjectIds(List<Long> projectIds);
 	Optional<ProjectUser> findAcceptedByProjectIdAndUserId(Long projectId, Long userId);
+	List<ProjectTitleDto> getMyProjectSummary(Long userId);
 }

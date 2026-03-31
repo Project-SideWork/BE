@@ -1,6 +1,7 @@
 package com.sidework.project.application.port.in;
 
 import com.sidework.common.response.PageResponse;
+import com.sidework.project.application.adapter.MyProjectSummaryResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
@@ -27,4 +28,6 @@ public interface ProjectQueryUseCase {
     ProjectUserReviewStatSummary queryStatSummaryByUserId(Long userId);
     List<ProjectUserReviewSummary> queryReviewSummaryByProjectIds(Long userId, List<Long> projectIds);
     Map<Long, Double> queryAverageReviewScoresByUserIds(List<Long> userIds);
+    List<MyProjectSummaryResponse> queryMyProjectSummary(Long userId);
+
 }

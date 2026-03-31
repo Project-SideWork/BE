@@ -185,5 +185,11 @@ public class ProjectController implements ProjectControllerDocs {
         );
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<List<MyProjectSummaryResponse>>> getMyProjects(
+        @AuthenticationPrincipal AuthenticatedUserDetails user){
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryMyProjectSummary(user.getId())));
+    }
+
 
 }
