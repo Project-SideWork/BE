@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>포트원 V2 결제 테스트</title>
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+          background: #f5f5f7;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+        }
+
+        .card {
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+          width: 100%;
+          max-width: 420px;
+          overflow: hidden;
+        }
+
+        .card-header {
+          background: #3182f6;
+          color: #fff;
+          padding: 20px 24px;
+        }
+
+        .card-header h1 { font-size: 18px; font-weight: 700; }
+        .card-header p  { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+        .card-body { padding: 24px; }
+
+        .product-box {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          background: #f8f9fa;
+          border-radius: 12px;
+          padding: 16px;
+          margin-bottom: 24px;
+        }
+
+        .product-icon { font-size: 40px; line-height: 1; }
+        .product-info .name  { font-size: 16px; font-weight: 600; color: #191919; }
+        .product-info .price { font-size: 14px; color: #3182f6; font-weight: 600; margin-top: 2px; }
+        .product-info .status { font-size: 12px; color: #888; margin-top: 2px; }
+
+        .section-title {
+          font-size: 13px;
+          font-weight: 700;
+          color: #888;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-bottom: 14px;
+        }
+
+        .field { margin-bottom: 16px; }
+
+        .field label {
+          display: block;
+          font-size: 13px;
+          font-weight: 600;
+          color: #444;
+          margin-bottom: 6px;
+        }
+
+        .field input, .field select {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1.5px solid #e0e0e0;
+          border-radius: 8px;
+          font-size: 14px;
+          color: #191919;
+          background: #fff;
+          transition: border-color 0.2s;
+          outline: none;
+        }
+
+        .field input:focus, .field select:focus { border-color: #3182f6; }
+        .field .hint { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+        .row { display: flex; gap: 10px; }
+        .row .field { flex: 1; }
+
+        hr { border: none; border-top: 1px solid #f0f0f0; margin: 20px 0; }
+
+        .btn-pay {
+          width: 100%;
+          padding: 14px;
+          background: #3182f6;
+          color: #fff;
+          border: none;
+          border-radius: 10px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.1s;
+          margin-top: 8px;
+        }
+
+        .btn-pay:hover   { background: #1c6fe0; }
+        .btn-pay:active  { transform: scale(0.98); }
+        .btn-pay:disabled { background: #c0d4f5; cursor: not-allowed; }
+
+        .result-box {
+          margin-top: 20px;
+          padding: 14px;
+          border-radius: 10px;
+          font-size: 13px;
+          display: none;
+        }
+
+        .result-box.success { background: #e8f5e9; border: 1.5px solid #81c784; color: #2e7d32; display: block; }
+        .result-box.error   { background: #ffebee; border: 1.5px solid #e57373; color: #c62828; display: block; }
+
+        .result-box .result-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+
+        .result-box .result-row {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 4px;
+        }
+
+        .result-box .result-label { opacity: 0.7; }
+        .result-box .result-value { font-weight: 600; word-break: break-all; text-align: right; max-width: 60%; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1>포트원 V2 결제 테스트</h1>
+        <p>브라우저 SDK 연동 데모 페이지</p>
+    </div>
+
+    <div class="card-body">
+
+        <!-- 상품 정보 -->
+        <div class="product-box">
+            <div class="product-icon">👟</div>
+            <div class="product-info">
+                <div class="name"  id="productName">불러오는 중...</div>
+                <div class="price" id="productPrice">-</div>
+                <div class="status" id="productStatus">서버에서 상품 정보를 불러옵니다</div>
+            </div>
+        </div>
+
+        <!-- 서버 / SDK 설정 -->
+        <div class="section-title">연동 설정</div>
+
+        <div class="field">
+            <label>백엔드 서버 URL</label>
+            <input type="text" id="serverBaseUrl" value="http://localhost:8080" />
+            <div class="hint">/api/item, /api/payment/complete 엔드포인트 기준</div>
+        </div>
+
+        <div class="field">
+            <label>Store ID <span style="color:#e53935">*</span></label>
+            <input type="text" id="storeId" placeholder="store-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+            <div class="hint">관리자 콘솔 > 연동 정보 우측 상단</div>
+        </div>
+
+        <div class="field">
+            <label>Channel Key <span style="color:#e53935">*</span></label>
+            <input type="text" id="channelKey" placeholder="channel-key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+            <div class="hint">관리자 콘솔 > 연동 정보 > 채널 목록</div>
+        </div>
+
+        <hr />
+        <div class="section-title">결제 정보</div>
+
+        <div class="field">
+            <label>결제 수단</label>
+            <select id="payMethod">
+                <option value="CARD">카드결제</option>
+                <option value="TRANSFER">계좌이체</option>
+                <option value="VIRTUAL_ACCOUNT">가상계좌</option>
+                <option value="EASY_PAY">간편결제</option>
+                <option value="MOBILE">휴대폰 소액결제</option>
+            </select>
+        </div>
+
+        <div class="row">
+            <div class="field">
+                <label>구매자 이름</label>
+                <input type="text" id="customerName" value="홍길동" />
+            </div>
+            <div class="field">
+                <label>연락처</label>
+                <input type="text" id="customerPhone" value="010-1234-5678" />
+            </div>
+        </div>
+
+        <div class="field">
+            <label>구매자 이메일</label>
+            <input type="email" id="customerEmail" value="test@example.com" />
+        </div>
+
+        <div class="field">
+            <label>Redirect URL <span style="color:#aaa">(모바일 필수)</span></label>
+            <input type="text" id="redirectUrl" placeholder="https://your-domain.com/payment/complete" />
+            <div class="hint">모바일 환경에서는 반드시 입력하세요</div>
+        </div>
+
+        <button class="btn-pay" id="payBtn" onclick="requestPayment()">결제하기</button>
+
+        <!-- 결과 -->
+        <div class="result-box" id="resultBox">
+            <div class="result-title" id="resultTitle"></div>
+            <div class="result-row">
+                <span class="result-label">paymentId</span>
+                <span class="result-value" id="resultPaymentId"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">상태</span>
+                <span class="result-value" id="resultStatus"></span>
+            </div>
+            <div class="result-row" id="resultCodeRow" style="display:none">
+                <span class="result-label">오류 코드</span>
+                <span class="result-value" id="resultCode"></span>
+            </div>
+            <div class="result-row" id="resultMsgRow" style="display:none">
+                <span class="result-label">메시지</span>
+                <span class="result-value" id="resultMsg"></span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let itemData = null;
+
+    // ── 상품 정보 불러오기 ───────────────────────────────────────────
+    async function loadItem() {
+      const serverUrl = document.getElementById("serverBaseUrl").value.trim();
+      try {
+        const res = await fetch(`${serverUrl}/api/v1/payments/item`);
+        if (!res.ok) throw new Error();
+        itemData = await res.json();
+        document.getElementById("productName").textContent   = itemData.name;
+        document.getElementById("productPrice").textContent  = Number(itemData.price).toLocaleString() + "원";
+        document.getElementById("productStatus").textContent = "서버에서 불러온 상품 정보";
+      } catch {
+        itemData = { id: "shoes", name: "신발", price: 1000, currency: "KRW" };
+        document.getElementById("productName").textContent   = itemData.name + " (로컬 기본값)";
+        document.getElementById("productPrice").textContent  = Number(itemData.price).toLocaleString() + "원";
+        document.getElementById("productStatus").textContent = "⚠️ 서버 미연결 — 기본값 사용 중";
+      }
+    }
+
+    // 서버 URL 변경 시 상품 정보 재조회
+    document.getElementById("serverBaseUrl").addEventListener("change", loadItem);
+
+    // ── 결제 요청 ────────────────────────────────────────────────────
+    async function requestPayment() {
+      const storeId    = document.getElementById("storeId").value.trim();
+      const channelKey = document.getElementById("channelKey").value.trim();
+
+      if (!storeId || !channelKey) {
+        alert("Store ID와 Channel Key를 입력해주세요.");
+        return;
+      }
+
+      if (!itemData) {
+        alert("상품 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+        return;
+      }
+
+      const paymentId = `payment-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const btn = document.getElementById("payBtn");
+      btn.disabled = true;
+      btn.textContent = "결제 요청 중...";
+      hideResult();
+
+      try {
+        const response = await PortOne.requestPayment({
+          storeId,
+          channelKey,
+          paymentId,
+          orderName:   itemData.name,
+          totalAmount: itemData.price,
+          currency:    itemData.currency || "KRW",
+          payMethod:   document.getElementById("payMethod").value,
+          customer: {
+            fullName:    document.getElementById("customerName").value,
+            phoneNumber: document.getElementById("customerPhone").value,
+            email:       document.getElementById("customerEmail").value,
+          },
+          customData: { item: itemData.id },
+          redirectUrl: document.getElementById("redirectUrl").value || undefined,
+        });
+
+        // 오류 처리
+        if (response?.code) {
+          showResult("error", {
+            title:   "결제 실패",
+            paymentId,
+            status:  "FAILED",
+            code:    response.code,
+            message: response.message,
+          });
+          return;
+        }
+
+        // 서버 검증
+        await completePayment(paymentId);
+
+      } catch (e) {
+        showResult("error", {
+          title:   "오류 발생",
+          paymentId,
+          status:  "ERROR",
+          code:    "CLIENT_ERROR",
+          message: e?.message || String(e),
+        });
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "결제하기";
+      }
+    }
+
+    // ── 서버 결제 완료 요청 ──────────────────────────────────────────
+    async function completePayment(paymentId) {
+      const serverUrl = document.getElementById("serverBaseUrl").value.trim();
+      try {
+        const res = await fetch(`${serverUrl}/api/v1/payments/complete`, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ paymentId }),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          showResult("error", {
+            title:   "서버 검증 실패",
+            paymentId,
+            status:  `HTTP ${res.status}`,
+            code:    "SERVER_VERIFY_FAILED",
+            message: text || "서버 오류",
+          });
+          return;
+        }
+
+        const data = await res.json();
+        showResult("success", {
+          title:  "✅ 결제 완료!",
+          paymentId,
+          status: data.status || "PAID",
+        });
+
+      } catch {
+        showResult("success", {
+          title:   "⚠️ 브라우저 결제 완료 (서버 미연결)",
+          paymentId,
+          status:  "BROWSER_ONLY",
+          message: "서버 검증을 건너뛰었습니다. 프로덕션에서는 반드시 서버 검증이 필요합니다.",
+        });
+      }
+    }
+
+    // ── UI 헬퍼 ─────────────────────────────────────────────────────
+    function showResult(type, { title, paymentId, status, code, message }) {
+      const box = document.getElementById("resultBox");
+      box.className = `result-box ${type}`;
+      document.getElementById("resultTitle").textContent     = title;
+      document.getElementById("resultPaymentId").textContent = paymentId;
+      document.getElementById("resultStatus").textContent    = status;
+
+      const codeRow = document.getElementById("resultCodeRow");
+      const msgRow  = document.getElementById("resultMsgRow");
+
+      if (code) {
+        document.getElementById("resultCode").textContent = code;
+        codeRow.style.display = "flex";
+      } else {
+        codeRow.style.display = "none";
+      }
+
+      if (message) {
+        document.getElementById("resultMsg").textContent = message;
+        msgRow.style.display = "flex";
+      } else {
+        msgRow.style.display = "none";
+      }
+
+      box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function hideResult() {
+      document.getElementById("resultBox").className = "result-box";
+    }
+
+    // ── 초기화 ───────────────────────────────────────────────────────
+    loadItem();
+</script>
+</body>
+</html>
