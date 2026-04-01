@@ -66,7 +66,7 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 
 	private void checkCanCreateProjectPromotion(Long projectId, Long userId){
 		checkProjectEnded(projectId);
-		validateNoRecentPromotion(projectId, userId);
+		// validateNoRecentPromotion(projectId, userId);
 		checkProjectUser(projectId, userId);
 	}
 
@@ -77,15 +77,15 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 		}
 	}
 
-	private void validateNoRecentPromotion(Long projectId, Long userId){
-		Instant limit = Instant.now().minus(24, ChronoUnit.HOURS);
-
-		boolean exists = projectPromotionRepository.existsRecentPromotion(projectId, userId,limit);
-
-		if (exists) {
-			throw new AlreadyPromotedException();
-		}
-	}
+	// private void validateNoRecentPromotion(Long projectId, Long userId){
+	// 	Instant limit = Instant.now().minus(24, ChronoUnit.HOURS);
+	//
+	// 	boolean exists = projectPromotionRepository.existsRecentPromotion(projectId, userId,limit);
+	//
+	// 	if (exists) {
+	// 		throw new AlreadyPromotedException();
+	// 	}
+	// }
 
 	private void checkProjectExists(Long projectId) {
 		if(!projectRepository.existsById(projectId)) {
