@@ -6,6 +6,7 @@ import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.MyProjectSummaryResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.adapter.ProjectPromotionDetailResponse;
 import com.sidework.project.application.adapter.ProjectPromotionListResponse;
 import com.sidework.project.application.dto.ProjectPromotionCommand;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
@@ -436,6 +437,31 @@ public interface ProjectControllerDocs {
         @PageableDefault(size = 20) Pageable pageable,
         @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
         @RequestParam(name = "skillIds", required = false) List<Long> skillIds
+    );
+
+    @Operation(description = "프로젝트 홍보글 상세 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "홍보글 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                            {
+                                              "code": "PROJECT_PROMOTION_001",
+                                              "message": "해당 프로젝트 홍보글을 찾을 수 없습니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<ProjectPromotionDetailResponse>> getProjectPromotion(
+            @PathVariable("projectId") Long projectId,
+            @PathVariable("promotionId") Long promotionId
     );
 
     @Operation(description = "내 참여 프로젝트 요약 조회")
