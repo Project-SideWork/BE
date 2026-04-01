@@ -31,6 +31,8 @@ dependencies {
     implementation project(':main-modules:region:region-infrastructure')
     implementation project(':main-modules:school:school-application')
     implementation project(':main-modules:school:school-infrastructure')
+    implementation project(':main-modules:payment:payment-application')
+    implementation project(':main-modules:payment:payment-infrastructure')
 
 
     implementation libs.bundles.jwt
