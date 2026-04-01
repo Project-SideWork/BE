@@ -20,6 +20,7 @@ import com.sidework.project.application.port.in.*;
 import com.sidework.project.domain.*;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.adapter.ProjectPromotionDetailResponse;
 import com.sidework.project.application.adapter.ProjectPromotionListResponse;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.ApplyStatus;
@@ -833,6 +834,74 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.result.content[0].usedStacks[1]").value("Spring"));
 
         verify(projectPromotionQueryUseCase).queryProjectPromotionList(eq(keyword), eq(skillIds), any());
+    }
+
+    @Test
+    void 프로젝트_홍보글_상세_조회시_200과_본문을_반환한다() throws Exception {
+        Long projectId = 10L;
+        Long promotionId = 100L;
+
+        ProjectPromotionDetailResponse.ProjectMemberResponse member =
+            new ProjectPromotionDetailResponse.ProjectMemberResponse(
+                5L,
+                20L,
+                "멤버1",
+                ProjectRole.OWNER,
+                ApplyStatus.ACCEPTED,
+                4.5
+            );
+
+        ProjectPromotionDetailResponse detail = new ProjectPromotionDetailResponse(
+            projectId,
+            promotionId,
+            "프로젝트 제목",
+            "홍보 본문",
+            MeetingType.ONLINE,
+            List.of("Java", "Spring"),
+            "서울",
+            3,
+            List.of(member)
+        );
+
+        when(projectPromotionQueryUseCase.queryProjectPromotionDetail(eq(promotionId), eq(projectId)))
+            .thenReturn(detail);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}/promotions/{promotionId}", projectId, promotionId)
+                .with(user(authenticatedUserDetails)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true))
+            .andExpect(jsonPath("$.result.projectId").value(10))
+            .andExpect(jsonPath("$.result.promotionId").value(100))
+            .andExpect(jsonPath("$.result.title").value("프로젝트 제목"))
+            .andExpect(jsonPath("$.result.description").value("홍보 본문"))
+            .andExpect(jsonPath("$.result.meetingType").value(MeetingType.ONLINE.name()))
+            .andExpect(jsonPath("$.result.usedStacks[0]").value("Java"))
+            .andExpect(jsonPath("$.result.usedStacks[1]").value("Spring"))
+            .andExpect(jsonPath("$.result.meetingPlace").value("서울"))
+            .andExpect(jsonPath("$.result.duration").value(3))
+            .andExpect(jsonPath("$.result.teamMembers[0].userId").value(5))
+            .andExpect(jsonPath("$.result.teamMembers[0].profileId").value(20))
+            .andExpect(jsonPath("$.result.teamMembers[0].name").value("멤버1"))
+            .andExpect(jsonPath("$.result.teamMembers[0].role").value(ProjectRole.OWNER.name()))
+            .andExpect(jsonPath("$.result.teamMembers[0].status").value(ApplyStatus.ACCEPTED.name()))
+            .andExpect(jsonPath("$.result.teamMembers[0].score").value(4.5));
+
+        verify(projectPromotionQueryUseCase).queryProjectPromotionDetail(promotionId, projectId);
+    }
+
+    @Test
+    void 프로젝트_홍보글_상세_조회시_홍보를_찾을_수_없으면_404를_반환한다() throws Exception {
+        Long projectId = 10L;
+        Long promotionId = 99L;
+
+        when(projectPromotionQueryUseCase.queryProjectPromotionDetail(eq(promotionId), eq(projectId)))
+            .thenThrow(new ProjectPromotionNotFoundException(promotionId));
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}/promotions/{promotionId}", projectId, promotionId)
+                .with(user(authenticatedUserDetails)))
+            .andDo(print())
+            .andExpect(status().isNotFound());
     }
 
     @Test
