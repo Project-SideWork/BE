@@ -125,7 +125,12 @@ project(':main-modules:region:domain').name = 'region-domain'
 project(':main-modules:region:application').name = 'region-application'
 project(':main-modules:region:infrastructure').name = 'region-infrastructure'
 
-
 project(':main-modules:school:domain').name = 'school-domain'
 project(':main-modules:school:application').name = 'school-application'
 project(':main-modules:school:infrastructure').name = 'school-infrastructure'
+
+project(':main-modules:payment:domain').name = 'payment-domain'
+project(':main-modules:payment:application').name = 'payment-application'
+project(':main-modules:payment:infrastructure').name = 'payment-infrastructure'
+
+
