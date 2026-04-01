@@ -29,7 +29,11 @@ public class ProjectPromotionSkillCommandService implements ProjectPromotionSkil
 		if (skillIds == null || skillIds.isEmpty()) {
 			return;
 		}
-		List<ProjectPromotionSkill> domains = createPromotionSkills(userId, promotionId, projectId, skillIds);
+		List<Long> distinctSkillIds = skillIds.stream()
+			.distinct()
+			.toList();
+
+		List<ProjectPromotionSkill> domains = createPromotionSkills(userId, promotionId, projectId, distinctSkillIds);
 		projectPromotionSkillRepository.saveAll(domains);
 	}
 
