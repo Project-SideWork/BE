@@ -51,10 +51,14 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
 
     @Query("""
 		SELECT NEW com.sidework.project.application.dto.ProjectTitleDto(p.id, p.title)
-		FROM ProjectUserEntity pu
-		JOIN ProjectEntity p ON p.id = pu.projectId
-		WHERE pu.userId = :userId
-		  AND p.status = com.sidework.project.domain.ProjectStatus.FINISHED
+		FROM ProjectEntity p
+		WHERE p.status = com.sidework.project.domain.ProjectStatus.FINISHED
+		  AND EXISTS (
+			SELECT 1
+			FROM ProjectUserEntity pu
+			WHERE pu.projectId = p.id
+			  AND pu.userId = :userId
+		  )
 		"""
     )
     List<ProjectTitleDto> findFinishedProjectTitlesByUserId(@Param("userId") Long userId);
