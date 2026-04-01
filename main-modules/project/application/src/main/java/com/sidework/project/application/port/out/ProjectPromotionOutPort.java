@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.sidework.project.application.adapter.ProjectPromotionListResponse;
-import com.sidework.project.application.dto.ProjectPromotionDetailRow;
 import com.sidework.project.domain.ProjectPromotion;
 
 public interface ProjectPromotionOutPort {
