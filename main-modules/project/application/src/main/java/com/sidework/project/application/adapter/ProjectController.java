@@ -4,6 +4,7 @@ import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.dto.ProjectPromotionCommand;
+import com.sidework.project.application.dto.ProjectPromotionDetailRow;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
@@ -182,6 +183,16 @@ public class ProjectController implements ProjectControllerDocs {
             ApiResponse.onSuccess(
                 promotionQueryService.queryProjectPromotionList(keyword, skillIds, pageable)
             )
+        );
+    }
+
+    @GetMapping("/{projectId}/promotions/{promotionId}")
+    public ResponseEntity<ApiResponse<ProjectPromotionDetailResponse>> getProjectPromotion(
+        @PathVariable("projectId") Long projectId,
+        @PathVariable("promotionId") Long promotionId){
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                promotionQueryService.queryProjectPromotionDetail(promotionId,projectId))
         );
     }
 

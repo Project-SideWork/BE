@@ -21,12 +21,13 @@ public record ProjectPromotionDetailResponse(
 	public record ProjectMemberResponse(
 		Long userId,
 		Long profileId,
+		String name,
 		ProjectRole role,
 		ApplyStatus status,
 		Double score
 	) {
-		public static ProjectDetailResponse.ProjectMemberResponse of(Long userId, Long profileId, ProjectRole role, ApplyStatus status,Double score) {
-			return new ProjectDetailResponse.ProjectMemberResponse(userId, profileId, role, status, score);
+		public static ProjectMemberResponse of(Long userId, Long profileId, String name ,ProjectRole role, ApplyStatus status,Double score) {
+			return new ProjectMemberResponse(userId, profileId, name, role, status, score);
 		}
 	}
 }

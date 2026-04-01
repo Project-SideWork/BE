@@ -44,7 +44,7 @@ public class ProjectPromotionPersistenceAdapter implements ProjectPromotionOutPo
 	@Override
 	public ProjectPromotion findByIdAndUserId(Long promotionId, Long userId) {
 		ProjectPromotionEntity entity = projectPromotionJpaRepository.findByIdAndUserId(promotionId, userId)
-			.orElseThrow(() -> new ProjectPromotionNotFoundException(promotionId, userId));
+			.orElseThrow(() -> new ProjectPromotionNotFoundException(promotionId));
 		return mapper.toDomain(entity);
 	}
 
@@ -90,5 +90,12 @@ public class ProjectPromotionPersistenceAdapter implements ProjectPromotionOutPo
 			map.computeIfAbsent(promotionId, k -> new ArrayList<>()).add(name);
 		}
 		return map;
+	}
+
+	@Override
+	public ProjectPromotion findById(Long promotionId) {
+		ProjectPromotionEntity entity = projectPromotionJpaRepository.findById(promotionId)
+			.orElseThrow(() -> new ProjectPromotionNotFoundException(promotionId));
+		return mapper.toDomain(entity);
 	}
 }
