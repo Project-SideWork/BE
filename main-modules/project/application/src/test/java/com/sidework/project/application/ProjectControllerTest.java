@@ -1057,7 +1057,7 @@ public class ProjectControllerTest {
         Long promotionId = 99L;
         ProjectPromotionCommand command = new ProjectPromotionCommand("설명", List.of(), null);
 
-        doThrow(new ProjectPromotionNotFoundException(promotionId, 1L))
+        doThrow(new ProjectPromotionNotFoundException(promotionId))
             .when(projectPromotionCommandUseCase)
             .update(anyLong(), eq(promotionId), eq(projectId), any(ProjectPromotionCommand.class));
 
