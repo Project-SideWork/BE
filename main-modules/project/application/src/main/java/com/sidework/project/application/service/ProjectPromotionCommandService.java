@@ -11,9 +11,11 @@ import com.sidework.project.application.exception.AlreadyPromotedException;
 import com.sidework.project.application.exception.ProjectNotFinishedException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.exception.InvalidCommandException;
+import com.sidework.project.application.exception.ProjectUserNotFoundException;
 import com.sidework.project.application.port.in.ProjectPromotionCommandUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectPromotionOutPort;
+import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.ProjectPromotion;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.skill.application.service.ProjectPromotionSkillCommandService;
@@ -26,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class ProjectPromotionCommandService implements ProjectPromotionCommandUseCase {
 	private final ProjectOutPort projectRepository;
 	private final ProjectPromotionOutPort projectPromotionRepository;
+	private final ProjectUserOutPort projectUserRepository;
 
 	private final ProjectPromotionSkillCommandService promotionSkillCommandService;
 
@@ -64,6 +67,7 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 	private void checkCanCreateProjectPromotion(Long projectId, Long userId){
 		checkProjectEnded(projectId);
 		validateNoRecentPromotion(projectId, userId);
+		checkProjectUser(projectId, userId);
 	}
 
 	private void checkProjectEnded(Long projectId){
@@ -91,6 +95,12 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 
 	private ProjectPromotion checkPromotionExists(Long promotionId, Long userId) {
 		return projectPromotionRepository.findByIdAndUserId(promotionId, userId);
+	}
+
+	private void checkProjectUser(Long projectId, Long userId) {
+		if(!projectUserRepository.existsByProjectIdAndUserId(projectId, userId)){
+			throw new ProjectUserNotFoundException(projectId);
+		}
 	}
 
 }
