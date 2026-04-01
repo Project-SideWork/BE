@@ -4,7 +4,6 @@ import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.dto.ProjectPromotionCommand;
-import com.sidework.project.application.dto.ProjectPromotionDetailRow;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
