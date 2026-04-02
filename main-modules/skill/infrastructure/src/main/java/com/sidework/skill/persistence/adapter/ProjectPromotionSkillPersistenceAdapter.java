@@ -1,6 +1,9 @@
 package com.sidework.skill.persistence.adapter;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -38,5 +41,20 @@ public class ProjectPromotionSkillPersistenceAdapter implements ProjectPromotion
 	@Override
 	public List<Long> findAllSkillIdsByPromotionId(Long promotionId) {
 		return repo.findAllSkillIdsByPromotionId(promotionId);
+	}
+
+	@Override
+	public Map<Long, List<String>> findSkillNamesByPromotionIdIn(List<Long> promotionIds) {
+		if (promotionIds == null || promotionIds.isEmpty()) {
+			return Map.of();
+		}
+		List<Object[]> rows = repo.findPromotionIdAndSkillNameByPromotionIdIn(promotionIds);
+		Map<Long, List<String>> map = new LinkedHashMap<>();
+		for (Object[] row : rows) {
+			Long promotionId = (Long) row[0];
+			String name = (String) row[1];
+			map.computeIfAbsent(promotionId, k -> new ArrayList<>()).add(name);
+		}
+		return map;
 	}
 }

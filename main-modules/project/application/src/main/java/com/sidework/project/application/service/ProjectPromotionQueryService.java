@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectPromotionDetailResponse;
 import com.sidework.project.application.adapter.ProjectPromotionListResponse;
+import com.sidework.project.application.dto.ProjectPromotionListRow;
 import com.sidework.project.application.port.in.ProjectPromotionQueryUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectPromotionOutPort;
@@ -44,9 +45,20 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 	private final UserQueryUseCase userQueryUseCase;
 
 	@Override
-	public PageResponse<List<ProjectPromotionListResponse>> queryProjectPromotionList(String keyword, List<Long> skillIds, Pageable pageable) {
-		Page<ProjectPromotionListResponse> page = projectPromotionOutPort.search(keyword, skillIds, pageable);
-		return PageResponse.from(page, page.getContent());
+	public PageResponse<List<ProjectPromotionListResponse>> queryProjectPromotionList(
+		String keyword, List<Long> skillIds, Pageable pageable
+	) {
+		Page<ProjectPromotionListRow> page = projectPromotionOutPort.search(keyword, skillIds, pageable);
+
+		List<Long> promotionIds = extractPromotionIds(page);
+
+		Map<Long, List<String>> stacksByPromotionId =
+			projectPromotionSkillQueryUseCase.queryNamesByPromotionIds(promotionIds);
+
+		List<ProjectPromotionListResponse> content =
+			toListResponse(page.getContent(), stacksByPromotionId);
+
+		return PageResponse.from(page, content);
 	}
 
 	@Override
@@ -151,5 +163,26 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 			return Map.of();
 		}
 		return userQueryUseCase.findNamesByUserIds(userIds);
+	}
+
+	private List<ProjectPromotionListResponse> toListResponse(
+		List<ProjectPromotionListRow> rows,
+		Map<Long, List<String>> stacksByPromotionId
+	) {
+		return rows.stream()
+			.map(row -> new ProjectPromotionListResponse(
+				row.promotionId(),
+				row.projectId(),
+				row.title(),
+				row.promotionDescription(),
+				stacksByPromotionId.getOrDefault(row.promotionId(), List.of())
+			))
+			.toList();
+	}
+
+	private List<Long> extractPromotionIds(Page<ProjectPromotionListRow> page) {
+		return page.getContent().stream()
+			.map(ProjectPromotionListRow::promotionId)
+			.toList();
 	}
 }

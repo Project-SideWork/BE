@@ -38,4 +38,12 @@ public class ProjectPromotionSkillQueryService implements ProjectPromotionSkillQ
 			.toList();
 	}
 
+	@Override
+	public Map<Long, List<String>> queryNamesByPromotionIds(List<Long> promotionIds) {
+		if (promotionIds == null || promotionIds.isEmpty()) {
+			return Map.of();
+		}
+		return projectPromotionSkillOutPort.findSkillNamesByPromotionIdIn(promotionIds);
+	}
+
 }

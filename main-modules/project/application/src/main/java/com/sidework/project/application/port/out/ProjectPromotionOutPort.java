@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.sidework.project.application.adapter.ProjectPromotionListResponse;
+import com.sidework.project.application.dto.ProjectPromotionListRow;
 import com.sidework.project.domain.ProjectPromotion;
 
 public interface ProjectPromotionOutPort {
@@ -18,5 +18,5 @@ public interface ProjectPromotionOutPort {
 
 	void deleteById(Long promotionId);
 
-	Page<ProjectPromotionListResponse> search(String keyword, List<Long> skillIds, Pageable pageable);
+	Page<ProjectPromotionListRow> search(String keyword, List<Long> skillIds, Pageable pageable);
 }
