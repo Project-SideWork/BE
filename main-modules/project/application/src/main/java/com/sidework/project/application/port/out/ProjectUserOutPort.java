@@ -20,5 +20,4 @@ public interface ProjectUserOutPort {
 	Map<Long, Long> findOwnerUserIdByProjectIds(List<Long> projectIds);
 	Optional<ProjectUser> findAcceptedByProjectIdAndUserId(Long projectId, Long userId);
 	List<ProjectTitleDto> getMyProjectSummary(Long userId);
-	boolean existsByProjectIdAndUserId(Long projectId, Long userId);
 }

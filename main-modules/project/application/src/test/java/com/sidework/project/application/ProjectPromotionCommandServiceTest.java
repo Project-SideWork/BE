@@ -8,8 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sidework.project.application.dto.ProjectPromotionCommand;
-import com.sidework.project.application.exception.AlreadyPromotedException;
 import com.sidework.project.application.exception.InvalidCommandException;
 import com.sidework.project.application.exception.ProjectNotFinishedException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
@@ -28,6 +27,7 @@ import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.application.service.ProjectPromotionCommandService;
 import com.sidework.project.domain.ProjectPromotion;
 import com.sidework.project.domain.ProjectStatus;
+import com.sidework.project.domain.ProjectUser;
 import com.sidework.skill.application.service.ProjectPromotionSkillCommandService;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +49,7 @@ class ProjectPromotionCommandServiceTest {
 	private ProjectPromotionCommandService service;
 
 	@Test
-	void create_프로젝트가_종료되고_최근_홍보가_없으면_저장하고_스킬을_등록한다() {
+	void create_프로젝트가_종료되고_수락된_멤버이면_저장하고_스킬을_등록한다() {
 		Long userId = 1L;
 		Long projectId = 10L;
 		ProjectPromotionCommand command = new ProjectPromotionCommand(
@@ -60,9 +60,8 @@ class ProjectPromotionCommandServiceTest {
 
 		when(projectRepository.existsById(projectId)).thenReturn(true);
 		when(projectRepository.getProjectStatus(projectId)).thenReturn(ProjectStatus.FINISHED);
-		when(projectPromotionRepository.existsRecentPromotion(eq(projectId), eq(userId), any(Instant.class)))
-			.thenReturn(false);
-		when(projectUserOutPort.existsByProjectIdAndUserId(projectId, userId)).thenReturn(true);
+		when(projectUserOutPort.findAcceptedByProjectIdAndUserId(projectId, userId))
+			.thenReturn(Optional.of(ProjectUser.builder().projectId(projectId).userId(userId).build()));
 		when(projectPromotionRepository.save(any(ProjectPromotion.class))).thenReturn(100L);
 		doNothing().when(promotionSkillCommandService)
 			.create(eq(userId), eq(100L), eq(projectId), eq(command.usedSkillIds()));
@@ -95,22 +94,6 @@ class ProjectPromotionCommandServiceTest {
 		assertThrows(
 			ProjectNotFinishedException.class,
 			() -> service.create(1L, projectId, new ProjectPromotionCommand("d", List.of(), null))
-		);
-		verify(projectPromotionRepository, never()).save(any());
-	}
-
-	@Test
-	void create_최근_홍보가_있으면_AlreadyPromotedException() {
-		Long userId = 1L;
-		Long projectId = 10L;
-		when(projectRepository.existsById(projectId)).thenReturn(true);
-		when(projectRepository.getProjectStatus(projectId)).thenReturn(ProjectStatus.FINISHED);
-		when(projectPromotionRepository.existsRecentPromotion(eq(projectId), eq(userId), any(Instant.class)))
-			.thenReturn(true);
-
-		assertThrows(
-			AlreadyPromotedException.class,
-			() -> service.create(userId, projectId, new ProjectPromotionCommand("d", List.of(), null))
 		);
 		verify(projectPromotionRepository, never()).save(any());
 	}

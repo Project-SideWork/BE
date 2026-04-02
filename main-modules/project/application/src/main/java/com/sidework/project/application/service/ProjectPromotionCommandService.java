@@ -1,13 +1,9 @@
 package com.sidework.project.application.service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sidework.project.application.dto.ProjectPromotionCommand;
-import com.sidework.project.application.exception.AlreadyPromotedException;
 import com.sidework.project.application.exception.ProjectNotFinishedException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.exception.InvalidCommandException;
@@ -66,7 +62,6 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 
 	private void checkCanCreateProjectPromotion(Long projectId, Long userId){
 		checkProjectEnded(projectId);
-		// validateNoRecentPromotion(projectId, userId);
 		checkProjectUser(projectId, userId);
 	}
 
@@ -76,16 +71,6 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 			throw new ProjectNotFinishedException(projectId);
 		}
 	}
-
-	// private void validateNoRecentPromotion(Long projectId, Long userId){
-	// 	Instant limit = Instant.now().minus(24, ChronoUnit.HOURS);
-	//
-	// 	boolean exists = projectPromotionRepository.existsRecentPromotion(projectId, userId,limit);
-	//
-	// 	if (exists) {
-	// 		throw new AlreadyPromotedException();
-	// 	}
-	// }
 
 	private void checkProjectExists(Long projectId) {
 		if(!projectRepository.existsById(projectId)) {
@@ -98,7 +83,7 @@ public class ProjectPromotionCommandService implements ProjectPromotionCommandUs
 	}
 
 	private void checkProjectUser(Long projectId, Long userId) {
-		if(!projectUserRepository.existsByProjectIdAndUserId(projectId, userId)){
+		if (projectUserRepository.findAcceptedByProjectIdAndUserId(projectId, userId).isEmpty()) {
 			throw new ProjectUserNotFoundException(projectId);
 		}
 	}

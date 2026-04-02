@@ -90,8 +90,4 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
         return repo.findFinishedProjectTitlesByUserId(userId);
     }
 
-    @Override
-    public boolean existsByProjectIdAndUserId(Long projectId, Long userId) {
-        return repo.existsByProjectIdAndUserId(projectId, userId);
-    }
 }

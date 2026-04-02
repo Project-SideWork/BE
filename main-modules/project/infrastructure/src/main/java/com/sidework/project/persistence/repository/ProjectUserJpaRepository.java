@@ -63,5 +63,4 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
     )
     List<ProjectTitleDto> findFinishedProjectTitlesByUserId(@Param("userId") Long userId);
 
-	boolean existsByProjectIdAndUserId(Long projectId, Long userId);
 }
