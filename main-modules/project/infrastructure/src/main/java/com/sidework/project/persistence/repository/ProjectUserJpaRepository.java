@@ -1,5 +1,6 @@
 package com.sidework.project.persistence.repository;
 
+import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.persistence.entity.ProjectUserEntity;
@@ -46,4 +47,20 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
     List<Object[]> findOwnerProjectIdAndUserIdByProjectIdIn(@Param("projectIds") List<Long> projectIds, @Param("role") ProjectRole role);
 
     Optional<ProjectUserEntity> findFirstByProjectIdAndUserIdAndStatus(Long projectId, Long userId, ApplyStatus status);
+
+
+    @Query("""
+		SELECT NEW com.sidework.project.application.dto.ProjectTitleDto(p.id, p.title)
+		FROM ProjectEntity p
+		WHERE p.status = com.sidework.project.domain.ProjectStatus.FINISHED
+		  AND EXISTS (
+			SELECT 1
+			FROM ProjectUserEntity pu
+			WHERE pu.projectId = p.id
+			  AND pu.userId = :userId
+		  )
+		"""
+    )
+    List<ProjectTitleDto> findFinishedProjectTitlesByUserId(@Param("userId") Long userId);
+
 }

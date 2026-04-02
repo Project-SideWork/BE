@@ -3,6 +3,7 @@ package com.sidework.project.application.adapter;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
+import com.sidework.project.application.dto.ProjectPromotionCommand;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
@@ -10,6 +11,8 @@ import com.sidework.project.application.port.in.ProjectApplyCommandUseCase;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectCommandUseCase;
 import com.sidework.project.application.port.in.ProjectLikeCommandUseCase;
+import com.sidework.project.application.port.in.ProjectPromotionCommandUseCase;
+import com.sidework.project.application.port.in.ProjectPromotionQueryUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.docs.ProjectControllerDocs;
 import com.sidework.project.application.port.in.ProjectUserReviewCommandUseCase;
@@ -35,6 +38,8 @@ public class ProjectController implements ProjectControllerDocs {
     private final ProjectQueryUseCase queryService;
     private final ProjectLikeCommandUseCase likeCommandService;
     private final ProjectUserReviewCommandUseCase reviewService;
+    private final ProjectPromotionCommandUseCase promotionCommandService;
+    private final ProjectPromotionQueryUseCase promotionQueryService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> postNewProject(
@@ -132,10 +137,68 @@ public class ProjectController implements ProjectControllerDocs {
     public ResponseEntity<ApiResponse<Void>> createMemberReview(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PathVariable("projectId") Long projectId,
-        @Validated @RequestBody ProjectUserReviewCommand command
-    ) {
+        @Validated @RequestBody ProjectUserReviewCommand command) {
         reviewService.create(user.getId(), projectId, command);
         return ResponseEntity.ok(ApiResponse.onSuccessVoid());
+    }
+
+    @PostMapping("/{projectId}/promotions")
+    public ResponseEntity<ApiResponse<Void>> postNewProjectPromotion(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PathVariable("projectId") Long projectId,
+        @Validated @RequestBody ProjectPromotionCommand command) {
+
+        promotionCommandService.create(user.getId(), projectId, command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
+    }
+
+    @PatchMapping("/{projectId}/promotions/{promotionId}")
+    public ResponseEntity<ApiResponse<Void>> patchProjectPromotion(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PathVariable("projectId") Long projectId,
+        @PathVariable("promotionId") Long promotionId,
+        @Validated @RequestBody ProjectPromotionCommand command) {
+
+        promotionCommandService.update(user.getId(), promotionId, projectId, command);
+        return ResponseEntity.ok(ApiResponse.onSuccessVoid());
+    }
+
+    @DeleteMapping("/{projectId}/promotions/{promotionId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProjectPromotion(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PathVariable("projectId") Long projectId,
+        @PathVariable("promotionId") Long promotionId) {
+
+        promotionCommandService.delete(user.getId(), promotionId, projectId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
+    @GetMapping("/promotions")
+    public ResponseEntity<ApiResponse<PageResponse<List<ProjectPromotionListResponse>>>> getProjectPromotionList(
+        @PageableDefault(size = 20) Pageable pageable,
+        @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds) {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                promotionQueryService.queryProjectPromotionList(keyword, skillIds, pageable)
+            )
+        );
+    }
+
+    @GetMapping("/{projectId}/promotions/{promotionId}")
+    public ResponseEntity<ApiResponse<ProjectPromotionDetailResponse>> getProjectPromotion(
+        @PathVariable("projectId") Long projectId,
+        @PathVariable("promotionId") Long promotionId){
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                promotionQueryService.queryProjectPromotionDetail(promotionId,projectId))
+        );
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<List<MyProjectSummaryResponse>>> getMyProjects(
+        @AuthenticationPrincipal AuthenticatedUserDetails user){
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryMyProjectSummary(user.getId())));
     }
 
 

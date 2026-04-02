@@ -1,5 +1,6 @@
 package com.sidework.project.persistence.adapter;
 
+import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
@@ -82,6 +83,11 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
     public Optional<ProjectUser> findAcceptedByProjectIdAndUserId(Long projectId, Long userId) {
         return repo.findFirstByProjectIdAndUserIdAndStatus(projectId, userId, ApplyStatus.ACCEPTED)
             .map(mapper::toDomain);
+    }
+
+    @Override
+    public List<ProjectTitleDto> getMyProjectSummary(Long userId) {
+        return repo.findFinishedProjectTitlesByUserId(userId);
     }
 
 }

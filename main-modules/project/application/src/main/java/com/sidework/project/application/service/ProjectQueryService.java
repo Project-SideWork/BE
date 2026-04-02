@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.sidework.common.response.PageResponse;
+import com.sidework.project.application.adapter.MyProjectSummaryResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
@@ -171,6 +172,13 @@ public class ProjectQueryService implements ProjectQueryUseCase {
                     score
                 );
             })
+            .toList();
+    }
+
+    @Override
+    public List<MyProjectSummaryResponse> queryMyProjectSummary(Long userId) {
+        return projectUserRepository.getMyProjectSummary(userId).stream()
+            .map(dto -> MyProjectSummaryResponse.create(dto.id(), dto.title()))
             .toList();
     }
 

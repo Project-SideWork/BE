@@ -1,8 +1,10 @@
 package com.sidework.project.application;
 
 import com.sidework.common.response.PageResponse;
+import com.sidework.project.application.adapter.MyProjectSummaryResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
@@ -382,6 +384,26 @@ class ProjectQueryServiceTest {
     @Test
     void queryAverageReviewScoresByUserIds_userIds가_비어있으면_빈_맵을_반환한다() {
         assertTrue(queryService.queryAverageReviewScoresByUserIds(List.of()).isEmpty());
+    }
+
+    @Test
+    void queryMyProjectSummary_참여한_프로젝트가_있으면_id와_title로_응답을_만든다() {
+        Long userId = 1L;
+        when(projectUserRepository.getMyProjectSummary(userId)).thenReturn(
+            List.of(
+                new ProjectTitleDto(10L, "프로젝트A"),
+                new ProjectTitleDto(20L, "프로젝트B")
+            )
+        );
+
+        List<MyProjectSummaryResponse> result = queryService.queryMyProjectSummary(userId);
+
+        assertEquals(2, result.size());
+        assertEquals(10L, result.get(0).projectId());
+        assertEquals("프로젝트A", result.get(0).title());
+        assertEquals(20L, result.get(1).projectId());
+        assertEquals("프로젝트B", result.get(1).title());
+        verify(projectUserRepository).getMyProjectSummary(userId);
     }
 
     private Project createProject(Long id) {
