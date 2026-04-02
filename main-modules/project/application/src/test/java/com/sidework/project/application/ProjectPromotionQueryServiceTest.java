@@ -3,6 +3,7 @@ package com.sidework.project.application;
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.ProjectPromotionDetailResponse;
 import com.sidework.project.application.adapter.ProjectPromotionListResponse;
+import com.sidework.project.application.dto.ProjectPromotionListRow;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectPromotionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
@@ -70,11 +71,13 @@ class ProjectPromotionQueryServiceTest {
 		String keyword = "키워드";
 		List<Long> skillIds = List.of(1L, 2L);
 		Pageable pageable = PageRequest.of(0, 20);
-		List<ProjectPromotionListResponse> rows = List.of(
-			new ProjectPromotionListResponse(100L, 1L, "제목", "설명", List.of("Java", "Spring"))
+		List<ProjectPromotionListRow> rows = List.of(
+			new ProjectPromotionListRow(1L, "제목", "설명", 100L)
 		);
-		Page<ProjectPromotionListResponse> page = new PageImpl<>(rows, pageable, 1L);
+		Page<ProjectPromotionListRow> page = new PageImpl<>(rows, pageable, 1L);
 		when(projectPromotionOutPort.search(eq(keyword), eq(skillIds), eq(pageable))).thenReturn(page);
+		when(projectPromotionSkillQueryUseCase.queryNamesByPromotionIds(List.of(100L)))
+			.thenReturn(Map.of(100L, List.of("Java", "Spring")));
 
 		PageResponse<List<ProjectPromotionListResponse>> result =
 			service.queryProjectPromotionList(keyword, skillIds, pageable);
@@ -90,6 +93,7 @@ class ProjectPromotionQueryServiceTest {
 		assertEquals(1L, result.totalElements());
 		assertEquals(1, result.totalPages());
 		verify(projectPromotionOutPort).search(keyword, skillIds, pageable);
+		verify(projectPromotionSkillQueryUseCase).queryNamesByPromotionIds(List.of(100L));
 	}
 
 	@Test

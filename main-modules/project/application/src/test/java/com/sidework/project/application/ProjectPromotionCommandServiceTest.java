@@ -24,6 +24,7 @@ import com.sidework.project.application.exception.ProjectNotFinishedException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectPromotionOutPort;
+import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.application.service.ProjectPromotionCommandService;
 import com.sidework.project.domain.ProjectPromotion;
 import com.sidework.project.domain.ProjectStatus;
@@ -40,6 +41,9 @@ class ProjectPromotionCommandServiceTest {
 
 	@Mock
 	private ProjectPromotionSkillCommandService promotionSkillCommandService;
+
+	@Mock
+	private ProjectUserOutPort projectUserOutPort;
 
 	@InjectMocks
 	private ProjectPromotionCommandService service;
@@ -58,6 +62,7 @@ class ProjectPromotionCommandServiceTest {
 		when(projectRepository.getProjectStatus(projectId)).thenReturn(ProjectStatus.FINISHED);
 		when(projectPromotionRepository.existsRecentPromotion(eq(projectId), eq(userId), any(Instant.class)))
 			.thenReturn(false);
+		when(projectUserOutPort.existsByProjectIdAndUserId(projectId, userId)).thenReturn(true);
 		when(projectPromotionRepository.save(any(ProjectPromotion.class))).thenReturn(100L);
 		doNothing().when(promotionSkillCommandService)
 			.create(eq(userId), eq(100L), eq(projectId), eq(command.usedSkillIds()));
