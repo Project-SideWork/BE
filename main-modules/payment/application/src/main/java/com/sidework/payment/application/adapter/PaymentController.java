@@ -33,7 +33,7 @@ public class PaymentController {
     @PostMapping("/complete")
     public CompletableFuture<Payment> completePayment(
             @RequestBody CompletePaymentRequest completeRequest) {
-        return paymentCommandService.syncPayment(completeRequest.getPaymentId());
+        return paymentCommandService.syncPayment(completeRequest.paymentId());
     }
 
     @PostMapping("/webhook")
