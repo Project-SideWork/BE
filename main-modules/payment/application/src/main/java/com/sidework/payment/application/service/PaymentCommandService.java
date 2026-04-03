@@ -31,42 +31,36 @@ public class PaymentCommandService implements PaymentCommandUseCase {
 
     @Override
     public CompletableFuture<Payment> syncPayment(String paymentId) {
-        return CompletableFuture.supplyAsync(() -> {
-            Object actualPayment;
-            try {
-                actualPayment = portone.getPayment(paymentId).join();
-            } catch (Exception e) {
-                throw new SyncPaymentException();
-            }
+        return portone.getPayment(paymentId)
+                .exceptionally(e -> { throw new SyncPaymentException(); })
+                .thenApply(actualPayment -> {
+                    if (!(actualPayment instanceof PaidPayment paidPayment)) {
+                        throw new SyncPaymentException();
+                    }
 
-            if (actualPayment instanceof PaidPayment paidPayment) {
-                if (!verifyPayment(paidPayment)) throw new SyncPaymentException();
+                    if (!verifyPayment(paidPayment)) throw new SyncPaymentException();
 
-                Payment domainPayment = Payment.create(
-                        paidPayment.getId(),
-                        paidPayment.getTransactionId(),
-                        paidPayment.getStoreId(),
-                        paidPayment.getOrderName(),
-                        paidPayment.getAmount().getTotal(),
-                        paidPayment.getCurrency().getValue(),
-                        "PAID",
-                        paidPayment.getCustomer().getName(),
-                        paidPayment.getCustomer().getEmail(),
-                        paidPayment.getCustomer().getPhoneNumber(),
-                        "item1",
-                        paidPayment.getPaidAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
-                        paidPayment.getRequestedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
-                        paidPayment.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime()
-                );
+                    Payment domainPayment = Payment.create(
+                            paidPayment.getId(),
+                            paidPayment.getTransactionId(),
+                            paidPayment.getStoreId(),
+                            paidPayment.getOrderName(),
+                            paidPayment.getAmount().getTotal(),
+                            paidPayment.getCurrency().getValue(),
+                            "PAID",
+                            paidPayment.getCustomer().getName(),
+                            paidPayment.getCustomer().getEmail(),
+                            paidPayment.getCustomer().getPhoneNumber(),
+                            "item1",
+                            paidPayment.getPaidAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
+                            paidPayment.getRequestedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
+                            paidPayment.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+                    );
 
-                create(domainPayment);
+                    create(domainPayment);
 
-                return domainPayment;
-
-            } else {
-                throw new SyncPaymentException();
-            }
-        });
+                    return domainPayment;
+                });
     }
 
     private boolean verifyPayment(PaidPayment payment) {
