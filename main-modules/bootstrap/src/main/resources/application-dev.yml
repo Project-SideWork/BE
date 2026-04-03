@@ -59,6 +59,11 @@ jwt:
   access-expiration: 3600
   refresh-expiration: 8640
 
+portone:
+  secret:
+    api: ${PORTONE_SECRET}
+    webhook: ${PORTONE_WEBHOOK_SECRET}
+
 
 firebase:
   credentials-base64: ${FIREBASE_CREDENTIALS_BASE64}

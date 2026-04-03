@@ -19,6 +19,10 @@ dependencies {
     compileOnly libs.lombok
     annotationProcessor libs.lombok
 
+    implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+    testAnnotationProcessor libs.mapstruct.processor
+
     implementation libs.querydsl.jpa
 
     annotationProcessor(libs.querydsl.apt) {
