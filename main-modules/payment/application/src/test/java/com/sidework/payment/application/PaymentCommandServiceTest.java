@@ -51,7 +51,6 @@ class PaymentCommandServiceTest {
         assertEquals(domain.getItemId(),        saved.getItemId());
         assertEquals(domain.getPaidAt(),        saved.getPaidAt());
         assertEquals(domain.getRequestedAt(),   saved.getRequestedAt());
-        assertEquals(domain.getUpdatedAt(),     saved.getUpdatedAt());
     }
 
 

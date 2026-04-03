@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,7 +63,6 @@ public class PaymentPersistenceAdapterTest {
                 .itemId(domain.getItemId())
                 .paidAt(domain.getPaidAt().atZone(ZoneId.of("Asia/Seoul")).toInstant())
                 .requestedAt(domain.getRequestedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant())
-                .updatedAt(domain.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant())
                 .build();
 
         when(mapper.toEntity(domain)).thenReturn(entity);
