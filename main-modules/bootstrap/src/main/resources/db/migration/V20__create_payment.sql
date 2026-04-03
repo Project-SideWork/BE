@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS payments (
 
     paid_at TIMESTAMP,
     requested_at TIMESTAMP,
-    updated_at TIMESTAMP,
 
     created_at TIMESTAMP NOT NULL,
 

@@ -38,8 +38,6 @@ public class Payment {
 
     private LocalDateTime requestedAt;
 
-    private LocalDateTime updatedAt;
-
 
     public static Payment create(
             String paymentId,
@@ -71,7 +69,6 @@ public class Payment {
                 .itemId(itemId)
                 .paidAt(paidAt)
                 .requestedAt(requestedAt)
-                .updatedAt(updatedAt)
                 .build();
     }
 }

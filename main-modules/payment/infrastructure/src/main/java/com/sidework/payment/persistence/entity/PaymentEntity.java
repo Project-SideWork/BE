@@ -44,6 +44,4 @@ public class PaymentEntity extends BaseEntity {
     private Instant paidAt;
 
     private Instant requestedAt;
-
-    private Instant updatedAt;
 }
