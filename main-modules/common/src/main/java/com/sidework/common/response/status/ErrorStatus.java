@@ -72,8 +72,10 @@ public enum ErrorStatus implements BaseStatusCode {
 
     // REGION
     REGION_NOT_FOUND(HttpStatus.NOT_FOUND, "REGION_001", "해당 지역을 찾을 수 없습니다."),
+    REGION_INVALID_LEVEL(HttpStatus.BAD_REQUEST, "REGION_002", "상위 행정구역은 입력될 수 없습니다."),
 
-    REGION_INVALID_LEVEL(HttpStatus.BAD_REQUEST, "REGION_002", "상위 행정구역은 입력될 수 없습니다.");
+    // PAYMENT
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_001", "해당 결제내역을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
