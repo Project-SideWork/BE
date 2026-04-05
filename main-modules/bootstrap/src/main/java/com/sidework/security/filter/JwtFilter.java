@@ -44,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
             "/login/oauth2/code/github",
             "/oauth2/authorization/github",
             "/api/v1/users/email",
-            "/api/v1/payments/**"
+            "/api/v1/payments/webhook"
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";
@@ -59,6 +59,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String requestUri = request.getRequestURI();
         String accessToken = CookieUtil.getAccessTokenFromRequest(request);
         String refreshToken = CookieUtil.getRefreshTokenFromRequest(request);
+
 
         if (isAllowedPath(requestUri)) {
             filterChain.doFilter(request, response);
