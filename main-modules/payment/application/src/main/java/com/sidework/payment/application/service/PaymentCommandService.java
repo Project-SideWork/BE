@@ -60,8 +60,7 @@ public class PaymentCommandService implements PaymentCommandUseCase {
                             paidPayment.getCustomer().getPhoneNumber(),
                             "item1",
                             paidPayment.getPaidAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
-                            paidPayment.getRequestedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
-                            paidPayment.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+                            paidPayment.getRequestedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime()
                     );
 
                     create(domainPayment);

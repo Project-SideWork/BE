@@ -54,8 +54,7 @@ public class Payment {
             String customerPhone,
             String itemId,
             LocalDateTime paidAt,
-            LocalDateTime requestedAt,
-            LocalDateTime updatedAt
+            LocalDateTime requestedAt
     ) {
         return Payment.builder()
                 .paymentId(paymentId)
