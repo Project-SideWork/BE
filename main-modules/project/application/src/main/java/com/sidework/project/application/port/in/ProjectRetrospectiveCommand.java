@@ -1,7 +1,9 @@
 package com.sidework.project.application.port.in;
 
+import jakarta.validation.constraints.NotEmpty;
+
 public record ProjectRetrospectiveCommand(
-	String role,
-	String strengths,
-	String improvements
+	@NotEmpty String roleDescription,
+	@NotEmpty String strengths,
+	@NotEmpty String improvements
 ) {}

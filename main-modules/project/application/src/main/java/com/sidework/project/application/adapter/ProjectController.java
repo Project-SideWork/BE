@@ -15,6 +15,8 @@ import com.sidework.project.application.port.in.ProjectPromotionCommandUseCase;
 import com.sidework.project.application.port.in.ProjectPromotionQueryUseCase;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.docs.ProjectControllerDocs;
+import com.sidework.project.application.port.in.ProjectRetrospectiveCommand;
+import com.sidework.project.application.port.in.ProjectRetrospectiveCommandUseCase;
 import com.sidework.project.application.port.in.ProjectUserReviewCommandUseCase;
 
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,7 @@ public class ProjectController implements ProjectControllerDocs {
     private final ProjectUserReviewCommandUseCase reviewService;
     private final ProjectPromotionCommandUseCase promotionCommandService;
     private final ProjectPromotionQueryUseCase promotionQueryService;
+    private final ProjectRetrospectiveCommandUseCase retrospectiveCommandService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> postNewProject(
@@ -200,6 +203,18 @@ public class ProjectController implements ProjectControllerDocs {
         @AuthenticationPrincipal AuthenticatedUserDetails user){
         return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryMyProjectSummary(user.getId())));
     }
+
+    @PostMapping("/{projectId}/retrospectives")
+    public ResponseEntity<ApiResponse<Void>> createProjectRetrospective(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PathVariable("projectId") Long projectId,
+        @Validated @RequestBody ProjectRetrospectiveCommand command
+    ) {
+        retrospectiveCommandService.create(user.getId(), projectId, command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
+    }
+
+
 
 
 }
