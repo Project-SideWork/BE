@@ -21,6 +21,8 @@ public class PaymentEntity extends BaseEntity {
     @Id
     private String paymentId;
 
+    private Long userId;
+
     private String transactionId;
 
     private String storeId;

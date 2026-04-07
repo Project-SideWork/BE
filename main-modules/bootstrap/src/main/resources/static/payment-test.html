@@ -330,13 +330,18 @@
 
     // ── 서버 결제 완료 요청 ──────────────────────────────────────────
     async function completePayment(paymentId) {
+      console.log("현재 쿠키:", document.cookie);
       const serverUrl = document.getElementById("serverBaseUrl").value.trim();
       try {
         const res = await fetch(`${serverUrl}/api/v1/payments/complete`, {
-          method:  "POST",
-          headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ paymentId }),
-        });
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body:    JSON.stringify({ paymentId }),
+    });
+
+        console.log("complete 응답 상태:", res.status); // 추가
+        console.log("complete 응답 body:", await res.text()); // 추
 
         if (!res.ok) {
           const text = await res.text();

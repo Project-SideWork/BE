@@ -1,5 +1,6 @@
 package com.sidework.payment.application.adapter;
 
+import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.payment.application.exception.SyncPaymentException;
 import com.sidework.payment.application.port.in.CompletePaymentRequest;
 import com.sidework.payment.application.port.in.Item;
@@ -10,9 +11,11 @@ import io.portone.sdk.server.webhook.WebhookTransaction;
 import io.portone.sdk.server.webhook.WebhookVerifier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -32,8 +35,13 @@ public class PaymentController {
 
     @PostMapping("/complete")
     public CompletableFuture<Payment> completePayment(
+            @AuthenticationPrincipal AuthenticatedUserDetails details,
             @RequestBody CompletePaymentRequest completeRequest) {
-        return paymentCommandService.syncPayment(completeRequest.paymentId());
+        return paymentCommandService.syncPayment(completeRequest.paymentId())
+                .thenApply(payment -> {
+            paymentCommandService.assignUser(details.getId(), payment.getPaymentId());
+            return payment;
+                });
     }
 
     @PostMapping("/webhook")

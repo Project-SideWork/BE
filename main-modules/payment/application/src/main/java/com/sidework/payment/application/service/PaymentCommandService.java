@@ -30,6 +30,13 @@ public class PaymentCommandService implements PaymentCommandUseCase {
     }
 
     @Override
+    public void assignUser(Long userId, String paymentId) {
+        Payment domain = repo.findById(paymentId);
+        domain.assignUser(userId);
+        repo.save(domain);
+    }
+
+    @Override
     public CompletableFuture<Payment> syncPayment(String paymentId) {
         return portone.getPayment(paymentId)
                 .exceptionally(e -> { throw new SyncPaymentException(); })
@@ -53,8 +60,7 @@ public class PaymentCommandService implements PaymentCommandUseCase {
                             paidPayment.getCustomer().getPhoneNumber(),
                             "item1",
                             paidPayment.getPaidAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
-                            paidPayment.getRequestedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
-                            paidPayment.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+                            paidPayment.getRequestedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime()
                     );
 
                     create(domainPayment);

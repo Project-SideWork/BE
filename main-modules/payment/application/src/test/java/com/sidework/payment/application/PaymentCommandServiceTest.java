@@ -12,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -53,7 +55,23 @@ class PaymentCommandServiceTest {
         assertEquals(domain.getRequestedAt(),   saved.getRequestedAt());
     }
 
+    @Test
+    void assignUser는_userId와_paymentId를_전달받아_Payment에_User_정보를_추가한다() {
+        Long userId = 1L;
+        Payment domain = makePayment();
 
+        when(repo.findById(domain.getPaymentId())).thenReturn(domain);
+        doNothing().when(repo).save(domain);
+
+        service.assignUser(userId, domain.getPaymentId());
+
+        verify(repo).findById(domain.getPaymentId());
+        verify(repo).save(captor.capture());
+
+        Payment saved = captor.getValue();
+
+        assertNotNull(saved.getUserId());
+    }
 
     private Payment makePayment() {
         return Payment.create(
@@ -61,8 +79,7 @@ class PaymentCommandServiceTest {
                 "신발", 1000L, "KRW", "PAID",
                 "홍길동", "test@example.com", "01012345678", "item1",
                 LocalDateTime.of(2026, 4, 1, 15, 0),
-                LocalDateTime.of(2026, 4, 1, 14, 50),
-                LocalDateTime.of(2026, 4, 1, 15, 1)
+                LocalDateTime.of(2026, 4, 1, 14, 50)
         );
     }
 }

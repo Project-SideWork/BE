@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 public class Payment {
     private String paymentId;
 
+    private Long userId;
+
     private String transactionId;
 
     private String storeId;
@@ -52,8 +54,7 @@ public class Payment {
             String customerPhone,
             String itemId,
             LocalDateTime paidAt,
-            LocalDateTime requestedAt,
-            LocalDateTime updatedAt
+            LocalDateTime requestedAt
     ) {
         return Payment.builder()
                 .paymentId(paymentId)
@@ -70,5 +71,9 @@ public class Payment {
                 .paidAt(paidAt)
                 .requestedAt(requestedAt)
                 .build();
+    }
+
+    public void assignUser(Long userId) {
+        this.userId = userId;
     }
 }
