@@ -37,13 +37,11 @@ public class PaymentController {
     public CompletableFuture<Payment> completePayment(
             @AuthenticationPrincipal AuthenticatedUserDetails details,
             @RequestBody CompletePaymentRequest completeRequest) {
-        CompletableFuture<Payment> res = paymentCommandService.syncPayment(completeRequest.paymentId());
-        try {
-            paymentCommandService.assignUser(details.getId(), res.get().getPaymentId());
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-        return res;
+        return paymentCommandService.syncPayment(completeRequest.paymentId())
+                .thenApply(payment -> {
+            paymentCommandService.assignUser(details.getId(), payment.getPaymentId());
+            return payment;
+                });
     }
 
     @PostMapping("/webhook")
