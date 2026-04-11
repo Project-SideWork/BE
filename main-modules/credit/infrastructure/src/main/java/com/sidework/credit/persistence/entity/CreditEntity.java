@@ -1,8 +1,8 @@
-package com.sidework.payment.persistence.entity;
+package com.sidework.credit.persistence.entity;
 
 
 import com.sidework.common.entity.BaseEntity;
-import com.sidework.payment.domain.CreditType;
+import com.sidework.credit.domain.CreditType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,18 +25,15 @@ public class CreditEntity extends BaseEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(length = 100)
+    private Long paymentId;
+
     @Column(nullable = false)
     private Long amount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CreditType type;
-
-    @Column(length = 255)
-    private String description;
-
-    @Column(length = 100)
-    private Long referenceId;
 
     private Instant expiredAt;
 }
