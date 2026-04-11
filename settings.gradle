@@ -133,4 +133,8 @@ project(':main-modules:payment:domain').name = 'payment-domain'
 project(':main-modules:payment:application').name = 'payment-application'
 project(':main-modules:payment:infrastructure').name = 'payment-infrastructure'
 
+project(':main-modules:credit:domain').name = 'credit-domain'
+project(':main-modules:credit:application').name = 'credit-application'
+project(':main-modules:credit:infrastructure').name = 'credit-infrastructure'
+
 
