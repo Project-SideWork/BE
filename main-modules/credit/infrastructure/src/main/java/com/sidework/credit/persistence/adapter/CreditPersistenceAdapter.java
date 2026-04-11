@@ -1,8 +1,7 @@
-package com.sidework.payment.persistence.adapter;
+package com.sidework.credit.persistence.adapter;
 
-import com.sidework.payment.application.port.out.CreditOutPort;
-import com.sidework.payment.persistence.mapper.CreditMapper;
-import com.sidework.payment.persistence.repository.CreditJpaRepository;
+import com.sidework.credit.application.port.out.CreditOutPort;
+import com.sidework.credit.persistence.repository.CreditJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

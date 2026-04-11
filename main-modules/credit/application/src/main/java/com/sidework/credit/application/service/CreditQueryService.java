@@ -1,7 +1,7 @@
-package com.sidework.payment.application.service;
+package com.sidework.credit.application.service;
 
-import com.sidework.payment.application.port.in.CreditQueryUseCase;
-import com.sidework.payment.application.port.out.CreditOutPort;
+import com.sidework.credit.application.port.in.CreditQueryUseCase;
+import com.sidework.credit.application.port.out.CreditOutPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CreditQueryService implements CreditQueryUseCase {
     private final CreditOutPort creditRepository;
-
 
     @Override
     public Long sumAmountByUser(Long userId) {

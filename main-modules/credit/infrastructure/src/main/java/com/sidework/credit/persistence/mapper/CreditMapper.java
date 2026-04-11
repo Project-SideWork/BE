@@ -1,7 +1,7 @@
-package com.sidework.payment.persistence.mapper;
+package com.sidework.credit.persistence.mapper;
 
-import com.sidework.payment.domain.Credit;
-import com.sidework.payment.persistence.entity.CreditEntity;
+import com.sidework.credit.domain.Credit;
+import com.sidework.credit.persistence.entity.CreditEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
