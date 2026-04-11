@@ -22,7 +22,9 @@ public class Payment {
 
     private String orderName;
 
-    private Long amount;
+    private Integer originalAmount; // 원래 가격
+
+    private Integer amount; // 실제 결제 금액
 
     private String currency;
 
@@ -46,7 +48,8 @@ public class Payment {
             String transactionId,
             String storeId,
             String orderName,
-            Long amount,
+            Integer originalAmount,
+            Integer amount,
             String currency,
             String status,
             String customerName,
@@ -61,6 +64,7 @@ public class Payment {
                 .transactionId(transactionId)
                 .storeId(storeId)
                 .orderName(orderName)
+                .originalAmount(originalAmount)
                 .amount(amount)
                 .currency(currency)
                 .status(status)

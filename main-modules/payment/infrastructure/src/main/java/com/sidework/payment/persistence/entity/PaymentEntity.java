@@ -29,7 +29,9 @@ public class PaymentEntity extends BaseEntity {
 
     private String orderName;
 
-    private Long amount;
+    private Integer originalAmount; // 원래 가격
+
+    private Integer amount; // 실제 결제 금액
 
     private String currency;
 
