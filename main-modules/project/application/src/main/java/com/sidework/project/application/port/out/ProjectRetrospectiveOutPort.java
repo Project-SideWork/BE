@@ -6,4 +6,5 @@ public interface ProjectRetrospectiveOutPort {
 	Long save(ProjectRetrospective retrospective);
 
 	boolean existsByProjectIdAndUserId(Long projectId, Long userId);
+	ProjectRetrospective findByProjectIdAndUserId(Long projectId, Long userId);
 }

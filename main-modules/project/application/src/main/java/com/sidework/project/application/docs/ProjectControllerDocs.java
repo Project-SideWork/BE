@@ -207,6 +207,7 @@ public interface ProjectControllerDocs {
             )
     })
     ResponseEntity<ApiResponse<ProjectDetailResponse>> getProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("projectId") Long projectId
     );
 

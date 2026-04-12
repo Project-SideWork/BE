@@ -1,7 +1,11 @@
 package com.sidework.project.persistence.adapter;
 
+import java.util.Optional;
+
+import com.sidework.project.application.exception.ProjectRetrospectiveNotFoundException;
 import com.sidework.project.application.port.out.ProjectRetrospectiveOutPort;
 import com.sidework.project.domain.ProjectRetrospective;
+import com.sidework.project.persistence.entity.ProjectRetrospectiveEntity;
 import com.sidework.project.persistence.mapper.ProjectRetrospectiveMapper;
 import com.sidework.project.persistence.repository.ProjectRetrospectiveJpaRepository;
 
@@ -24,5 +28,18 @@ public class ProjectRetrospectivePersistenceAdapter implements ProjectRetrospect
 	@Override
 	public boolean existsByProjectIdAndUserId(Long projectId, Long userId) {
 		return repo.existsByProjectIdAndUserId(projectId, userId);
+	}
+
+	@Override
+	public ProjectRetrospective findByProjectIdAndUserId(Long projectId, Long userId) {
+		ProjectRetrospectiveEntity entity = repo.findByProjectIdAndUserId(projectId, userId)
+			.orElse(null);
+
+		if (entity == null) {
+			return null;
+		}
+
+		return mapper.toDomain(entity);
+
 	}
 }

@@ -20,7 +20,8 @@ public record ProjectDetailResponse(
 	List<ProjectMemberResponse> teamMembers,
 	List<RecruitPositionResponse> recruitPositions,
 	List<String> requiredStacks,
-	List<String> preferredStacks
+	List<String> preferredStacks,
+	ProjectRetrospectiveResponse retrospective
 ) {
 	public record ProjectMemberResponse(
 		Long userId,
@@ -42,6 +43,16 @@ public record ProjectDetailResponse(
 	) {
 		public static RecruitPositionResponse of(ProjectRole role, Integer headCount, Integer currentCount, SkillLevel level) {
 			return new RecruitPositionResponse(role, headCount, currentCount, level);
+		}
+	}
+
+	public record ProjectRetrospectiveResponse(
+		String roleDescription,
+		String strengths,
+		String improvements
+	){
+		public static ProjectRetrospectiveResponse of(String roleDescription, String strengths, String improvements) {
+			return new ProjectRetrospectiveResponse(roleDescription, strengths, improvements);
 		}
 	}
 }

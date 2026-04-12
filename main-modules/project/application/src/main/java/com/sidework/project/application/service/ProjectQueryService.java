@@ -20,11 +20,13 @@ import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.application.adapter.ProjectDetailResponse.RecruitPositionResponse;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
+import com.sidework.project.application.port.out.ProjectRetrospectiveOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.application.port.out.ProjectUserReviewOutPort;
 import com.sidework.project.application.port.out.ProjectUserReviewStatOutPort;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRecruitPosition;
+import com.sidework.project.domain.ProjectRetrospective;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
 import com.sidework.project.domain.ProjectUserReview;
@@ -49,6 +51,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     private final ProjectRecruitPositionOutPort projectRecruitPositionRepository;
     private final ProjectUserReviewStatOutPort projectUserReviewStatRepository;
     private final ProjectUserReviewOutPort projectUserReviewOutPort;
+    private final ProjectRetrospectiveOutPort projectRetrospectiveOutPort;
 
     private final ProjectPreferredSkillQueryUseCase projectPreferredSkillQueryUseCase;
     private final ProjectRequiredQueryUseCase projectRequiredQueryUseCase;
@@ -71,11 +74,13 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     @Override
-    public ProjectDetailResponse queryProjectDetail(Long projectId) {
+    public ProjectDetailResponse queryProjectDetail(Long userId, Long projectId) {
         Project project = queryById(projectId);
         if (project == null) {
             throw new ProjectNotFoundException(projectId);
         }
+
+        ProjectRetrospective rowRetrospective = projectRetrospectiveOutPort.findByProjectIdAndUserId(projectId, userId);
 
         List<ProjectUser> allMembers = deduplicateMembersByUserId(projectId);
 
@@ -102,7 +107,8 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             teamMembers,
             recruitPositions,
             requiredStacks,
-            preferredStacks
+            preferredStacks,
+            buildRetrospectiveResponse(rowRetrospective)
         );
     }
 
@@ -365,6 +371,11 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             ));
     }
 
+    private ProjectDetailResponse.ProjectRetrospectiveResponse buildRetrospectiveResponse(ProjectRetrospective retrospective) {
+        if (retrospective == null) {
+            return null;
+        }
+        return ProjectDetailResponse.ProjectRetrospectiveResponse.of(retrospective.getRoleDescription(), retrospective.getStrengths(), retrospective.getImprovements());
 
-
+    }
 }

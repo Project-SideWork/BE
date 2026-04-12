@@ -97,8 +97,10 @@ public class ProjectController implements ProjectControllerDocs {
     }
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProject(@PathVariable("projectId") Long projectId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(projectId)));
+    public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProject(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
+        @PathVariable("projectId") Long projectId) {
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(user.getId(), projectId)));
     }
 
     @GetMapping()
