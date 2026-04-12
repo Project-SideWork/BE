@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sidework.project.application.exception.InvalidCommandException;
 import com.sidework.project.application.exception.ProjectNotFinishedException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
+import com.sidework.project.application.exception.ProjectRetrospectiveAlreadyExistsException;
 import com.sidework.project.application.exception.ProjectUserNotAcceptedException;
 import com.sidework.project.application.port.in.ProjectRetrospectiveCommand;
 import com.sidework.project.application.port.in.ProjectRetrospectiveCommandUseCase;
@@ -65,7 +66,7 @@ public class ProjectRetrospectiveCommandService implements ProjectRetrospectiveC
 
 	private void checkNotAlreadyWritten(Long projectId, Long userId) {
 		if (projectRetrospectiveRepository.existsByProjectIdAndUserId(projectId, userId)) {
-			throw new InvalidCommandException("이미 해당 프로젝트에 대한 회고를 작성했습니다.");
+			throw new ProjectRetrospectiveAlreadyExistsException();
 		}
 	}
 }
