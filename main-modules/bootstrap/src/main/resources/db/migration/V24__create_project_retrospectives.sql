@@ -4,7 +4,8 @@ CREATE TABLE project_retrospectives (
     user_id BIGINT NOT NULL,
     role_description TEXT NOT NULL,
     strengths TEXT NOT NULL,
-    improvements TEXT NOT NULL,
+    regrets TEXT NOT NULL,
+    learnings TEXT NOT NULL,
 
     UNIQUE KEY uk_project_retrospective (project_id, user_id),
     INDEX idx_project_retrospectives_project (project_id),
