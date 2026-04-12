@@ -375,7 +375,12 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         if (retrospective == null) {
             return null;
         }
-        return ProjectDetailResponse.ProjectRetrospectiveResponse.of(retrospective.getRoleDescription(), retrospective.getStrengths(), retrospective.getImprovements());
+        return ProjectDetailResponse.ProjectRetrospectiveResponse.of(
+            retrospective.getRoleDescription(),
+            retrospective.getStrengths(),
+            retrospective.getRegrets(),
+            retrospective.getLearnings()
+        );
 
     }
 }

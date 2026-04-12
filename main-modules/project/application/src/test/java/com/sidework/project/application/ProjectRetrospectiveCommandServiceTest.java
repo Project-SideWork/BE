@@ -45,7 +45,7 @@ class ProjectRetrospectiveCommandServiceTest {
 		Long projectId = 10L;
 		Long userId = 1L;
 		ProjectUser member = ProjectUser.builder().userId(userId).status(ApplyStatus.ACCEPTED).build();
-		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "개선점");
+		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "아쉬운 점", "배운 점");
 
 		when(projectOutPort.existsById(projectId)).thenReturn(true);
 		when(projectOutPort.getProjectStatus(projectId)).thenReturn(ProjectStatus.FINISHED);
@@ -62,7 +62,7 @@ class ProjectRetrospectiveCommandServiceTest {
 		Long projectId = 10L;
 		when(projectOutPort.existsById(projectId)).thenReturn(false);
 
-		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "개선점");
+		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "아쉬운 점", "배운 점");
 
 		assertThrows(ProjectNotFoundException.class, () -> service.create(1L, projectId, command));
 	}
@@ -73,7 +73,7 @@ class ProjectRetrospectiveCommandServiceTest {
 		when(projectOutPort.existsById(projectId)).thenReturn(true);
 		when(projectOutPort.getProjectStatus(projectId)).thenReturn(ProjectStatus.RECRUITING);
 
-		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "개선점");
+		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "아쉬운 점", "배운 점");
 
 		assertThrows(ProjectNotFinishedException.class, () -> service.create(1L, projectId, command));
 	}
@@ -86,7 +86,7 @@ class ProjectRetrospectiveCommandServiceTest {
 		when(projectOutPort.getProjectStatus(projectId)).thenReturn(ProjectStatus.FINISHED);
 		when(projectUserOutPort.findAcceptedByProjectIdAndUserId(projectId, userId)).thenReturn(Optional.empty());
 
-		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "개선점");
+		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "아쉬운 점", "배운 점");
 
 		assertThrows(ProjectUserNotAcceptedException.class, () -> service.create(userId, projectId, command));
 	}
@@ -102,7 +102,7 @@ class ProjectRetrospectiveCommandServiceTest {
 		when(projectUserOutPort.findAcceptedByProjectIdAndUserId(projectId, userId)).thenReturn(Optional.of(member));
 		when(projectRetrospectiveOutPort.existsByProjectIdAndUserId(projectId, userId)).thenReturn(true);
 
-		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "개선점");
+		ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("역할", "잘한 점", "아쉬운 점", "배운 점");
 
 		assertThrows(ProjectRetrospectiveAlreadyExistsException.class, () -> service.create(userId, projectId, command));
 	}

@@ -5,5 +5,6 @@ import jakarta.validation.constraints.NotEmpty;
 public record ProjectRetrospectiveCommand(
 	@NotEmpty String roleDescription,
 	@NotEmpty String strengths,
-	@NotEmpty String improvements
+	@NotEmpty String regrets,
+	@NotEmpty String learnings
 ) {}

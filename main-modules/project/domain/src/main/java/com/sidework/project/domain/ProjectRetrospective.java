@@ -16,15 +16,24 @@ public class ProjectRetrospective {
 	private Long userId;
 	private String roleDescription;
 	private String strengths;
-	private String improvements;
+	private String regrets;
+	private String learnings;
 
-	public static  ProjectRetrospective create(Long projectId, Long userId, String roleDescription, String strengths, String improvements) {
+	public static ProjectRetrospective create(
+		Long projectId,
+		Long userId,
+		String roleDescription,
+		String strengths,
+		String regrets,
+		String learnings
+	) {
 		return ProjectRetrospective.builder()
 			.projectId(projectId)
 			.userId(userId)
 			.roleDescription(roleDescription)
 			.strengths(strengths)
-			.improvements(improvements)
+			.regrets(regrets)
+			.learnings(learnings)
 			.build();
 	}
 

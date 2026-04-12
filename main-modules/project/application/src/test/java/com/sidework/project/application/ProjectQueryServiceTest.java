@@ -157,7 +157,8 @@ class ProjectQueryServiceTest {
                 .userId(userId)
                 .roleDescription("백엔드")
                 .strengths("협업")
-                .improvements("문서화")
+                .regrets("일정")
+                .learnings("문서화")
                 .build());
 
         ProjectDetailResponse result = queryService.queryProjectDetail(userId, projectId);
@@ -181,7 +182,8 @@ class ProjectQueryServiceTest {
         assertNotNull(result.retrospective());
         assertEquals("백엔드", result.retrospective().roleDescription());
         assertEquals("협업", result.retrospective().strengths());
-        assertEquals("문서화", result.retrospective().improvements());
+        assertEquals("일정", result.retrospective().regrets());
+        assertEquals("문서화", result.retrospective().learnings());
     }
 
     @Test

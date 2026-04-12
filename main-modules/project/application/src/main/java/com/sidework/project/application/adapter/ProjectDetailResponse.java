@@ -49,10 +49,16 @@ public record ProjectDetailResponse(
 	public record ProjectRetrospectiveResponse(
 		String roleDescription,
 		String strengths,
-		String improvements
+		String regrets,
+		String learnings
 	){
-		public static ProjectRetrospectiveResponse of(String roleDescription, String strengths, String improvements) {
-			return new ProjectRetrospectiveResponse(roleDescription, strengths, improvements);
+		public static ProjectRetrospectiveResponse of(
+			String roleDescription,
+			String strengths,
+			String regrets,
+			String learnings
+		) {
+			return new ProjectRetrospectiveResponse(roleDescription, strengths, regrets, learnings);
 		}
 	}
 }

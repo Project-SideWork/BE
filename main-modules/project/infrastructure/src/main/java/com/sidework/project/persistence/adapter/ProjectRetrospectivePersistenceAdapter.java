@@ -1,8 +1,5 @@
 package com.sidework.project.persistence.adapter;
 
-import java.util.Optional;
-
-import com.sidework.project.application.exception.ProjectRetrospectiveNotFoundException;
 import com.sidework.project.application.port.out.ProjectRetrospectiveOutPort;
 import com.sidework.project.domain.ProjectRetrospective;
 import com.sidework.project.persistence.entity.ProjectRetrospectiveEntity;

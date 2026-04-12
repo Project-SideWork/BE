@@ -3,7 +3,6 @@ package com.sidework.project.application.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sidework.project.application.exception.InvalidCommandException;
 import com.sidework.project.application.exception.ProjectNotFinishedException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.exception.ProjectRetrospectiveAlreadyExistsException;
@@ -39,7 +38,8 @@ public class ProjectRetrospectiveCommandService implements ProjectRetrospectiveC
 			userId,
 			command.roleDescription(),
 			command.strengths(),
-			command.improvements()
+			command.regrets(),
+			command.learnings()
 		);
 
 		projectRetrospectiveRepository.save(retrospective);

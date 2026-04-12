@@ -30,7 +30,10 @@ public class ProjectRetrospectiveEntity {
 	@Column(name = "strengths", columnDefinition = "TEXT", nullable = false)
 	private String strengths;
 
-	@Column(name = "improvements", columnDefinition = "TEXT", nullable = false)
-	private String improvements;
+	@Column(name = "regrets", columnDefinition = "TEXT", nullable = false)
+	private String regrets;
+
+	@Column(name = "learnings", columnDefinition = "TEXT", nullable = false)
+	private String learnings;
 
 }

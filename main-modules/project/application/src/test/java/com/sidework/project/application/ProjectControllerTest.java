@@ -725,7 +725,7 @@ public class ProjectControllerTest {
             List.of(ProjectDetailResponse.RecruitPositionResponse.of(ProjectRole.BACKEND, 1, 0, SkillLevel.JUNIOR)),
             List.of("Java", "Spring"),
             List.of("Redis"),
-            ProjectDetailResponse.ProjectRetrospectiveResponse.of("백엔드", "협업", "문서화")
+            ProjectDetailResponse.ProjectRetrospectiveResponse.of("백엔드", "협업", "일정", "문서화")
         );
         when(projectQueryUseCase.queryProjectDetail(eq(userId), eq(projectId))).thenReturn(detail);
 
@@ -741,7 +741,8 @@ public class ProjectControllerTest {
                 .andExpect(jsonPath("$.result.preferredStacks").isArray())
                 .andExpect(jsonPath("$.result.retrospective.roleDescription").value("백엔드"))
                 .andExpect(jsonPath("$.result.retrospective.strengths").value("협업"))
-                .andExpect(jsonPath("$.result.retrospective.improvements").value("문서화"));
+                .andExpect(jsonPath("$.result.retrospective.regrets").value("일정"))
+                .andExpect(jsonPath("$.result.retrospective.learnings").value("문서화"));
     }
 
     @Test
@@ -1021,7 +1022,7 @@ public class ProjectControllerTest {
     @Test
     void 프로젝트_회고_작성_요청시_성공하면_201을_반환한다() throws Exception {
         Long projectId = 1L;
-        ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("백엔드", "협업", "문서화");
+        ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("백엔드", "협업", "일정", "문서화");
 
         doNothing().when(projectRetrospectiveCommandUseCase)
             .create(anyLong(), eq(projectId), any(ProjectRetrospectiveCommand.class));
