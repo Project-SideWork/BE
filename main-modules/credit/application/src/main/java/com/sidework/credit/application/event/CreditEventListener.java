@@ -28,7 +28,7 @@ public class CreditEventListener {
         for (Credit credit : available) {
             if (spent <= 0) break;
 
-            int deduct = Math.min(credit.getAmount(), spent);
+            int deduct = Math.min(credit.getRemainingAmount(), spent);
 
             credit.spend(deduct);
             spent -= deduct;
