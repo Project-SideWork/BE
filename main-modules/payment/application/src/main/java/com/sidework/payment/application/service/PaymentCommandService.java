@@ -1,6 +1,7 @@
 package com.sidework.payment.application.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sidework.common.event.PaymentCompleteEvent;
 import com.sidework.payment.application.exception.SyncPaymentException;
 import com.sidework.payment.application.port.in.CustomData;
 import com.sidework.payment.application.port.in.Item;
@@ -11,7 +12,10 @@ import io.portone.sdk.server.common.Currency;
 import io.portone.sdk.server.common.SelectedChannelType;
 import io.portone.sdk.server.payment.PaidPayment;
 import io.portone.sdk.server.payment.PaymentClient;
+import io.portone.sdk.server.payment.PaymentStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
@@ -19,18 +23,16 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentCommandService implements PaymentCommandUseCase {
+    private final ApplicationEventPublisher publisher;
     private final PaymentClient portone;
     private final PaymentOutPort repo;
     private final ObjectMapper objectMapper;
 
-    @Override
-    public void create(Payment payment) {
-        repo.save(payment);
-    }
+    private static final int ITEM_PRICE = 10000;
 
-    @Override
-    public void assignUser(Long userId, String paymentId) {
+    private void assignUser(Long userId, String paymentId) {
         Payment domain = repo.findById(paymentId);
         domain.assignUser(userId);
         repo.save(domain);
@@ -52,9 +54,10 @@ public class PaymentCommandService implements PaymentCommandUseCase {
                             paidPayment.getTransactionId(),
                             paidPayment.getStoreId(),
                             paidPayment.getOrderName(),
-                            paidPayment.getAmount().getTotal(),
+                            ITEM_PRICE,
+                            Math.toIntExact(paidPayment.getAmount().getTotal()),
                             paidPayment.getCurrency().getValue(),
-                            "PAID",
+                            PaymentStatus.Paid.INSTANCE.getValue(),
                             paidPayment.getCustomer().getName(),
                             paidPayment.getCustomer().getEmail(),
                             paidPayment.getCustomer().getPhoneNumber(),
@@ -63,10 +66,17 @@ public class PaymentCommandService implements PaymentCommandUseCase {
                             paidPayment.getRequestedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime()
                     );
 
-                    create(domainPayment);
+                    repo.save(domainPayment);
 
                     return domainPayment;
                 });
+    }
+
+    @Override
+    public void processAfterPaymentCompleted(Long userId, String paymentId) {
+        assignUser(userId, paymentId);
+        int usedCredit = repo.calculateUsedCredit(paymentId);
+        publisher.publishEvent(new PaymentCompleteEvent(userId, usedCredit, paymentId));
     }
 
     private boolean verifyPayment(PaidPayment payment) {
@@ -79,10 +89,14 @@ public class PaymentCommandService implements PaymentCommandUseCase {
 
         try {
             CustomData customData = objectMapper.readValue(customDataStr, CustomData.class);
+            long creditUsed = customData.getUsedCredit();
 
-            // TODO: 결제 아이템 삽입 후 customData에서 꺼낸 값으로 쿼리 로직 추가
+            if (creditUsed < 0 || creditUsed > ITEM_PRICE) return false;
+
+            int expectedAmount = Math.toIntExact(ITEM_PRICE - creditUsed);
+
             Item item = new Item(
-                    "ITEM_001", "신발", 1000, Currency.Krw.INSTANCE.getValue()
+                    "ITEM_001", "멤버십", expectedAmount, Currency.Krw.INSTANCE.getValue()
             );
 
             return payment.getOrderName().equals(item.name())
