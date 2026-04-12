@@ -16,30 +16,30 @@ public class Credit {
 
     private Long userId;
 
-    private String paymentId;
-
     private Integer amount;
 
-    private CreditType type;
+    private Integer remainingAmount;
 
-    private LocalDate expiredAt;
+    private LocalDate expiresAt;
 
     public static Credit create(
             Long userId,
-            String paymentId,
             Integer amount,
             CreditType type,
-            LocalDate expiredAt
+            LocalDate expiresAt
     ) {
         validate(userId, amount, type);
 
         return Credit.builder()
                 .userId(userId)
-                .paymentId(paymentId)
                 .amount(amount)
-                .type(type)
-                .expiredAt(expiredAt)
+                .remainingAmount(amount)
+                .expiresAt(expiresAt)
                 .build();
+    }
+
+    public void spend(Integer amount) {
+        this.remainingAmount -= amount;
     }
 
     private static void validate(Long userId, Integer amount, CreditType type) {

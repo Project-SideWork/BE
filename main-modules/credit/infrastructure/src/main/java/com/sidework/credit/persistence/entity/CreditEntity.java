@@ -25,15 +25,11 @@ public class CreditEntity extends BaseEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(length = 100)
-    private Long paymentId;
+    @Column(nullable = false)
+    private Integer amount;
 
     @Column(nullable = false)
-    private Long amount;
+    private Integer remainingAmount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CreditType type;
-
-    private Instant expiredAt;
+    private Instant expiresAt;
 }
