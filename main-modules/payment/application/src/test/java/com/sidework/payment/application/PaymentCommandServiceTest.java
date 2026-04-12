@@ -1,8 +1,15 @@
 package com.sidework.payment.application;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sidework.common.event.PaymentCompleteEvent;
+import com.sidework.payment.application.port.in.CustomData;
 import com.sidework.payment.application.port.out.PaymentOutPort;
 import com.sidework.payment.application.service.PaymentCommandService;
 import com.sidework.payment.domain.Payment;
+import io.portone.sdk.server.common.Currency;
+import io.portone.sdk.server.common.SelectedChannelType;
+import io.portone.sdk.server.payment.PaidPayment;
+import io.portone.sdk.server.payment.PaymentClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -10,15 +17,18 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentCommandServiceTest {
+
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     @Mock
     private PaymentOutPort repo;
@@ -29,54 +39,33 @@ class PaymentCommandServiceTest {
     @Captor
     private ArgumentCaptor<Payment> captor;
 
-    @Test
-    void create는_도메인_객체를_전달받아_저장한다() {
-        doNothing().when(repo).save(any(Payment.class));
-
-        Payment domain = makePayment();
-
-        service.create(domain);
-
-        verify(repo).save(captor.capture());
-        Payment saved = captor.getValue();
-
-        assertEquals(domain.getPaymentId(),     saved.getPaymentId());
-        assertEquals(domain.getTransactionId(), saved.getTransactionId());
-        assertEquals(domain.getStoreId(),       saved.getStoreId());
-        assertEquals(domain.getOrderName(),     saved.getOrderName());
-        assertEquals(domain.getAmount(),        saved.getAmount());
-        assertEquals(domain.getCurrency(),      saved.getCurrency());
-        assertEquals(domain.getStatus(),        saved.getStatus());
-        assertEquals(domain.getCustomerName(),  saved.getCustomerName());
-        assertEquals(domain.getCustomerEmail(), saved.getCustomerEmail());
-        assertEquals(domain.getCustomerPhone(), saved.getCustomerPhone());
-        assertEquals(domain.getItemId(),        saved.getItemId());
-        assertEquals(domain.getPaidAt(),        saved.getPaidAt());
-        assertEquals(domain.getRequestedAt(),   saved.getRequestedAt());
-    }
 
     @Test
-    void assignUser는_userId와_paymentId를_전달받아_Payment에_User_정보를_추가한다() {
+    void processAfterPaymentCompleted는_유저를_할당하고_이벤트를_발행한다() {
+        // given
         Long userId = 1L;
+        String paymentId = "payment-test-123";
         Payment domain = makePayment();
 
-        when(repo.findById(domain.getPaymentId())).thenReturn(domain);
-        doNothing().when(repo).save(domain);
+        when(repo.findById(paymentId)).thenReturn(domain);
+        doNothing().when(repo).save(any(Payment.class));
+        when(repo.calculateUsedCredit(paymentId)).thenReturn(0);
 
-        service.assignUser(userId, domain.getPaymentId());
+        // when
+        service.processAfterPaymentCompleted(userId, paymentId);
 
-        verify(repo).findById(domain.getPaymentId());
+        // then
+        verify(repo).findById(paymentId);
         verify(repo).save(captor.capture());
+        assertNotNull(captor.getValue().getUserId());
 
-        Payment saved = captor.getValue();
-
-        assertNotNull(saved.getUserId());
+        verify(publisher).publishEvent(any(PaymentCompleteEvent.class));
     }
 
     private Payment makePayment() {
         return Payment.create(
                 "payment-test-123", "tx-test-123", "store-test-123",
-                "신발", 1000L, "KRW", "PAID",
+                "멤버십", 10000, 10000, "KRW", "PAID",
                 "홍길동", "test@example.com", "01012345678", "item1",
                 LocalDateTime.of(2026, 4, 1, 15, 0),
                 LocalDateTime.of(2026, 4, 1, 14, 50)

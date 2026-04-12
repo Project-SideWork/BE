@@ -24,7 +24,6 @@ import com.sidework.project.application.adapter.ProjectPromotionDetailResponse;
 import com.sidework.project.application.adapter.ProjectPromotionListResponse;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.ApplyStatus;
-import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.skill.application.port.out.SkillOutPort;
