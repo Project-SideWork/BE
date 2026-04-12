@@ -11,6 +11,7 @@ import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.application.port.out.ProjectRecruitPositionOutPort;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
+import com.sidework.project.application.port.out.ProjectRetrospectiveOutPort;
 import com.sidework.project.application.port.out.ProjectUserReviewOutPort;
 import com.sidework.project.application.port.out.ProjectUserReviewStatOutPort;
 import com.sidework.project.application.service.ProjectQueryService;
@@ -18,6 +19,7 @@ import com.sidework.project.domain.ProjectUserReviewStat;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
+import com.sidework.project.domain.ProjectRetrospective;
 import com.sidework.project.domain.ProjectRecruitPosition;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
@@ -76,6 +78,9 @@ class ProjectQueryServiceTest {
     @Mock
     private ProjectUserReviewOutPort projectUserReviewOutPort;
 
+    @Mock
+    private ProjectRetrospectiveOutPort projectRetrospectiveOutPort;
+
     @InjectMocks
     private ProjectQueryService queryService;
 
@@ -123,6 +128,7 @@ class ProjectQueryServiceTest {
 
     @Test
     void queryProjectDetail_정상_조회_시_ProjectDetailResponse를_반환한다() {
+        Long userId = 1L;
         Long projectId = 1L;
         Project project = createProject(projectId);
         List<ProjectUser> members = List.of(
@@ -145,8 +151,16 @@ class ProjectQueryServiceTest {
                 ProjectUserReviewStat.builder().userId(1L).ratingScore(18.0).ratingCount(4L).build(),
                 ProjectUserReviewStat.builder().userId(2L).ratingScore(8.0).ratingCount(2L).build()
             ));
+        when(projectRetrospectiveOutPort.findByProjectIdAndUserId(projectId, userId))
+            .thenReturn(ProjectRetrospective.builder()
+                .projectId(projectId)
+                .userId(userId)
+                .roleDescription("백엔드")
+                .strengths("협업")
+                .improvements("문서화")
+                .build());
 
-        ProjectDetailResponse result = queryService.queryProjectDetail(projectId);
+        ProjectDetailResponse result = queryService.queryProjectDetail(userId, projectId);
 
         assertNotNull(result);
         assertEquals(projectId, result.id());
@@ -164,6 +178,10 @@ class ProjectQueryServiceTest {
         assertEquals(SkillLevel.JUNIOR, result.recruitPositions().get(0).level());
         assertEquals(requiredStacks, result.requiredStacks());
         assertEquals(preferredStacks, result.preferredStacks());
+        assertNotNull(result.retrospective());
+        assertEquals("백엔드", result.retrospective().roleDescription());
+        assertEquals("협업", result.retrospective().strengths());
+        assertEquals("문서화", result.retrospective().improvements());
     }
 
     @Test
@@ -171,17 +189,18 @@ class ProjectQueryServiceTest {
         Long projectId = 999L;
         when(projectRepository.findById(projectId)).thenReturn(null);
 
-        assertThrows(ProjectNotFoundException.class, () -> queryService.queryProjectDetail(projectId));
+        assertThrows(ProjectNotFoundException.class, () -> queryService.queryProjectDetail(1L, projectId));
     }
 
     @Test
     void queryProjectDetail_멤버가_없으면_ProjectHasNoMembersException을_던진다() {
+        Long userId = 1L;
         Long projectId = 1L;
         Project project = createProject(projectId);
         when(projectRepository.findById(projectId)).thenReturn(project);
         when(projectUserRepository.findAllByProjectId(projectId)).thenReturn(List.of());
 
-        assertThrows(ProjectHasNoMembersException.class, () -> queryService.queryProjectDetail(projectId));
+        assertThrows(ProjectHasNoMembersException.class, () -> queryService.queryProjectDetail(userId, projectId));
     }
 
     @Test
