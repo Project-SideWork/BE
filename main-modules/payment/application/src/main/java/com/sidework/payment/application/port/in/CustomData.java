@@ -7,5 +7,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomData {
     private String item;
-    private Integer creditUsed;
+    private Integer usedCredit;
 }
