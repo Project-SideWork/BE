@@ -53,7 +53,7 @@ public enum ErrorStatus implements BaseStatusCode {
 
     // PROJECT_RETROSPECTIVE
     PROJECT_RETROSPECTIVE_NOT_FOUND(HttpStatus.NOT_FOUND,"PROJECT_RETROSPECTIVE_001", "해당 프로젝트 회고를 찾을 수 없습니다." ),
-    PROJECT_RETROSPECTIVE_ALREADY_EXISTS(HttpStatus.CONFLICT, "PROJECT_RETROSPECTIVE_002", "이미 최근에 작성된 프로젝트 회고입니다."),
+    PROJECT_RETROSPECTIVE_ALREADY_EXISTS(HttpStatus.CONFLICT, "PROJECT_RETROSPECTIVE_002", "이미 작성된 프로젝트 회고입니다."),
 
     // PROFILE
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROFILE_001", "해당 프로필을 찾을 수 없습니다."),
