@@ -89,6 +89,9 @@ public class ProjectControllerTest {
     private ProjectPromotionQueryUseCase projectPromotionQueryUseCase;
 
     @MockitoBean
+    private ProjectRetrospectiveCommandUseCase projectRetrospectiveCommandUseCase;
+
+    @MockitoBean
     private ProjectOutPort repo;
 
     @MockitoBean
@@ -708,6 +711,7 @@ public class ProjectControllerTest {
 
     @Test
     void 프로젝트_상세_조회_요청시_성공하면_200과_상세_응답을_반환한다() throws Exception {
+        Long userId = authenticatedUserDetails.getId();
         Long projectId = 1L;
         ProjectDetailResponse detail = new ProjectDetailResponse(
             1L,
@@ -720,9 +724,10 @@ public class ProjectControllerTest {
             List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED, 4.5)),
             List.of(ProjectDetailResponse.RecruitPositionResponse.of(ProjectRole.BACKEND, 1, 0, SkillLevel.JUNIOR)),
             List.of("Java", "Spring"),
-            List.of("Redis")
+            List.of("Redis"),
+            ProjectDetailResponse.ProjectRetrospectiveResponse.of("백엔드", "협업", "일정", "문서화")
         );
-        when(projectQueryUseCase.queryProjectDetail(projectId)).thenReturn(detail);
+        when(projectQueryUseCase.queryProjectDetail(eq(userId), eq(projectId))).thenReturn(detail);
 
         mockMvc.perform(get("/api/v1/projects/{projectId}", projectId)
                 .with(user(authenticatedUserDetails)))
@@ -733,14 +738,19 @@ public class ProjectControllerTest {
                 .andExpect(jsonPath("$.result.title").value("테스트 프로젝트"))
                 .andExpect(jsonPath("$.result.teamMembers").isArray())
                 .andExpect(jsonPath("$.result.requiredStacks").isArray())
-                .andExpect(jsonPath("$.result.preferredStacks").isArray());
+                .andExpect(jsonPath("$.result.preferredStacks").isArray())
+                .andExpect(jsonPath("$.result.retrospective.roleDescription").value("백엔드"))
+                .andExpect(jsonPath("$.result.retrospective.strengths").value("협업"))
+                .andExpect(jsonPath("$.result.retrospective.regrets").value("일정"))
+                .andExpect(jsonPath("$.result.retrospective.learnings").value("문서화"));
     }
 
     @Test
     void 프로젝트_상세_조회_요청시_projectId가_존재하지_않으면_404를_반환한다() throws Exception {
+        Long userId = authenticatedUserDetails.getId();
         Long projectId = 999L;
         doThrow(new ProjectNotFoundException(projectId))
-                .when(projectQueryUseCase).queryProjectDetail(projectId);
+                .when(projectQueryUseCase).queryProjectDetail(eq(userId), eq(projectId));
 
         mockMvc.perform(get("/api/v1/projects/{projectId}", projectId)
                 .with(user(authenticatedUserDetails)))
@@ -750,9 +760,10 @@ public class ProjectControllerTest {
 
     @Test
     void 프로젝트_상세_조회_요청시_멤버가_없으면_500을_반환한다() throws Exception {
+        Long userId = authenticatedUserDetails.getId();
         Long projectId = 1L;
         doThrow(new ProjectHasNoMembersException(projectId))
-                .when(projectQueryUseCase).queryProjectDetail(projectId);
+                .when(projectQueryUseCase).queryProjectDetail(eq(userId), eq(projectId));
 
         mockMvc.perform(get("/api/v1/projects/{projectId}", projectId)
                 .with(user(authenticatedUserDetails)))
@@ -1006,6 +1017,26 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.isSuccess").value(true));
 
         verify(projectUserReviewCommandUseCase).create(eq(1L), eq(projectId), any(ProjectUserReviewCommand.class));
+    }
+
+    @Test
+    void 프로젝트_회고_작성_요청시_성공하면_201을_반환한다() throws Exception {
+        Long projectId = 1L;
+        ProjectRetrospectiveCommand command = new ProjectRetrospectiveCommand("백엔드", "협업", "일정", "문서화");
+
+        doNothing().when(projectRetrospectiveCommandUseCase)
+            .create(anyLong(), eq(projectId), any(ProjectRetrospectiveCommand.class));
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/retrospectives", projectId)
+                .with(user(authenticatedUserDetails))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(command)))
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.isSuccess").value(true));
+
+        verify(projectRetrospectiveCommandUseCase).create(eq(1L), eq(projectId), any(ProjectRetrospectiveCommand.class));
     }
 
     @Test
