@@ -1,0 +1,2 @@
+ALTER TABLE payments
+ADD COLUMN processed TINYINT(1);
