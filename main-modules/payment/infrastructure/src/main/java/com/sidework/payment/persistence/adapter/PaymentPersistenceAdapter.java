@@ -29,6 +29,10 @@ public class PaymentPersistenceAdapter implements PaymentOutPort {
 
     @Override
     public int calculateUsedCredit(String paymentId) {
-        return repo.findUsedCreditById(paymentId);
+        int usedCredit = repo.findUsedCreditById(paymentId);
+        if (usedCredit < 0) {
+            throw new IllegalStateException("usedCredit must be >= 0. paymentId=" + paymentId);
+        }
+        return usedCredit;
     }
 }
