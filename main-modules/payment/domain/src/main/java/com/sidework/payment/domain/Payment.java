@@ -38,6 +38,8 @@ public class Payment {
 
     private String itemId;
 
+    private boolean processed;
+
     private LocalDateTime paidAt;
 
     private LocalDateTime requestedAt;
@@ -72,6 +74,7 @@ public class Payment {
                 .customerEmail(customerEmail)
                 .customerPhone(customerPhone)
                 .itemId(itemId)
+                .processed(false)
                 .paidAt(paidAt)
                 .requestedAt(requestedAt)
                 .build();
@@ -79,5 +82,16 @@ public class Payment {
 
     public void assignUser(Long userId) {
         this.userId = userId;
+    }
+
+    public boolean isAlreadyProcessed() {
+        return this.processed;
+    }
+
+    public void process() {
+        if (this.processed) {
+            throw new IllegalStateException("이미 처리된 결제입니다.");
+        }
+        this.processed = true;
     }
 }

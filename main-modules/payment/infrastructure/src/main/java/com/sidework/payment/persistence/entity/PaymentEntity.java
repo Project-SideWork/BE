@@ -45,6 +45,8 @@ public class PaymentEntity extends BaseEntity {
 
     private String itemId;
 
+    private boolean processed;
+
     private Instant paidAt;
 
     private Instant requestedAt;
