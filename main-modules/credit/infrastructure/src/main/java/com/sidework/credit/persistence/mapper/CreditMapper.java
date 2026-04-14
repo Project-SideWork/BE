@@ -17,7 +17,7 @@ public interface CreditMapper {
 
     default Instant map(LocalDate value) {
         if (value == null) return null;
-        return value
+        return value.plusDays(1)
                 .atStartOfDay(PROJECT_ZONE)
                 .toInstant();
     }
