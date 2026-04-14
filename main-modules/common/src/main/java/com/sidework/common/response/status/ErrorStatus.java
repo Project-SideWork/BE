@@ -76,6 +76,7 @@ public enum ErrorStatus implements BaseStatusCode {
 
     // PAYMENT
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_001", "해당 결제내역을 찾을 수 없습니다."),
+    PAYMENT_AFTER_PROCESS_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT_002", "결제 후처리에 실패했습니다."),
 
     // CREDIT
     CREDIT_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "CREDIT_001", "사용 가능한 크레딧이 부족합니다.");
