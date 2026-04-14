@@ -25,10 +25,9 @@ public class Credit {
     public static Credit create(
             Long userId,
             Integer amount,
-            CreditType type,
             LocalDate expiresAt
     ) {
-        validate(userId, amount, type);
+        validate(userId, amount);
 
         return Credit.builder()
                 .userId(userId)
@@ -39,18 +38,21 @@ public class Credit {
     }
 
     public void spend(Integer amount) {
+        if (amount == null || amount <= 0) {
+            throw new IllegalArgumentException("차감 금액은 0보다 커야 합니다.");
+        }
+        if (remainingAmount == null || remainingAmount < amount) {
+            throw new IllegalArgumentException("보유 크레딧이 부족합니다.");
+        }
         this.remainingAmount -= amount;
     }
 
-    private static void validate(Long userId, Integer amount, CreditType type) {
+    private static void validate(Long userId, Integer amount) {
         if (userId == null) {
             throw new IllegalArgumentException("userId는 필수입니다.");
         }
         if (amount == null || amount <= 0) {
             throw new IllegalArgumentException("amount는 0보다 커야 합니다.");
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("type은 필수입니다.");
         }
     }
 }
