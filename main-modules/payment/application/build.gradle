@@ -21,6 +21,7 @@ dependencies {
 
     implementation project(':main-modules:common')
     implementation project(':main-modules:payment:payment-domain')
+    implementation project(':main-modules:credit:credit-application')
 
     implementation("org.springframework:spring-context")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
