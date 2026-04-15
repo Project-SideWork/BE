@@ -98,6 +98,8 @@ jobs:
                   GIT_CLIENT_ID=${{ secrets.GIT_CLIENT_ID }}
                   GIT_CLIENT_SECRET=${{ secrets.GIT_CLIENT_SECRET }}
                   AES_ENCRYPT_KEY=${{ secrets.AES_ENCRYPT_KEY }}
+                  PORTONE_SECRET=${{ secrets.PORTONE_SECRET }}
+                  PORTONE_WEBHOOK_SECRET=${{ secrets.PORTONE_WEBHOOK_SECRET }}
                   EOF
                   
                   scp myapp.tar .env.production growp:/home/ubuntu/app/
