@@ -95,6 +95,7 @@ public class PaymentPersistenceAdapterTest {
                 "test@example.com",
                 "01012345678",
                 "item1",
+                true,
                 LocalDateTime.of(2026, 4, 1, 15, 0),
                 LocalDateTime.of(2026, 4, 1, 14, 50)
         );
@@ -113,6 +114,7 @@ public class PaymentPersistenceAdapterTest {
                 "test@example.com",
                 "01012345678",
                 "item1",
+                true,
                 Instant.now(),
                 Instant.now()
         );

@@ -30,9 +30,6 @@ public class CreditControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockitoBean
     private CreditQueryUseCase creditQueryService;
 
@@ -41,7 +38,7 @@ public class CreditControllerTest {
 
     @Test
     void 크레딧_조회_요청시_성공하면_200과_잔액을_반환한다() throws Exception {
-        Long expectedCredit = 3000L;
+        Integer expectedCredit = 3000;
 
         when(creditQueryService.sumAmountByUser(authenticatedUserDetails.getId()))
                 .thenReturn(expectedCredit);
@@ -59,7 +56,7 @@ public class CreditControllerTest {
     @Test
     void 크레딧_조회_요청시_크레딧이_없으면_0을_반환한다() throws Exception {
         when(creditQueryService.sumAmountByUser(authenticatedUserDetails.getId()))
-                .thenReturn(0L);
+                .thenReturn(0);
 
         mockMvc.perform(get("/api/v1/credits")
                         .with(user(authenticatedUserDetails)))

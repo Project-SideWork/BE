@@ -9,6 +9,7 @@ import io.portone.sdk.server.webhook.WebhookTransaction;
 import io.portone.sdk.server.webhook.WebhookVerifier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,13 +30,13 @@ public class PaymentController {
                 "ITEM_001", "멤버십", 10000, Currency.Krw.INSTANCE.getValue()
         );
     }
-
     @PostMapping("/prepare")
     public ResponseEntity<ApiResponse<PreparePaymentResponse>> preparePayment(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @RequestBody PreparePaymentRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(paymentCommandService.preparePayment(user.getId(), request)));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.onSuccess(paymentCommandService.preparePayment(user.getId(), request)));
     }
 
     @PostMapping("/complete")

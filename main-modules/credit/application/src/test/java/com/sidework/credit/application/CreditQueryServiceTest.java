@@ -25,11 +25,11 @@ class CreditQueryServiceTest {
     @Test
     void sumAmountByUser는_userId로_크레딧_합계를_반환한다() {
         Long userId = 1L;
-        Long expected = 3000L;
+        Integer expected = 3000;
 
         when(creditRepository.findAmountByUser(userId)).thenReturn(expected);
 
-        Long result = service.sumAmountByUser(userId);
+        Integer result = service.sumAmountByUser(userId);
 
         assertEquals(expected, result);
         verify(creditRepository).findAmountByUser(userId);
@@ -41,7 +41,7 @@ class CreditQueryServiceTest {
 
         when(creditRepository.findAmountByUser(userId)).thenReturn(null);
 
-        Long result = service.sumAmountByUser(userId);
+        Integer result = service.sumAmountByUser(userId);
 
         assertNull(result);
         verify(creditRepository).findAmountByUser(userId);
