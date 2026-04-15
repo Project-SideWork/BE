@@ -19,6 +19,8 @@ import java.util.List;
 public class CreditEventListener {
     private final CreditOutPort repo;
 
+
+    // TODO: 크레딧 사용 내역 테이블 추가 후 paymentId 사용
     @EventListener
     @Transactional
     public void onPaymentCompleted(PaymentCompleteEvent event) {
