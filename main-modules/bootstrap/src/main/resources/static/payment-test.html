@@ -462,7 +462,7 @@
 
     const paymentId = prepareData.paymentId;
     const approvedCredit = Number(prepareData.approvedCredit || 0);
-    const finalAmount = Math.max(0, Number(itemData.price || 0) - approvedCredit);
+    const finalAmount = Number(prepareData.finalAmount || 0);
 
     // UI도 서버 승인 기준으로 갱신
     document.getElementById("summaryUsedCredit").textContent = formatWon(approvedCredit);

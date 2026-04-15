@@ -60,7 +60,7 @@ public class PaymentControllerTest {
     }
 
     @Test
-    void 결제_준비_요청시_성공하면_200과_prepare응답을_반환한다() throws Exception {
+    void 결제_준비_요청시_성공하면_201과_prepare응답을_반환한다() throws Exception {
         PreparePaymentRequest request = new PreparePaymentRequest(2000);
         PreparePaymentResponse response = new PreparePaymentResponse(
                 "payment-test-123",

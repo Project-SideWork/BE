@@ -21,12 +21,12 @@ public class PaymentReservation {
     private String status;
 
 
-    public static PaymentReservation create(String paymentId, Long userId, Integer approvedCredit, String status){
+    public static PaymentReservation create(String paymentId, Long userId, Integer approvedCredit){
         return PaymentReservation.builder()
                 .paymentId(paymentId)
                 .userId(userId)
                 .approvedCredit(approvedCredit)
-                .status(status)
+                .status("READY")
                 .build();
     }
 

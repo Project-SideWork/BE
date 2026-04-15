@@ -144,7 +144,7 @@ class PaymentCommandServiceTest {
         );
     }
 
-    private PaymentReservation makeReservation(String paymentId, Long userId, int approvedCredit, String status) {
-        return PaymentReservation.create(paymentId, userId, approvedCredit, status);
+    private PaymentReservation makeReservation(String paymentId, Long userId, int approvedCredit) {
+        return PaymentReservation.create(paymentId, userId, approvedCredit);
     }
 }

@@ -37,8 +37,7 @@ public class PaymentReservationPersistenceAdapterTest {
         PaymentReservation domain = PaymentReservation.create(
                 "payment-test-123",
                 1L,
-                2000,
-                "READY"
+                2000
         );
 
         PaymentReservationEntity entity = new PaymentReservationEntity();

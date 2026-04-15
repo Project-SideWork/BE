@@ -36,7 +36,7 @@ public class PaymentCommandService implements PaymentCommandUseCase {
 
     @Override
     public PreparePaymentResponse preparePayment(Long userId, PreparePaymentRequest request) {
-        int usedCredit = Math.max(request.requestedCredit(), 0);
+        int usedCredit = Math.max(request.requestedCredit() != null ? request.requestedCredit() : 0, 0);
 
         int originalAmount = ITEM_PRICE;
 
@@ -52,8 +52,7 @@ public class PaymentCommandService implements PaymentCommandUseCase {
         PaymentReservation reservation = PaymentReservation.create(
                 paymentId,
                 userId,
-                approvedCredit,
-                "READY"
+                approvedCredit
         );
 
         paymentReservationRepo.save(reservation);
