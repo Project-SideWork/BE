@@ -325,24 +325,9 @@
     }
 
     function getUseCredit() {
-      const input = document.getElementById("useCredit");
-      const raw = Number(input.value || 0);
-
-      if (!itemData) return 0;
-
-      const maxUsable = Math.min(
-        Math.max(creditAmount, 0),
-        Math.max(Number(itemData.price || 0), 0)
-      );
-
-      const normalized = Math.max(0, Math.min(raw, maxUsable));
-
-      if (raw !== normalized) {
-        input.value = normalized;
-      }
-
-      return normalized;
-    }
+  const raw = Number(document.getElementById("useCredit").value || 0);
+  return Math.max(0, raw);
+}
 
     function updatePriceSummary() {
       const originalPrice = Number(itemData?.price || 0);
@@ -419,75 +404,120 @@
     document.getElementById("useCredit").addEventListener("input", updatePriceSummary);
 
     async function requestPayment() {
-      const storeId = document.getElementById("storeId").value.trim();
-      const channelKey = document.getElementById("channelKey").value.trim();
+  const storeId = document.getElementById("storeId").value.trim();
+  const channelKey = document.getElementById("channelKey").value.trim();
+  const serverUrl = getServerUrl();
 
-      if (!storeId || !channelKey) {
-        alert("Store ID와 Channel Key를 입력해주세요.");
-        return;
-      }
+  if (!storeId || !channelKey) {
+    alert("Store ID와 Channel Key를 입력해주세요.");
+    return;
+  }
 
-      if (!itemData) {
-        alert("상품 정보를 아직 불러오지 못했습니다.");
-        return;
-      }
+  if (!itemData) {
+    alert("상품 정보를 아직 불러오지 못했습니다.");
+    return;
+  }
 
-      const usedCredit = getUseCredit();
-      const finalAmount = Math.max(0, Number(itemData.price) - usedCredit);
-      const paymentId = `payment-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const requestedCredit = getUseCredit();
 
-      const btn = document.getElementById("payBtn");
-      btn.disabled = true;
-      btn.textContent = "결제 요청 중...";
-      hideResult();
+  const btn = document.getElementById("payBtn");
+  btn.disabled = true;
+  btn.textContent = "결제 준비 중...";
+  hideResult();
 
-      try {
-        const response = await PortOne.requestPayment({
-          storeId,
-          channelKey,
-          paymentId,
-          orderName: itemData.name,
-          totalAmount: finalAmount,
-          currency: itemData.currency || "KRW",
-          payMethod: document.getElementById("payMethod").value,
-          customer: {
-            fullName: document.getElementById("customerName").value,
-            phoneNumber: document.getElementById("customerPhone").value,
-            email: document.getElementById("customerEmail").value,
-          },
-          customData: {
-            item: itemData.id,
-            usedCredit: usedCredit
-          },
-          redirectUrl: document.getElementById("redirectUrl").value || undefined,
-        });
+  try {
+    // 1. 서버에 prepare 요청
+    const prepareRes = await fetch(`${serverUrl}/api/v1/payments/prepare`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        requestedCredit: requestedCredit
+      }),
+    });
 
-        if (response?.code) {
-          showResult("error", {
-            title: "결제 실패",
-            paymentId,
-            status: "FAILED",
-            code: response.code,
-            message: response.message,
-          });
-          return;
-        }
+    const prepareText = await prepareRes.text();
+    console.log("prepare 응답 상태:", prepareRes.status);
+    console.log("prepare 응답 body:", prepareText);
 
-        await completePayment(paymentId);
-      } catch (e) {
-        showResult("error", {
-          title: "오류 발생",
-          paymentId,
-          status: "ERROR",
-          code: "CLIENT_ERROR",
-          message: e?.message || String(e),
-        });
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "결제하기";
-      }
+    if (!prepareRes.ok) {
+      showResult("error", {
+        title: "결제 준비 실패",
+        paymentId: "-",
+        status: `HTTP ${prepareRes.status}`,
+        code: "PREPARE_FAILED",
+        message: prepareText || "서버 오류",
+      });
+      return;
     }
 
+    let prepareJson = {};
+    try {
+      prepareJson = prepareText ? JSON.parse(prepareText) : {};
+    } catch (_) {
+      prepareJson = {};
+    }
+
+    const prepareData = prepareJson?.data ?? prepareJson?.result ?? prepareJson;
+
+    const paymentId = prepareData.paymentId;
+    const approvedCredit = Number(prepareData.approvedCredit || 0);
+    const finalAmount = Math.max(0, Number(itemData.price || 0) - approvedCredit);
+
+    // UI도 서버 승인 기준으로 갱신
+    document.getElementById("summaryUsedCredit").textContent = formatWon(approvedCredit);
+    document.getElementById("summaryFinalPrice").textContent = formatWon(finalAmount);
+    document.getElementById("useCredit").value = approvedCredit;
+
+    btn.textContent = "결제 요청 중...";
+
+    // 2. 서버가 준 paymentId로 포트원 결제 요청
+    const response = await PortOne.requestPayment({
+      storeId,
+      channelKey,
+      paymentId,
+      orderName: itemData.name,
+      totalAmount: finalAmount,
+      currency: itemData.currency || "KRW",
+      payMethod: document.getElementById("payMethod").value,
+      customer: {
+        fullName: document.getElementById("customerName").value,
+        phoneNumber: document.getElementById("customerPhone").value,
+        email: document.getElementById("customerEmail").value,
+      },
+      customData: {
+        item: itemData.id,
+        usedCredit: approvedCredit
+      },
+      redirectUrl: document.getElementById("redirectUrl").value || undefined,
+    });
+
+    if (response?.code) {
+      showResult("error", {
+        title: "결제 실패",
+        paymentId,
+        status: "FAILED",
+        code: response.code,
+        message: response.message,
+      });
+      return;
+    }
+
+    // 3. 결제 완료 후 서버 검증
+    await completePayment(paymentId);
+  } catch (e) {
+    showResult("error", {
+      title: "오류 발생",
+      paymentId: "-",
+      status: "ERROR",
+      code: "CLIENT_ERROR",
+      message: e?.message || String(e),
+    });
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "결제하기";
+  }
+}
     async function completePayment(paymentId) {
       const serverUrl = getServerUrl();
 
