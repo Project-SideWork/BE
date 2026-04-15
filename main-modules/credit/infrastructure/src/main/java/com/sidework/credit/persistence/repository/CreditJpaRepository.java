@@ -15,7 +15,7 @@ public interface CreditJpaRepository extends JpaRepository<CreditEntity, Long> {
             SELECT COALESCE(SUM(c.remainingAmount), 0) FROM CreditEntity c
             WHERE c.userId = :userId
             """)
-    Long findSumAmountByUserId(@Param("userId") Long userId);
+    Integer findSumAmountByUserId(@Param("userId") Long userId);
 
     @Query("""
         SELECT c FROM CreditEntity c

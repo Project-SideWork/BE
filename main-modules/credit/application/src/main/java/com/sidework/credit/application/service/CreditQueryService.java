@@ -11,7 +11,7 @@ public class CreditQueryService implements CreditQueryUseCase {
     private final CreditOutPort creditRepository;
 
     @Override
-    public Long sumAmountByUser(Long userId) {
+    public Integer sumAmountByUser(Long userId) {
         return creditRepository.findAmountByUser(userId);
     }
 }

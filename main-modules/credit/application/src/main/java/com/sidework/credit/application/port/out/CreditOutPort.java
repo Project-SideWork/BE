@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface CreditOutPort {
     void saveAll(List<Credit> domains);
-    Long findAmountByUser(Long userId);
+    Integer findAmountByUser(Long userId);
     List<Credit> findAvailableCredits(Long userId);
 }

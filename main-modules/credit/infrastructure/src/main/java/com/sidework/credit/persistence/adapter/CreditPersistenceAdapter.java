@@ -23,7 +23,7 @@ public class CreditPersistenceAdapter implements CreditOutPort {
     }
 
     @Override
-    public Long findAmountByUser(Long userId) {
+    public Integer findAmountByUser(Long userId) {
         return repo.findSumAmountByUserId(userId);
     }
 

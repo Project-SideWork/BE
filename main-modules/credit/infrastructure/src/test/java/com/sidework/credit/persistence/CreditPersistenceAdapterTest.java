@@ -51,11 +51,11 @@ class CreditPersistenceAdapterTest {
     @Test
     void findAmountByUser는_userId로_크레딧_합계를_반환한다() {
         Long userId = 1L;
-        Long expected = 3000L;
+        Integer expected = 3000;
 
         when(repo.findSumAmountByUserId(userId)).thenReturn(expected);
 
-        Long result = adapter.findAmountByUser(userId);
+        Integer result = adapter.findAmountByUser(userId);
 
         assertEquals(expected, result);
         verify(repo).findSumAmountByUserId(userId);
@@ -67,7 +67,7 @@ class CreditPersistenceAdapterTest {
 
         when(repo.findSumAmountByUserId(userId)).thenReturn(null);
 
-        Long result = adapter.findAmountByUser(userId);
+        Integer result = adapter.findAmountByUser(userId);
 
         assertNull(result);
         verify(repo).findSumAmountByUserId(userId);
