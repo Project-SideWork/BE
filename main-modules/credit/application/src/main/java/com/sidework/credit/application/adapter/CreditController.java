@@ -19,7 +19,7 @@ public class CreditController {
     private final CreditQueryUseCase creditQueryService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Long>> getCredit(@AuthenticationPrincipal AuthenticatedUserDetails user) {
+    public ResponseEntity<ApiResponse<Integer>> getCredit(@AuthenticationPrincipal AuthenticatedUserDetails user) {
         return ResponseEntity.ok(ApiResponse.onSuccess(creditQueryService.sumAmountByUser(user.getId())));
     }
 }
