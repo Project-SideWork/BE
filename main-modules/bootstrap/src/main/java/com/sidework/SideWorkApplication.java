@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sidework.profile.persistence.entity", "com.sidework.skill.persistence.entity",
         "com.sidework.notification.persistence.entity", "com.sidework.chat.persistence.entity",
         "com.sidework.region.persistence.entity", "com.sidework.school.persistence.entity",
-        "com.sidework.payment.persistence.entity" })
+        "com.sidework.payment.persistence.entity", "com.sidework.credit.persistence.entity" })
 @EnableConfigurationProperties(PortOneSecretProperties.class)
 public class SideWorkApplication {
 

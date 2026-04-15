@@ -41,7 +41,8 @@ public class PaymentPersistenceAdapterTest {
                 "tx-test-123",
                 "store-test-123",
                 "테스트 상품",
-                1000L,
+                1000,
+                1000,
                 "KRW",
                 "PAID",
                 "홍길동",
@@ -86,13 +87,15 @@ public class PaymentPersistenceAdapterTest {
                 "tx-test-123",
                 "store-test-123",
                 "테스트 상품",
-                1000L,
+                1000,
+                1000,
                 "KRW",
                 "PAID",
                 "홍길동",
                 "test@example.com",
                 "01012345678",
                 "item1",
+                true,
                 LocalDateTime.of(2026, 4, 1, 15, 0),
                 LocalDateTime.of(2026, 4, 1, 14, 50)
         );
@@ -103,13 +106,15 @@ public class PaymentPersistenceAdapterTest {
                 "tx-test-123",
                 "store-test-123",
                 "테스트 상품",
-                1000L,
+                1000,
+                1000,
                 "KRW",
                 "PAID",
                 "홍길동",
                 "test@example.com",
                 "01012345678",
                 "item1",
+                true,
                 Instant.now(),
                 Instant.now()
         );
@@ -137,5 +142,18 @@ public class PaymentPersistenceAdapterTest {
         );
 
         verify(repo).findById("payment-test-123");
+    }
+
+    @Test
+    void calculateUsedCredit는_paymentId로_사용된_크레딧을_반환한다() {
+        String paymentId = "payment-test-123";
+        int expectedCredit = 990;
+
+        when(repo.findUsedCreditById(paymentId)).thenReturn(expectedCredit);
+
+        int result = adapter.calculateUsedCredit(paymentId);
+
+        assertEquals(expectedCredit, result);
+        verify(repo).findUsedCreditById(paymentId);
     }
 }

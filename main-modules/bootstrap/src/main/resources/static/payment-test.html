@@ -23,7 +23,7 @@
           border-radius: 16px;
           box-shadow: 0 4px 24px rgba(0,0,0,0.08);
           width: 100%;
-          max-width: 420px;
+          max-width: 460px;
           overflow: hidden;
         }
 
@@ -38,20 +38,61 @@
 
         .card-body { padding: 24px; }
 
+        .product-box, .credit-box, .summary-box {
+          background: #f8f9fa;
+          border-radius: 12px;
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+
         .product-box {
           display: flex;
           align-items: center;
           gap: 14px;
-          background: #f8f9fa;
-          border-radius: 12px;
-          padding: 16px;
-          margin-bottom: 24px;
         }
 
         .product-icon { font-size: 40px; line-height: 1; }
+
         .product-info .name  { font-size: 16px; font-weight: 600; color: #191919; }
         .product-info .price { font-size: 14px; color: #3182f6; font-weight: 600; margin-top: 2px; }
         .product-info .status { font-size: 12px; color: #888; margin-top: 2px; }
+
+        .credit-box .title,
+        .summary-box .title {
+          font-size: 14px;
+          font-weight: 700;
+          color: #191919;
+          margin-bottom: 8px;
+        }
+
+        .credit-box .value {
+          font-size: 22px;
+          font-weight: 800;
+          color: #3182f6;
+        }
+
+        .credit-box .status {
+          font-size: 12px;
+          color: #888;
+          margin-top: 4px;
+        }
+
+        .summary-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 14px;
+          margin-top: 8px;
+        }
+
+        .summary-row.total {
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid #e6e6e6;
+          font-size: 16px;
+          font-weight: 800;
+          color: #191919;
+        }
 
         .section-title {
           font-size: 13px;
@@ -92,7 +133,7 @@
 
         hr { border: none; border-top: 1px solid #f0f0f0; margin: 20px 0; }
 
-        .btn-pay {
+        .btn-pay, .btn-refresh {
           width: 100%;
           padding: 14px;
           background: #3182f6;
@@ -106,9 +147,15 @@
           margin-top: 8px;
         }
 
-        .btn-pay:hover   { background: #1c6fe0; }
-        .btn-pay:active  { transform: scale(0.98); }
-        .btn-pay:disabled { background: #c0d4f5; cursor: not-allowed; }
+        .btn-refresh {
+          font-size: 13px;
+          padding: 10px;
+          margin-top: 12px;
+        }
+
+        .btn-pay:hover, .btn-refresh:hover { background: #1c6fe0; }
+        .btn-pay:active, .btn-refresh:active { transform: scale(0.98); }
+        .btn-pay:disabled, .btn-refresh:disabled { background: #c0d4f5; cursor: not-allowed; }
 
         .result-box {
           margin-top: 20px;
@@ -138,19 +185,26 @@
 <div class="card">
     <div class="card-header">
         <h1>포트원 V2 결제 테스트</h1>
-        <p>브라우저 SDK 연동 데모 페이지</p>
+        <p>상품 정보 + 내 크레딧 조회 포함 데모 페이지</p>
     </div>
 
     <div class="card-body">
-
         <!-- 상품 정보 -->
         <div class="product-box">
-            <div class="product-icon">👟</div>
+            <div class="product-icon">💎</div>
             <div class="product-info">
-                <div class="name"  id="productName">불러오는 중...</div>
+                <div class="name" id="productName">불러오는 중...</div>
                 <div class="price" id="productPrice">-</div>
                 <div class="status" id="productStatus">서버에서 상품 정보를 불러옵니다</div>
             </div>
+        </div>
+
+        <!-- 크레딧 정보 -->
+        <div class="credit-box">
+            <div class="title">내 보유 크레딧</div>
+            <div class="value" id="creditAmount">-</div>
+            <div class="status" id="creditStatus">서버에서 크레딧 정보를 불러옵니다</div>
+            <button class="btn-refresh" type="button" onclick="reloadData()">상품/크레딧 다시 불러오기</button>
         </div>
 
         <!-- 서버 / SDK 설정 -->
@@ -159,7 +213,7 @@
         <div class="field">
             <label>백엔드 서버 URL</label>
             <input type="text" id="serverBaseUrl" value="http://localhost:8080" />
-            <div class="hint">/api/item, /api/payment/complete 엔드포인트 기준</div>
+            <div class="hint">/api/v1/payments/item, /api/v1/credits, /api/v1/payments/complete 기준</div>
         </div>
 
         <div class="field">
@@ -175,6 +229,7 @@
         </div>
 
         <hr />
+
         <div class="section-title">결제 정보</div>
 
         <div class="field">
@@ -186,6 +241,28 @@
                 <option value="EASY_PAY">간편결제</option>
                 <option value="MOBILE">휴대폰 소액결제</option>
             </select>
+        </div>
+
+        <div class="field">
+            <label>사용할 크레딧</label>
+            <input type="number" id="useCredit" min="0" value="0" placeholder="0" />
+            <div class="hint">현재는 화면에서 입력한 값으로 결제 금액을 줄여서 요청합니다. 서버 검증 로직도 이에 맞게 반영되어 있어야 합니다.</div>
+        </div>
+
+        <div class="summary-box">
+            <div class="title">결제 금액 요약</div>
+            <div class="summary-row">
+                <span>상품 금액</span>
+                <strong id="summaryOriginalPrice">-</strong>
+            </div>
+            <div class="summary-row">
+                <span>사용 크레딧</span>
+                <strong id="summaryUsedCredit">0원</strong>
+            </div>
+            <div class="summary-row total">
+                <span>최종 결제 금액</span>
+                <strong id="summaryFinalPrice">-</strong>
+            </div>
         </div>
 
         <div class="row">
@@ -232,156 +309,277 @@
                 <span class="result-value" id="resultMsg"></span>
             </div>
         </div>
-
     </div>
 </div>
 
 <script>
     let itemData = null;
+    let creditAmount = 0;
 
-    // ── 상품 정보 불러오기 ───────────────────────────────────────────
+    function formatWon(value) {
+      return `${Number(value || 0).toLocaleString()}원`;
+    }
+
+    function getServerUrl() {
+      return document.getElementById("serverBaseUrl").value.trim();
+    }
+
+    function getUseCredit() {
+  const raw = Number(document.getElementById("useCredit").value || 0);
+  return Math.max(0, raw);
+}
+
+    function updatePriceSummary() {
+      const originalPrice = Number(itemData?.price || 0);
+      const usedCredit = getUseCredit();
+      const finalPrice = Math.max(0, originalPrice - usedCredit);
+
+      document.getElementById("summaryOriginalPrice").textContent = formatWon(originalPrice);
+      document.getElementById("summaryUsedCredit").textContent = formatWon(usedCredit);
+      document.getElementById("summaryFinalPrice").textContent = formatWon(finalPrice);
+    }
+
     async function loadItem() {
-      const serverUrl = document.getElementById("serverBaseUrl").value.trim();
+      const serverUrl = getServerUrl();
+
       try {
-        const res = await fetch(`${serverUrl}/api/v1/payments/item`);
-        if (!res.ok) throw new Error();
+        const res = await fetch(`${serverUrl}/api/v1/payments/item`, {
+          credentials: "include"
+        });
+
+        if (!res.ok) throw new Error("상품 정보 조회 실패");
+
         itemData = await res.json();
-        document.getElementById("productName").textContent   = itemData.name;
-        document.getElementById("productPrice").textContent  = Number(itemData.price).toLocaleString() + "원";
+
+        document.getElementById("productName").textContent = itemData.name;
+        document.getElementById("productPrice").textContent = formatWon(itemData.price);
         document.getElementById("productStatus").textContent = "서버에서 불러온 상품 정보";
-      } catch {
-        itemData = { id: "shoes", name: "신발", price: 1000, currency: "KRW" };
-        document.getElementById("productName").textContent   = itemData.name + " (로컬 기본값)";
-        document.getElementById("productPrice").textContent  = Number(itemData.price).toLocaleString() + "원";
-        document.getElementById("productStatus").textContent = "⚠️ 서버 미연결 — 기본값 사용 중";
-      }
-    }
-
-    // 서버 URL 변경 시 상품 정보 재조회
-    document.getElementById("serverBaseUrl").addEventListener("change", loadItem);
-
-    // ── 결제 요청 ────────────────────────────────────────────────────
-    async function requestPayment() {
-      const storeId    = document.getElementById("storeId").value.trim();
-      const channelKey = document.getElementById("channelKey").value.trim();
-
-      if (!storeId || !channelKey) {
-        alert("Store ID와 Channel Key를 입력해주세요.");
-        return;
-      }
-
-      if (!itemData) {
-        alert("상품 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
-        return;
-      }
-
-      const paymentId = `payment-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const btn = document.getElementById("payBtn");
-      btn.disabled = true;
-      btn.textContent = "결제 요청 중...";
-      hideResult();
-
-      try {
-        const response = await PortOne.requestPayment({
-          storeId,
-          channelKey,
-          paymentId,
-          orderName:   itemData.name,
-          totalAmount: itemData.price,
-          currency:    itemData.currency || "KRW",
-          payMethod:   document.getElementById("payMethod").value,
-          customer: {
-            fullName:    document.getElementById("customerName").value,
-            phoneNumber: document.getElementById("customerPhone").value,
-            email:       document.getElementById("customerEmail").value,
-          },
-          customData: { item: itemData.id },
-          redirectUrl: document.getElementById("redirectUrl").value || undefined,
-        });
-
-        // 오류 처리
-        if (response?.code) {
-          showResult("error", {
-            title:   "결제 실패",
-            paymentId,
-            status:  "FAILED",
-            code:    response.code,
-            message: response.message,
-          });
-          return;
-        }
-
-        // 서버 검증
-        await completePayment(paymentId);
-
       } catch (e) {
-        showResult("error", {
-          title:   "오류 발생",
-          paymentId,
-          status:  "ERROR",
-          code:    "CLIENT_ERROR",
-          message: e?.message || String(e),
-        });
+        itemData = {
+          id: "ITEM_001",
+          name: "멤버십",
+          price: 10000,
+          currency: "KRW"
+        };
+
+        document.getElementById("productName").textContent = `${itemData.name} (로컬 기본값)`;
+        document.getElementById("productPrice").textContent = formatWon(itemData.price);
+        document.getElementById("productStatus").textContent = "⚠️ 서버 미연결 — 기본 상품값 사용 중";
       } finally {
-        btn.disabled = false;
-        btn.textContent = "결제하기";
+        updatePriceSummary();
       }
     }
 
-    // ── 서버 결제 완료 요청 ──────────────────────────────────────────
-    async function completePayment(paymentId) {
-      console.log("현재 쿠키:", document.cookie);
-      const serverUrl = document.getElementById("serverBaseUrl").value.trim();
-      try {
-        const res = await fetch(`${serverUrl}/api/v1/payments/complete`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body:    JSON.stringify({ paymentId }),
-    });
+    async function loadCredit() {
+      const serverUrl = getServerUrl();
 
-        console.log("complete 응답 상태:", res.status); // 추가
-        console.log("complete 응답 body:", await res.text()); // 추
+      try {
+        const res = await fetch(`${serverUrl}/api/v1/credits`, {
+          credentials: "include"
+        });
 
         if (!res.ok) {
-          const text = await res.text();
+          throw new Error(`크레딧 조회 실패 (${res.status})`);
+        }
+
+        const response = await res.json();
+        creditAmount = Number(response?.data ?? response?.result ?? 0);
+
+        document.getElementById("creditAmount").textContent = formatWon(creditAmount);
+        document.getElementById("creditStatus").textContent = "서버에서 불러온 내 크레딧";
+      } catch (e) {
+        creditAmount = 0;
+        document.getElementById("creditAmount").textContent = formatWon(0);
+        document.getElementById("creditStatus").textContent = "⚠️ 크레딧 조회 실패 — 로그인/쿠키/서버 상태를 확인하세요";
+      } finally {
+        updatePriceSummary();
+      }
+    }
+
+    async function reloadData() {
+      await Promise.all([loadItem(), loadCredit()]);
+    }
+
+    document.getElementById("serverBaseUrl").addEventListener("change", reloadData);
+    document.getElementById("useCredit").addEventListener("input", updatePriceSummary);
+
+    async function requestPayment() {
+  const storeId = document.getElementById("storeId").value.trim();
+  const channelKey = document.getElementById("channelKey").value.trim();
+  const serverUrl = getServerUrl();
+
+  if (!storeId || !channelKey) {
+    alert("Store ID와 Channel Key를 입력해주세요.");
+    return;
+  }
+
+  if (!itemData) {
+    alert("상품 정보를 아직 불러오지 못했습니다.");
+    return;
+  }
+
+  const requestedCredit = getUseCredit();
+
+  const btn = document.getElementById("payBtn");
+  btn.disabled = true;
+  btn.textContent = "결제 준비 중...";
+  hideResult();
+
+  try {
+    // 1. 서버에 prepare 요청
+    const prepareRes = await fetch(`${serverUrl}/api/v1/payments/prepare`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        requestedCredit: requestedCredit
+      }),
+    });
+
+    const prepareText = await prepareRes.text();
+    console.log("prepare 응답 상태:", prepareRes.status);
+    console.log("prepare 응답 body:", prepareText);
+
+    if (!prepareRes.ok) {
+      showResult("error", {
+        title: "결제 준비 실패",
+        paymentId: "-",
+        status: `HTTP ${prepareRes.status}`,
+        code: "PREPARE_FAILED",
+        message: prepareText || "서버 오류",
+      });
+      return;
+    }
+
+    let prepareJson = {};
+    try {
+      prepareJson = prepareText ? JSON.parse(prepareText) : {};
+    } catch (_) {
+      prepareJson = {};
+    }
+
+    const prepareData = prepareJson?.data ?? prepareJson?.result ?? prepareJson;
+
+    const paymentId = prepareData.paymentId;
+    const approvedCredit = Number(prepareData.approvedCredit || 0);
+    const finalAmount = Number(prepareData.finalAmount || 0);
+
+    // UI도 서버 승인 기준으로 갱신
+    document.getElementById("summaryUsedCredit").textContent = formatWon(approvedCredit);
+    document.getElementById("summaryFinalPrice").textContent = formatWon(finalAmount);
+    document.getElementById("useCredit").value = approvedCredit;
+
+    btn.textContent = "결제 요청 중...";
+
+    // 2. 서버가 준 paymentId로 포트원 결제 요청
+    const response = await PortOne.requestPayment({
+      storeId,
+      channelKey,
+      paymentId,
+      orderName: itemData.name,
+      totalAmount: finalAmount,
+      currency: itemData.currency || "KRW",
+      payMethod: document.getElementById("payMethod").value,
+      customer: {
+        fullName: document.getElementById("customerName").value,
+        phoneNumber: document.getElementById("customerPhone").value,
+        email: document.getElementById("customerEmail").value,
+      },
+      customData: {
+        item: itemData.id,
+        usedCredit: approvedCredit
+      },
+      redirectUrl: document.getElementById("redirectUrl").value || undefined,
+    });
+
+    if (response?.code) {
+      showResult("error", {
+        title: "결제 실패",
+        paymentId,
+        status: "FAILED",
+        code: response.code,
+        message: response.message,
+      });
+      return;
+    }
+
+    // 3. 결제 완료 후 서버 검증
+    await completePayment(paymentId);
+  } catch (e) {
+    showResult("error", {
+      title: "오류 발생",
+      paymentId: "-",
+      status: "ERROR",
+      code: "CLIENT_ERROR",
+      message: e?.message || String(e),
+    });
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "결제하기";
+  }
+}
+    async function completePayment(paymentId) {
+      const serverUrl = getServerUrl();
+
+      try {
+        const res = await fetch(`${serverUrl}/api/v1/payments/complete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ paymentId }),
+        });
+
+        const text = await res.text();
+
+        console.log("complete 응답 상태:", res.status);
+        console.log("complete 응답 body:", text);
+
+        if (!res.ok) {
           showResult("error", {
-            title:   "서버 검증 실패",
+            title: "서버 검증 실패",
             paymentId,
-            status:  `HTTP ${res.status}`,
-            code:    "SERVER_VERIFY_FAILED",
+            status: `HTTP ${res.status}`,
+            code: "SERVER_VERIFY_FAILED",
             message: text || "서버 오류",
           });
           return;
         }
 
-        const data = await res.json();
+        let data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (_) {
+          data = {};
+        }
+
         showResult("success", {
-          title:  "✅ 결제 완료!",
+          title: "✅ 결제 완료!",
           paymentId,
           status: data.status || "PAID",
         });
 
-      } catch {
-        showResult("success", {
-          title:   "⚠️ 브라우저 결제 완료 (서버 미연결)",
+        await loadCredit();
+      } catch (e) {
+        showResult("error", {
+          title: "서버 통신 오류",
           paymentId,
-          status:  "BROWSER_ONLY",
-          message: "서버 검증을 건너뛰었습니다. 프로덕션에서는 반드시 서버 검증이 필요합니다.",
+          status: "ERROR",
+          code: "SERVER_COMM_ERROR",
+          message: e?.message || "서버 검증 요청 실패",
         });
       }
     }
 
-    // ── UI 헬퍼 ─────────────────────────────────────────────────────
     function showResult(type, { title, paymentId, status, code, message }) {
       const box = document.getElementById("resultBox");
       box.className = `result-box ${type}`;
-      document.getElementById("resultTitle").textContent     = title;
-      document.getElementById("resultPaymentId").textContent = paymentId;
-      document.getElementById("resultStatus").textContent    = status;
+
+      document.getElementById("resultTitle").textContent = title;
+      document.getElementById("resultPaymentId").textContent = paymentId || "-";
+      document.getElementById("resultStatus").textContent = status || "-";
 
       const codeRow = document.getElementById("resultCodeRow");
-      const msgRow  = document.getElementById("resultMsgRow");
+      const msgRow = document.getElementById("resultMsgRow");
 
       if (code) {
         document.getElementById("resultCode").textContent = code;
@@ -402,10 +600,11 @@
 
     function hideResult() {
       document.getElementById("resultBox").className = "result-box";
+      document.getElementById("resultCodeRow").style.display = "none";
+      document.getElementById("resultMsgRow").style.display = "none";
     }
 
-    // ── 초기화 ───────────────────────────────────────────────────────
-    loadItem();
+    reloadData();
 </script>
 </body>
 </html>

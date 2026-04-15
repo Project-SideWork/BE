@@ -26,4 +26,13 @@ public class PaymentPersistenceAdapter implements PaymentOutPort {
         PaymentEntity entity = repo.findById(id).orElseThrow(PaymentNotFoundException::new);
         return mapper.toDomain(entity);
     }
+
+    @Override
+    public int calculateUsedCredit(String paymentId) {
+        int usedCredit = repo.findUsedCreditById(paymentId);
+        if (usedCredit < 0) {
+            throw new IllegalStateException("usedCredit must be >= 0. paymentId=" + paymentId);
+        }
+        return usedCredit;
+    }
 }

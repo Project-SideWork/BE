@@ -1,21 +1,20 @@
 package com.sidework.payment.application.adapter;
 
 import com.sidework.common.auth.AuthenticatedUserDetails;
+import com.sidework.common.response.ApiResponse;
 import com.sidework.payment.application.exception.SyncPaymentException;
-import com.sidework.payment.application.port.in.CompletePaymentRequest;
-import com.sidework.payment.application.port.in.Item;
-import com.sidework.payment.application.port.in.PaymentCommandUseCase;
-import com.sidework.payment.domain.Payment;
+import com.sidework.payment.application.port.in.*;
 import io.portone.sdk.server.common.Currency;
 import io.portone.sdk.server.webhook.WebhookTransaction;
 import io.portone.sdk.server.webhook.WebhookVerifier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -25,23 +24,28 @@ public class PaymentController {
     private final WebhookVerifier portoneWebhook;
     private final PaymentCommandUseCase paymentCommandService;
 
-    // TODO: DB에 저장된 구매 아이템 조회 API로 변경
     @GetMapping("/item")
     public Item getItem() {
         return new Item(
-                "ITEM_001", "신발", 1000, Currency.Krw.INSTANCE.getValue()
+                "ITEM_001", "멤버십", 10000, Currency.Krw.INSTANCE.getValue()
         );
+    }
+    @PostMapping("/prepare")
+    public ResponseEntity<ApiResponse<PreparePaymentResponse>> preparePayment(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @RequestBody PreparePaymentRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.onSuccess(paymentCommandService.preparePayment(user.getId(), request)));
     }
 
     @PostMapping("/complete")
-    public CompletableFuture<Payment> completePayment(
+    public ResponseEntity<ApiResponse<Void>> completePayment(
             @AuthenticationPrincipal AuthenticatedUserDetails details,
             @RequestBody CompletePaymentRequest completeRequest) {
-        return paymentCommandService.syncPayment(completeRequest.paymentId())
-                .thenApply(payment -> {
-            paymentCommandService.assignUser(details.getId(), payment.getPaymentId());
-            return payment;
-                });
+        paymentCommandService.syncPayment(completeRequest.paymentId()).join();
+        paymentCommandService.processAfterPaymentCompleted(details.getId(), completeRequest.paymentId());
+        return ResponseEntity.ok(ApiResponse.onSuccessVoid());
     }
 
     @PostMapping("/webhook")

@@ -5,7 +5,7 @@ import com.sidework.payment.domain.Payment;
 import java.util.concurrent.CompletableFuture;
 
 public interface PaymentCommandUseCase {
-    void create(Payment payment);
-    void assignUser(Long userId, String paymentId);
+    PreparePaymentResponse preparePayment(Long userId, PreparePaymentRequest request);
     CompletableFuture<Payment> syncPayment(String paymentId);
+    void processAfterPaymentCompleted(Long userId, String paymentId);
 }

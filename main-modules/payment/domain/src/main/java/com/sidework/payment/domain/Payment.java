@@ -22,7 +22,9 @@ public class Payment {
 
     private String orderName;
 
-    private Long amount;
+    private Integer originalAmount; // 원래 가격
+
+    private Integer amount; // 실제 결제 금액
 
     private String currency;
 
@@ -36,6 +38,8 @@ public class Payment {
 
     private String itemId;
 
+    private boolean processed;
+
     private LocalDateTime paidAt;
 
     private LocalDateTime requestedAt;
@@ -46,7 +50,8 @@ public class Payment {
             String transactionId,
             String storeId,
             String orderName,
-            Long amount,
+            Integer originalAmount,
+            Integer amount,
             String currency,
             String status,
             String customerName,
@@ -61,6 +66,7 @@ public class Payment {
                 .transactionId(transactionId)
                 .storeId(storeId)
                 .orderName(orderName)
+                .originalAmount(originalAmount)
                 .amount(amount)
                 .currency(currency)
                 .status(status)
@@ -68,6 +74,7 @@ public class Payment {
                 .customerEmail(customerEmail)
                 .customerPhone(customerPhone)
                 .itemId(itemId)
+                .processed(false)
                 .paidAt(paidAt)
                 .requestedAt(requestedAt)
                 .build();
@@ -75,5 +82,16 @@ public class Payment {
 
     public void assignUser(Long userId) {
         this.userId = userId;
+    }
+
+    public boolean isAlreadyProcessed() {
+        return this.processed;
+    }
+
+    public void process() {
+        if (this.processed) {
+            throw new IllegalStateException("이미 처리된 결제입니다.");
+        }
+        this.processed = true;
     }
 }
