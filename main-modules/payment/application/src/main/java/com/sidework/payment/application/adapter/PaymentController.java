@@ -3,9 +3,7 @@ package com.sidework.payment.application.adapter;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.ApiResponse;
 import com.sidework.payment.application.exception.SyncPaymentException;
-import com.sidework.payment.application.port.in.CompletePaymentRequest;
-import com.sidework.payment.application.port.in.Item;
-import com.sidework.payment.application.port.in.PaymentCommandUseCase;
+import com.sidework.payment.application.port.in.*;
 import io.portone.sdk.server.common.Currency;
 import io.portone.sdk.server.webhook.WebhookTransaction;
 import io.portone.sdk.server.webhook.WebhookVerifier;
@@ -30,6 +28,14 @@ public class PaymentController {
         return new Item(
                 "ITEM_001", "멤버십", 10000, Currency.Krw.INSTANCE.getValue()
         );
+    }
+
+    @PostMapping("/prepare")
+    public ResponseEntity<ApiResponse<PreparePaymentResponse>> preparePayment(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @RequestBody PreparePaymentRequest request
+    ) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(paymentCommandService.preparePayment(user.getId(), request)));
     }
 
     @PostMapping("/complete")

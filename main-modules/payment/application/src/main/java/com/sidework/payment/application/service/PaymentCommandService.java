@@ -1,13 +1,14 @@
 package com.sidework.payment.application.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sidework.common.event.PaymentCompleteEvent;
+import com.sidework.credit.application.port.out.CreditOutPort;
+import com.sidework.payment.application.exception.PaymentProcessingException;
 import com.sidework.payment.application.exception.SyncPaymentException;
-import com.sidework.payment.application.port.in.CustomData;
-import com.sidework.payment.application.port.in.Item;
-import com.sidework.payment.application.port.in.PaymentCommandUseCase;
+import com.sidework.payment.application.port.in.*;
 import com.sidework.payment.application.port.out.PaymentOutPort;
+import com.sidework.payment.application.port.out.PaymentReservationOutPort;
 import com.sidework.payment.domain.Payment;
+import com.sidework.payment.domain.PaymentReservation;
 import io.portone.sdk.server.common.Currency;
 import io.portone.sdk.server.common.SelectedChannelType;
 import io.portone.sdk.server.payment.PaidPayment;
@@ -26,20 +27,53 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class PaymentCommandService implements PaymentCommandUseCase {
     private final ApplicationEventPublisher publisher;
+    private final CreditOutPort creditRepo;
     private final PaymentClient portone;
     private final PaymentOutPort repo;
-    private final ObjectMapper objectMapper;
+    private final PaymentReservationOutPort paymentReservationRepo;
 
     private static final int ITEM_PRICE = 10000;
 
-    private void assignUser(Long userId, String paymentId) {
-        Payment domain = repo.findById(paymentId);
-        domain.assignUser(userId);
-        repo.save(domain);
+    @Override
+    public PreparePaymentResponse preparePayment(Long userId, PreparePaymentRequest request) {
+        int usedCredit = Math.max(request.requestedCredit(), 0);
+
+        int originalAmount = ITEM_PRICE;
+
+        int availableCredit = creditRepo.findAmountByUser(userId);
+
+        int approvedCredit = Math.min(usedCredit, availableCredit);
+        approvedCredit = Math.min(approvedCredit, originalAmount);
+
+        int finalAmount = originalAmount - approvedCredit;
+
+        String paymentId = generatePaymentId();
+
+        PaymentReservation reservation = PaymentReservation.create(
+                paymentId,
+                userId,
+                approvedCredit,
+                "READY"
+        );
+
+        paymentReservationRepo.save(reservation);
+
+        return new PreparePaymentResponse(
+                paymentId,
+                approvedCredit,
+                finalAmount
+        );
+    }
+
+    private String generatePaymentId() {
+        return "payment-" + System.currentTimeMillis() + "-" + java.util.UUID.randomUUID()
+                .toString().substring(0, 8);
     }
 
     @Override
     public CompletableFuture<Payment> syncPayment(String paymentId) {
+        PaymentReservation reservation = paymentReservationRepo.findById(paymentId);
+
         return portone.getPayment(paymentId)
                 .exceptionally(e -> { throw new SyncPaymentException(); })
                 .thenApply(actualPayment -> {
@@ -47,7 +81,9 @@ public class PaymentCommandService implements PaymentCommandUseCase {
                         throw new SyncPaymentException();
                     }
 
-                    if (!verifyPayment(paidPayment)) throw new SyncPaymentException();
+                    if (!verifyPayment(paidPayment, reservation)) {
+                        throw new SyncPaymentException();
+                    }
 
                     Payment domainPayment = Payment.create(
                             paidPayment.getId(),
@@ -67,43 +103,47 @@ public class PaymentCommandService implements PaymentCommandUseCase {
                     );
 
                     repo.save(domainPayment);
-
                     return domainPayment;
                 });
     }
 
     @Override
     public void processAfterPaymentCompleted(Long userId, String paymentId) {
-        assignUser(userId, paymentId);
-        int usedCredit = repo.calculateUsedCredit(paymentId);
-        publisher.publishEvent(new PaymentCompleteEvent(userId, usedCredit, paymentId));
+        try {
+            Payment domain = repo.findById(paymentId);
+            PaymentReservation reservation = paymentReservationRepo.findById(paymentId);
+
+            if (domain.isAlreadyProcessed()) {
+                log.info("Payment already processed. paymentId={}", paymentId);
+                return;
+            }
+
+            domain.assignUser(userId);
+            int usedCredit = repo.calculateUsedCredit(paymentId);
+
+            domain.process();
+            repo.save(domain);
+
+            reservation.paid();
+            paymentReservationRepo.save(reservation);
+
+            publisher.publishEvent(new PaymentCompleteEvent(userId, usedCredit, paymentId));
+
+        } catch (Exception e) {
+            throw new PaymentProcessingException();
+        }
     }
 
-    private boolean verifyPayment(PaidPayment payment) {
+    private boolean verifyPayment(PaidPayment payment, PaymentReservation reservation) {
         // TODO: 실연동 시 변경
         //if (payment.getChannel().getType() != SelectedChannelType.Live.INSTANCE) return false;
         if (payment.getChannel().getType() != SelectedChannelType.Test.INSTANCE) return false;
+        if (!"READY".equals(reservation.getStatus())) return false;
 
-        String customDataStr = payment.getCustomData();
-        if (customDataStr == null) return false;
+        int expectedAmount = ITEM_PRICE - reservation.getApprovedCredit();
 
-        try {
-            CustomData customData = objectMapper.readValue(customDataStr, CustomData.class);
-            long creditUsed = customData.getUsedCredit();
-
-            if (creditUsed < 0 || creditUsed > ITEM_PRICE) return false;
-
-            int expectedAmount = Math.toIntExact(ITEM_PRICE - creditUsed);
-
-            Item item = new Item(
-                    "ITEM_001", "멤버십", expectedAmount, Currency.Krw.INSTANCE.getValue()
-            );
-
-            return payment.getOrderName().equals(item.name())
-                    && payment.getAmount().getTotal() == item.price()
-                    && payment.getCurrency().getValue().equals(item.currency());
-        } catch (Exception e) {
-            return false;
-        }
+        return "멤버십".equals(payment.getOrderName())
+                && payment.getAmount().getTotal() == expectedAmount
+                && Currency.Krw.INSTANCE.getValue().equals(payment.getCurrency().getValue());
     }
 }
