@@ -16,6 +16,7 @@ public interface ProjectOutPort {
     Long save(Project project);
     Project findById(Long id);
     List<Project> findByIdIn(List<Long> ids);
+    List<Project> findByIdInDesc(List<Long> ids);
     List<ProjectTitleDto> findAllTitles(List<Long> projectIds);
     Page<Project> findPage(Pageable pageable);
     Page<Project> search(String keyword, Pageable pageable);
