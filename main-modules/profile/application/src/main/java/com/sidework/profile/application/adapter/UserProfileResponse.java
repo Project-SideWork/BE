@@ -20,7 +20,6 @@ public record UserProfileResponse(
 	Long profileId,
 	String selfIntroduction,
 	String residence,
-	Integer projectCounts,
 	Double score,
 	List<RoleInfo> roles, //직군 정보
 	List<SchoolInfo> schools, // 학교 장보
