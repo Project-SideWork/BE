@@ -45,8 +45,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProjectQueryServiceTest {
@@ -425,6 +424,46 @@ class ProjectQueryServiceTest {
         assertEquals(20L, result.get(1).projectId());
         assertEquals("프로젝트B", result.get(1).title());
         verify(projectUserRepository).getMyProjectSummary(userId);
+    }
+
+    @Test
+    void pageByUserId는_프로젝트ID가_없으면_빈리스트를_반환한다() {
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 5);
+
+        when(projectUserRepository.pageByUserId(userId, pageable)).thenReturn(List.of());
+
+        List<Project> result = queryService.pageByUserId(userId, pageable);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(projectUserRepository).pageByUserId(userId, pageable);
+        verify(projectRepository, never()).findByIdInDesc(anyList());
+    }
+
+    @Test
+    void pageByUserId는_프로젝트ID로_프로젝트목록을_조회한다() {
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 5);
+        List<Long> ids = List.of(23L, 22L);
+
+        List<Project> projects = List.of(
+                Project.builder().id(23L).title("A").build(),
+                Project.builder().id(22L).title("B").build()
+        );
+
+        when(projectUserRepository.pageByUserId(userId, pageable)).thenReturn(ids);
+        when(projectRepository.findByIdInDesc(ids)).thenReturn(projects);
+
+        List<Project> result = queryService.pageByUserId(userId, pageable);
+
+        assertEquals(2, result.size());
+        assertEquals(23L, result.get(0).getId());
+        assertEquals(22L, result.get(1).getId());
+
+        verify(projectUserRepository).pageByUserId(userId, pageable);
+        verify(projectRepository).findByIdInDesc(ids);
     }
 
     private Project createProject(Long id) {

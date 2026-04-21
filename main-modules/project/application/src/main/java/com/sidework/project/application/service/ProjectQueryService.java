@@ -65,6 +65,15 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     @Override
+    public List<Project> pageByUserId(Long userId, Pageable pageable) {
+        List<Long> projectIds = projectUserRepository.pageByUserId(userId, pageable);
+        if (projectIds == null || projectIds.isEmpty()) {
+            return List.of();
+        }
+        return projectRepository.findByIdInDesc(projectIds);
+    }
+
+    @Override
     public List<Project> queryByUserId(Long userId) {
         List<Long> projectIds = projectUserRepository.queryAllProjectIds(userId);
         if (projectIds == null || projectIds.isEmpty()) {
@@ -186,6 +195,11 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         return projectUserRepository.getMyProjectSummary(userId).stream()
             .map(dto -> MyProjectSummaryResponse.create(dto.id(), dto.title()))
             .toList();
+    }
+
+    @Override
+    public Long queryProjectCount(Long userId) {
+        return projectUserRepository.findProjectCountByUserId(userId);
     }
 
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {

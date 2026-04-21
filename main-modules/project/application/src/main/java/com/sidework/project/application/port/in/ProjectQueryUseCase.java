@@ -18,7 +18,8 @@ import java.util.Map;
 
 public interface ProjectQueryUseCase {
     Project queryById(Long projectId);
-    List<Project> queryByUserId(Long userId);
+    List<Project> queryByUserId(Long userId); // TODO: 페이지네이션 적용 이후 삭제
+    List<Project> pageByUserId(Long userId, Pageable pageable);
     ProjectDetailResponse queryProjectDetail(Long userId, Long projectId);
     List<ProjectRecruitPosition> queryProjectRecruitPosition(Long projectId);
     Map<Long, List<ProjectRole>> queryUserRolesByProjects(Long userId, List<Long> projectIds);
@@ -29,5 +30,5 @@ public interface ProjectQueryUseCase {
     List<ProjectUserReviewSummary> queryReviewSummaryByProjectIds(Long userId, List<Long> projectIds);
     Map<Long, Double> queryAverageReviewScoresByUserIds(List<Long> userIds);
     List<MyProjectSummaryResponse> queryMyProjectSummary(Long userId);
-
+    Long queryProjectCount(Long userId);
 }
