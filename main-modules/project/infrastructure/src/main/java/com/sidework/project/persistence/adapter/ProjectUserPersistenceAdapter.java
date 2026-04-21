@@ -9,6 +9,7 @@ import com.sidework.project.persistence.entity.ProjectUserEntity;
 import com.sidework.project.persistence.mapper.ProjectUserMapper;
 import com.sidework.project.persistence.repository.ProjectUserJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -52,6 +53,11 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
     }
 
     @Override
+    public List<Long> pageByUserId(Long userId, Pageable pageable) {
+        return repo.pageIdsByUserId(userId, pageable);
+    }
+
+    @Override
     public Optional<ProjectUser> findByProjectIdAndUserId(Long projectId, Long userId) {
         return repo.findFirstByProjectIdAndUserId(projectId, userId)
             .map(mapper::toDomain);
@@ -88,6 +94,11 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
     @Override
     public List<ProjectTitleDto> getMyProjectSummary(Long userId) {
         return repo.findFinishedProjectTitlesByUserId(userId);
+    }
+
+    @Override
+    public Long findProjectCountByUserId(Long userId) {
+        return repo.findProjectCountByUserId(userId);
     }
 
 }
