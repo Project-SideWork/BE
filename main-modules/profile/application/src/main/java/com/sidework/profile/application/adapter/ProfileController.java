@@ -2,11 +2,14 @@ package com.sidework.profile.application.adapter;
 
 import java.util.List;
 
+import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/profiles")
 @RequiredArgsConstructor
+@Validated
 public class ProfileController implements ProfileControllerDocs {
 	private final ProfileCommandUseCase commandService;
 	private final ProfileQueryUseCase profileQueryUseCase;
@@ -39,6 +43,17 @@ public class ProfileController implements ProfileControllerDocs {
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
 		@AuthenticationPrincipal AuthenticatedUserDetails user) {
 		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(user.getId())));
+	}
+
+    @GetMapping("/me/projects")
+	public ResponseEntity<ApiResponse<PageResponse<List<UserProjectDto>>>> getUserProfileProject(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
+        @Min(value = 1, message = "page는 1보다 작을 수 없습니다.")
+        @RequestParam(name = "page", defaultValue = "1") Integer page,
+        @Min(value = 1, message = "size는 1보다 작을 수 없습니다.")
+        @RequestParam(name = "size", defaultValue = "5") Integer size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProjectList(user.getId(), pageable)));
 	}
 
 	@PutMapping("/me")

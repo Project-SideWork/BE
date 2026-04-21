@@ -5,6 +5,7 @@ import com.sidework.common.response.ApiResponse;
 import com.sidework.common.response.PageResponse;
 import com.sidework.profile.application.adapter.UserProfileListResponse;
 import com.sidework.profile.application.adapter.UserProfileResponse;
+import com.sidework.profile.application.adapter.UserProjectDto;
 import com.sidework.profile.application.port.in.ProfileUpdateCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -46,6 +47,48 @@ public interface ProfileControllerDocs {
     })
     ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
             @AuthenticationPrincipal AuthenticatedUserDetails user
+    );
+
+    @Operation(description = "내 프로젝트 목록 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "400 예시",
+                                    value = """
+                                        {
+                                          "code": "COMMON_400",
+                                          "message": "잘못된 요청입니다.",
+                                          "isSuccess": false,
+                                          "path": "/error"
+                                        }
+                                """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                        {
+                                          "code": "COMMON_401",
+                                          "message": "인증이 필요합니다.",
+                                          "isSuccess": false,
+                                          "path": "/error"
+                                        }
+                                """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<PageResponse<List<UserProjectDto>>>> getUserProfileProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @RequestParam(name = "page", defaultValue = "1") Integer page,
+            @RequestParam(name = "size", defaultValue = "5") Integer size
     );
 
     @Operation(description = "내 프로필 수정")
