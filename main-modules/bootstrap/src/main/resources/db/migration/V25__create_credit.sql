@@ -1,4 +1,4 @@
-CREATE TABLE credits (
+CREATE TABLE IF NOT EXISTS credits (
     id BIGINT NOT NULL AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
     amount INT NOT NULL,
