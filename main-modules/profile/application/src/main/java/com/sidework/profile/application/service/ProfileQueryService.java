@@ -1,10 +1,10 @@
 package com.sidework.profile.application.service;
 
 import com.sidework.profile.application.adapter.UserProfileListResponse;
+import com.sidework.profile.application.adapter.UserProjectDto;
 import com.sidework.profile.application.dto.ProjectContext;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.dto.ProjectUserReviewSummary;
-import com.sidework.project.application.exception.ProjectUserReviewStatNotFoundException;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
@@ -50,8 +50,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ProfileQueryService implements ProfileQueryUseCase
-{
+public class ProfileQueryService implements ProfileQueryUseCase {
 	private final ProfileOutPort profileRepository;
 	private final SkillOutPort skillRepository;
 	private final PortfolioOutPort portfolioRepository;
@@ -66,19 +65,17 @@ public class ProfileQueryService implements ProfileQueryUseCase
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long userId) {
-
+        // TODO: 리뷰도 페이지네이션 적용 필요해서 아예 별도 함수로 분리. 최종적으로는 이 함수에 project, ctx를 사용하는 부분이 없도록 리팩터링하는 게 목표
 		User user = userQueryUseCase.findById(userId);
+        List<Project> projects = projectQueryUseCase.queryByUserId(userId);
 
-		List<Project> projects = projectQueryUseCase.queryByUserId(userId);
-		int projectCounts = countCompletedProjects(projects);
+        ProjectContext ctx = loadProjectContext(userId, projects);
 
-		ProjectContext ctx = loadProjectContext(userId, projects);
-
-		Profile profile = profileRepository.getProfileByUserId(userId);
+        Profile profile = profileRepository.getProfileByUserId(userId);
 		if (profile == null) {
-			return buildResponseWhenNoProfile(user, projectCounts, ctx);
+			return buildResponseWhenNoProfile(user, ctx);
 		}
-		return buildProfileResponse(user, profile, projectCounts, ctx);
+		return buildProfileResponse(user, profile, ctx);
 	}
 
 	@Override
@@ -100,10 +97,42 @@ public class ProfileQueryService implements ProfileQueryUseCase
 		return buildProfileListResponse(viewerUserId, page, false);
 	}
 
-	private UserProfileResponse buildProfileResponse(
+    @Override
+    public PageResponse<List<UserProjectDto>> getUserProjectList(Long viewerUserId, Pageable pageable) {
+        List<Project> projects = projectQueryUseCase.pageByUserId(viewerUserId, pageable);
+        Long projectCount = projectQueryUseCase.queryProjectCount(viewerUserId);
+        int totalPage = (int) Math.ceil((double) projectCount / pageable.getPageSize());
+
+        ProjectContext ctx = loadProjectContext(viewerUserId, projects);
+
+        List<UserProjectDto> items = buildProjectInfos(projects, ctx.skillNamesByProjectId(), ctx.rolesByProjectId());
+
+        return PageResponse.of(items, pageable.getPageNumber(), pageable.getPageSize(), projectCount, totalPage);
+    }
+
+    private List<UserProjectDto> buildProjectInfos(
+            List<Project> projects,
+            Map<Long, List<String>> skillNamesByProjectId,
+            Map<Long, List<ProjectRole>> rolesByProjectId
+    ) {
+        return projects.stream()
+                .map(project -> new UserProjectDto(
+                        project.getId(),
+                        project.getTitle(),
+                        project.getDescription(),
+                        project.getStartDt(),
+                        project.getEndDt(),
+                        project.getMeetingType(),
+                        project.getStatus(),
+                        skillNamesByProjectId.getOrDefault(project.getId(), List.of()),
+                        rolesByProjectId.getOrDefault(project.getId(), List.of())
+                ))
+                .toList();
+    }
+
+    private UserProfileResponse buildProfileResponse(
 		User user,
 		Profile profile,
-		int projectCounts,
 		ProjectContext ctx
 	) {
 		return new UserProfileResponse(
@@ -115,13 +144,11 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			profile.getId(),
 			profile.getSelfIntroduction(),
 			buildResidenceText(user.getResidenceRegionId()),
-			projectCounts,
 			buildScoreInfo(user.getId()),
 			buildRoleInfos(profile.getId()),
 			buildSchoolInfos(profile.getId()),
 			buildSkillInfos(profile.getId()),
 			buildPortfolioInfos(profile.getId()),
-			buildProjectInfos(ctx.projects(), ctx.skillNamesByProjectId(), ctx.rolesByProjectId()),
 			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle())
 		);
 	}
@@ -129,7 +156,6 @@ public class ProfileQueryService implements ProfileQueryUseCase
 
 	private UserProfileResponse buildResponseWhenNoProfile(
 		User user,
-		int projectCounts,
 		ProjectContext ctx
 	) {
 		return new UserProfileResponse(
@@ -141,18 +167,26 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			null,
 			null,
 			null,
-			projectCounts,
 			buildScoreInfo(user.getId()),
 			List.of(),
 			List.of(),
 			List.of(),
 			List.of(),
-			buildProjectInfos(ctx.projects(), ctx.skillNamesByProjectId(), ctx.rolesByProjectId()),
 			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle())
 		);
 	}
 
 	private ProjectContext loadProjectContext(Long userId, List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return new ProjectContext(
+                    List.of(),
+                    List.of(),
+                    Map.of(),
+                    List.of(),
+                    Map.of(),
+                    Map.of()
+            );
+        }
 
 		List<Long> projectIds = projects.stream()
 			.map(Project::getId)
@@ -298,25 +332,6 @@ public class ProfileQueryService implements ProfileQueryUseCase
 			.count();
 	}
 
-	private List<UserProfileResponse.ProjectInfo> buildProjectInfos(
-		List<Project> projects,
-		Map<Long, List<String>> skillNamesByProjectId,
-		Map<Long, List<ProjectRole>> rolesByProjectId
-	) {
-		return projects.stream()
-			.map(project -> new UserProfileResponse.ProjectInfo(
-				project.getId(),
-				project.getTitle(),
-				project.getDescription(),
-				project.getStartDt(),
-				project.getEndDt(),
-				project.getMeetingType(),
-				project.getStatus(),
-				skillNamesByProjectId.getOrDefault(project.getId(), List.of()),
-				rolesByProjectId.getOrDefault(project.getId(), List.of())
-			))
-			.toList();
-	}
 
 	private List<UserProfileResponse.RoleInfo> buildRoleInfos(Long profileId) {
 		List<ProfileRole> profileRoles = profileRepository.getProfileRoles(profileId);

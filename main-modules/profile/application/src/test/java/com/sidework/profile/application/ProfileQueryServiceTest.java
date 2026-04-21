@@ -2,6 +2,7 @@ package com.sidework.profile.application;
 
 import com.sidework.profile.application.adapter.UserProfileResponse;
 import com.sidework.profile.application.adapter.UserProfileListResponse;
+import com.sidework.profile.application.adapter.UserProjectDto;
 import com.sidework.profile.application.port.out.PortfolioOutPort;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.application.port.out.RoleOutPort;
@@ -257,12 +258,10 @@ class ProfileQueryServiceTest {
 		assertEquals(user.getEmail(), response.email());
 		assertEquals(user.getName(), response.name());
 		assertNull(response.profileId());
-		assertEquals(0, response.projectCounts());
 		assertTrue(response.roles().isEmpty());
 		assertTrue(response.schools().isEmpty());
 		assertTrue(response.skills().isEmpty());
 		assertTrue(response.portfolios().isEmpty());
-		assertTrue(response.projects().isEmpty());
 
 		verify(profileRepository).getProfileByUserId(userId);
 		verify(userQueryUseCase).findById(userId);
@@ -313,12 +312,10 @@ class ProfileQueryServiceTest {
 		assertNotNull(response);
 		assertEquals(userId, response.userId());
 		assertEquals(profileId, response.profileId());
-		assertEquals(0, response.projectCounts());
 		assertEquals(2, response.roles().size());
 		assertEquals(1, response.schools().size());
 		assertEquals(3, response.skills().size());
 		assertEquals(2, response.portfolios().size());
-		assertEquals(2, response.projects().size());
 
 		verify(profileRepository).getProfileByUserId(userId);
 		verify(userQueryUseCase).findById(userId);
@@ -357,7 +354,6 @@ class ProfileQueryServiceTest {
 		assertTrue(response.schools().isEmpty());
 		assertTrue(response.skills().isEmpty());
 		assertTrue(response.portfolios().isEmpty());
-		assertTrue(response.projects().isEmpty());
 	}
 
 	@Test
@@ -382,11 +378,6 @@ class ProfileQueryServiceTest {
 		assertNotNull(response);
 		assertEquals(userId, response.userId());
 		assertNull(response.profileId());
-		assertEquals(0, response.projectCounts());
-		assertEquals(2, response.projects().size());
-		assertEquals("협업 플랫폼 개발", response.projects().get(0).title());
-		assertEquals(MeetingType.HYBRID, response.projects().get(0).meetingType());
-		assertEquals(ProjectStatus.RECRUITING, response.projects().get(0).status());
 
 		verify(projectQueryUseCase).queryByUserId(userId);
 		verify(requiredSkillUseCase).queryNamesByProjectIds(anyList());
@@ -414,9 +405,165 @@ class ProfileQueryServiceTest {
 
 		// then
 		assertNotNull(response);
-		assertTrue(response.projects().isEmpty());
 		verify(projectQueryUseCase).queryByUserId(userId);
 	}
+
+    @Test
+    void 내_프로젝트_목록_조회시_페이지_메타와_프로젝트_정보를_반환한다() {
+        // given
+        Long viewerUserId = 1L;
+        var pageable = PageRequest.of(0, 5);
+
+        List<Project> projects = List.of(
+                Project.builder()
+                        .id(23L)
+                        .title("테스트 프로젝트 A")
+                        .description("설명 A")
+                        .startDt(LocalDate.of(2026, 4, 17))
+                        .endDt(LocalDate.of(2026, 6, 17))
+                        .meetingType(MeetingType.HYBRID)
+                        .status(ProjectStatus.PREPARING)
+                        .build(),
+                Project.builder()
+                        .id(22L)
+                        .title("테스트 프로젝트 B")
+                        .description("설명 B")
+                        .startDt(LocalDate.of(2026, 3, 1))
+                        .endDt(LocalDate.of(2026, 5, 1))
+                        .meetingType(MeetingType.OFFLINE)
+                        .status(ProjectStatus.RECRUITING)
+                        .build()
+        );
+
+        when(projectQueryUseCase.pageByUserId(viewerUserId, pageable)).thenReturn(projects);
+        when(projectQueryUseCase.queryProjectCount(viewerUserId)).thenReturn(16L);
+        when(requiredSkillUseCase.queryNamesByProjectIds(List.of(23L, 22L)))
+                .thenReturn(Map.of(
+                        23L, List.of("Java", "Spring"),
+                        22L, List.of("React")
+                ));
+        when(projectQueryUseCase.queryUserRolesByProjects(viewerUserId, List.of(23L, 22L)))
+                .thenReturn(Map.of(
+                        23L, List.of(ProjectRole.OWNER, ProjectRole.BACKEND),
+                        22L, List.of(ProjectRole.FRONTEND)
+                ));
+
+        // when
+        PageResponse<List<UserProjectDto>> response = service.getUserProjectList(viewerUserId, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.page());
+        assertEquals(5, response.size());
+        assertEquals(16L, response.totalElements());
+        assertEquals(4, response.totalPages());
+
+        assertNotNull(response.content());
+        assertEquals(2, response.content().size());
+
+        UserProjectDto first = response.content().get(0);
+        assertEquals(23L, first.projectId());
+        assertEquals("테스트 프로젝트 A", first.title());
+        assertEquals("설명 A", first.description());
+        assertEquals(MeetingType.HYBRID, first.meetingType());
+        assertEquals(ProjectStatus.PREPARING, first.status());
+        assertEquals(List.of("Java", "Spring"), first.projectStacks());
+        assertEquals(List.of(ProjectRole.OWNER, ProjectRole.BACKEND), first.role());
+
+        UserProjectDto second = response.content().get(1);
+        assertEquals(22L, second.projectId());
+        assertEquals(List.of("React"), second.projectStacks());
+        assertEquals(List.of(ProjectRole.FRONTEND), second.role());
+
+        verify(projectQueryUseCase).pageByUserId(viewerUserId, pageable);
+        verify(projectQueryUseCase).queryProjectCount(viewerUserId);
+        verify(requiredSkillUseCase).queryNamesByProjectIds(List.of(23L, 22L));
+        verify(projectQueryUseCase).queryUserRolesByProjects(viewerUserId, List.of(23L, 22L));
+    }
+
+    @Test
+    void 내_프로젝트_목록_조회시_프로젝트가_없으면_빈_리스트를_반환한다() {
+        // given
+        Long viewerUserId = 1L;
+        var pageable = PageRequest.of(0, 5);
+
+        when(projectQueryUseCase.pageByUserId(viewerUserId, pageable)).thenReturn(List.of());
+        when(projectQueryUseCase.queryProjectCount(viewerUserId)).thenReturn(0L);
+
+        // when
+        PageResponse<List<UserProjectDto>> response = service.getUserProjectList(viewerUserId, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.page());
+        assertEquals(5, response.size());
+        assertEquals(0L, response.totalElements());
+        assertEquals(0, response.totalPages());
+        assertNotNull(response.content());
+        assertTrue(response.content().isEmpty());
+
+        verify(projectQueryUseCase).pageByUserId(viewerUserId, pageable);
+        verify(projectQueryUseCase).queryProjectCount(viewerUserId);
+        verify(requiredSkillUseCase, never()).queryNamesByProjectIds(anyList());
+        verify(projectQueryUseCase, never()).queryUserRolesByProjects(anyLong(), anyList());
+    }
+
+    @Test
+    void 내_프로젝트_목록_조회시_현재_페이지_프로젝트가_없어도_전체_카운트는_반환한다() {
+        // given
+        Long viewerUserId = 1L;
+        var pageable = PageRequest.of(2, 5); // 3페이지 요청
+
+        when(projectQueryUseCase.pageByUserId(viewerUserId, pageable)).thenReturn(List.of());
+        when(projectQueryUseCase.queryProjectCount(viewerUserId)).thenReturn(11L);
+
+        // when
+        PageResponse<List<UserProjectDto>> response = service.getUserProjectList(viewerUserId, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(3, response.page());
+        assertEquals(5, response.size());
+        assertEquals(11L, response.totalElements());
+        assertEquals(3, response.totalPages());
+        assertNotNull(response.content());
+        assertTrue(response.content().isEmpty());
+
+        verify(projectQueryUseCase).pageByUserId(viewerUserId, pageable);
+        verify(projectQueryUseCase).queryProjectCount(viewerUserId);
+    }
+
+    @Test
+    void 내_프로젝트_목록_조회시_전체_페이지를_올림으로_계산한다() {
+        // given
+        Long viewerUserId = 1L;
+        var pageable = PageRequest.of(0, 5);
+
+        List<Project> projects = List.of(
+                Project.builder()
+                        .id(1L)
+                        .title("프로젝트")
+                        .description("설명")
+                        .startDt(LocalDate.of(2026, 1, 1))
+                        .endDt(LocalDate.of(2026, 2, 1))
+                        .meetingType(MeetingType.ONLINE)
+                        .status(ProjectStatus.PREPARING)
+                        .build()
+        );
+
+        when(projectQueryUseCase.pageByUserId(viewerUserId, pageable)).thenReturn(projects);
+        when(projectQueryUseCase.queryProjectCount(viewerUserId)).thenReturn(6L);
+        when(requiredSkillUseCase.queryNamesByProjectIds(List.of(1L)))
+                .thenReturn(Map.of(1L, List.of("Java")));
+        when(projectQueryUseCase.queryUserRolesByProjects(viewerUserId, List.of(1L)))
+                .thenReturn(Map.of(1L, List.of(ProjectRole.BACKEND)));
+
+        // when
+        PageResponse<List<UserProjectDto>> response = service.getUserProjectList(viewerUserId, pageable);
+
+        // then
+        assertEquals(2, response.totalPages()); // 6 / 5 = 1.2 -> 올림 2
+    }
 
 	private User createUser(Long userId) {
 		User user = User.builder()
