@@ -77,6 +77,75 @@ public class ProjectPersistenceAdapterTest {
         verify(repo).findById(2L);
     }
 
+    @Test
+    void findByIdInDesc는_ids가_비어있으면_빈_리스트를_반환한다() {
+        List<Project> result = adapter.findByIdInDesc(List.of());
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findByIdInDesc는_ids로_프로젝트를_DESC_순으로_조회해_도메인으로_변환한다() {
+        // given
+        List<Long> ids = List.of(3L, 2L, 1L);
+
+        ProjectEntity entity1 = new ProjectEntity(
+                3L,
+                1L,
+                "프로젝트3",
+                "설명3",
+                Instant.now(),
+                Instant.now(),
+                MeetingType.HYBRID,
+                ProjectStatus.RECRUITING
+        );
+
+        ProjectEntity entity2 = new ProjectEntity(
+                2L,
+                1L,
+                "프로젝트2",
+                "설명2",
+                Instant.now(),
+                Instant.now(),
+                MeetingType.ONLINE,
+                ProjectStatus.PREPARING
+        );
+
+        ProjectEntity entity3 = new ProjectEntity(
+                1L,
+                1L,
+                "프로젝트1",
+                "설명1",
+                Instant.now(),
+                Instant.now(),
+                MeetingType.OFFLINE,
+                ProjectStatus.CANCELED
+        );
+
+        when(repo.findAllByIdsInDesc(ids)).thenReturn(List.of(entity1, entity2, entity3));
+
+        // when
+        List<Project> result = adapter.findByIdInDesc(ids);
+
+        // then
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertEquals(3L, result.get(0).getId());
+        assertEquals(2L, result.get(1).getId());
+        assertEquals(1L, result.get(2).getId());
+        verify(repo).findAllByIdsInDesc(ids);
+    }
+
+    @Test
+    void findByIdInDesc는_ids가_null이면_빈_리스트를_반환한다() {
+        List<Project> result = adapter.findByIdInDesc(null);
+
+        assertNotNull(result);
+
+        assertTrue(result.isEmpty());
+    }
+
     private ProjectCommand createCommand() {
         return new ProjectCommand(
                 "버스 실시간 위치 서비스",                 // title
