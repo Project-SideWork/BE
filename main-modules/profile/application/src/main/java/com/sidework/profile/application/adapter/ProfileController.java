@@ -49,10 +49,7 @@ public class ProfileController implements ProfileControllerDocs {
     @GetMapping("/me/projects")
 	public ResponseEntity<ApiResponse<PageResponse<List<UserProjectDto>>>> getUserProfileProject(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
-        @Min(value = 1, message = "page는 1보다 작을 수 없습니다.")
         @RequestParam(name = "page", defaultValue = "1") Integer page,
-        @Min(value = 1, message = "size는 1보다 작을 수 없습니다.")
-        @Max(value = 100, message = "size는 100보다 클 수 없습니다.")
         @RequestParam(name = "size", defaultValue = "5") Integer size) {
         Pageable pageable = PageRequest.of(page - 1, size);
 		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProjectList(user.getId(), pageable)));
