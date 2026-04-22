@@ -103,7 +103,7 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(user.getId(), projectId)));
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PageableDefault(size = 20) Pageable pageable,
