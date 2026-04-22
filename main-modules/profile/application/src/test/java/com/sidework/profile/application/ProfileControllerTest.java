@@ -174,6 +174,17 @@ class ProfileControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void 내_프로젝트_목록_조회시_size가_100보다_크면_400을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/profiles/me/projects")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "1")
+                        .param("size", "101")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
 	@Test
 	void 프로필_수정_요청시_성공하면_200을_반환한다() throws Exception {
 		// given
