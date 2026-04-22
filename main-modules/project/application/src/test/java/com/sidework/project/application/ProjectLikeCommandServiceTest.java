@@ -122,13 +122,13 @@ class ProjectLikeCommandServiceTest {
         Long userId = 10L;
         Long projectId = 10L;
 
-        when(projectLikeOutPort.isLiked(userId, projectId)).thenReturn(false);
+        when(projectLikeOutPort.unlike(userId, projectId)).thenReturn(0);
         assertThrows(
                 ProjectLikeNotFoundException.class,
                 () -> service.delete(userId, projectId)
         );
 
         // then
-        verify(projectLikeOutPort).isLiked(userId, projectId);
+        verify(projectLikeOutPort).unlike(userId, projectId);
     }
 }
