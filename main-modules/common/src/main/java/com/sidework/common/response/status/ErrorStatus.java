@@ -46,6 +46,8 @@ public enum ErrorStatus implements BaseStatusCode {
     PROJECT_SELF_REVIEW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "PROJECT_013", "자기 자신에 대한 평가는 불가능합니다."),
     PROJECT_USER_ALREADY_REVIEWED(HttpStatus.CONFLICT, "PROJECT_014", "이미 평가한 팀원입니다."),
     PROJECT_USER_REVIEW_STAT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_015", "해당 사용자의 프로젝트 평점이 존재하지 않습니다."),
+    PROJECT_LIKE_ALREADY_EXISTS(HttpStatus.CONFLICT, "PROJECT_016", "이미 좋아요를 한 프로젝트입니다."),
+    PROJECT_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT_017", "해당 프로젝트 좋아요 내역을 찾을 수 없습니다."),
 
     // PROJECT_PROMOTION
     PROJECT_PROMOTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "PROJECT_PROMOTION_001", "이미 최근에 홍보된 프로젝트입니다."),
