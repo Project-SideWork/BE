@@ -124,6 +124,14 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
     }
 
+    @DeleteMapping("/{projectId}/likes")
+    public ResponseEntity<ApiResponse<Void>> deleteLikeProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId) {
+        likeCommandService.delete(user.getId(), projectId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
     @GetMapping("/me/likes")
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getLikedProjectList(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
