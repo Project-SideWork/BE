@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.sidework.project.application.exception.ProjectLikeNotFoundException;
 import com.sidework.project.persistence.entity.ProjectLikeEntity;
 import org.springframework.stereotype.Component;
 
@@ -30,8 +31,8 @@ public class ProjectLikePersistenceAdapter implements ProjectLikeOutPort {
 	}
 
     @Override
-    public void unlike(Long userId, Long projectId) {
-        projectLikeRepository.deleteByUserIdAndProjectId(userId, projectId);
+    public int unlike(Long userId, Long projectId) {
+        return projectLikeRepository.deleteByUserIdAndProjectId(userId, projectId);
     }
 
 	@Override

@@ -20,7 +20,7 @@ public interface ProjectLikeRepository extends JpaRepository<ProjectLikeEntity, 
     WHERE pl.userId = :userId
       AND pl.projectId = :projectId
     """)
-	void deleteByUserIdAndProjectId(@Param("userId") Long userId, @Param("projectId") Long projectId);
+    int deleteByUserIdAndProjectId(@Param("userId") Long userId, @Param("projectId") Long projectId);
 
 	@Modifying
 	@Query(
