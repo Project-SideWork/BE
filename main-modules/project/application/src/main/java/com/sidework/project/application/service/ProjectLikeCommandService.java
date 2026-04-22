@@ -1,5 +1,7 @@
 package com.sidework.project.application.service;
 
+import com.sidework.project.application.exception.ProjectLikeExistException;
+import com.sidework.project.application.exception.ProjectLikeNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(readOnly = false)
 public class ProjectLikeCommandService implements ProjectLikeCommandUseCase {
-
 	private final ProjectLikeOutPort projectLikeRepository;
 
 	private final ProjectQueryUseCase projectRepository;
@@ -26,7 +27,23 @@ public class ProjectLikeCommandService implements ProjectLikeCommandUseCase {
 		projectRepository.queryById(projectId);
 		userRepository.validateExists(userId);
 
-		ProjectLike like = ProjectLike.create(userId, projectId);
+        if(projectLikeRepository.isLiked(userId, projectId)) {
+            throw new ProjectLikeExistException();
+        }
+
+        ProjectLike like = ProjectLike.create(userId, projectId);
 		projectLikeRepository.like(like);
 	}
+
+    @Override
+    public void delete(Long userId, Long projectId) {
+        projectRepository.queryById(projectId);
+        userRepository.validateExists(userId);
+
+        if(projectLikeRepository.isLiked(userId, projectId)) {
+            projectLikeRepository.unlike(userId, projectId);
+        } else {
+            throw new ProjectLikeNotFoundException();
+        }
+    }
 }
