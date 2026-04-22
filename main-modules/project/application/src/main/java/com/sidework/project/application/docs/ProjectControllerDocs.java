@@ -225,9 +225,86 @@ public interface ProjectControllerDocs {
 
     @Operation(description = "프로젝트 좋아요")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "409",
+                    description = "이미 좋아요한 프로젝트",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "409 예시",
+                                    value = """
+                                        {
+                                          "code": "PROJECT_016",
+                                          "message": "이미 좋아요를 한 프로젝트입니다.",
+                                          "isSuccess": false,
+                                          "path": "/api/v1/projects/1/likes"
+                                        }
+                                        """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
     })
     ResponseEntity<ApiResponse<Void>> likeProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId
+    );
+
+    @Operation(description = "프로젝트 좋아요 취소")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "좋아요 내역을 찾을 수 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                        {
+                                          "code": "PROJECT_017",
+                                          "message": "해당 프로젝트 좋아요 내역을 찾을 수 없습니다.",
+                                          "isSuccess": false,
+                                          "path": "/api/v1/projects/1/likes"
+                                        }
+                                        """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> deleteLikeProject(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("projectId") Long projectId
     );
