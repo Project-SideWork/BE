@@ -95,6 +95,4 @@ public class ProfileController implements ProfileControllerDocs {
 		@RequestParam(name = "skillIds", required = false) List<Long> skillIds) {
 		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getLikedUserProfileList(user.getId(), skillIds, pageable)));
 	}
-
-
 }
