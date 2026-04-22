@@ -40,6 +40,14 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Long>
     SELECT p.status
     FROM ProjectEntity p
     WHERE p.id = :projectId
-""")
+    """)
 	ProjectStatus findStatusById(@Param("projectId") Long projectId);
+
+    @Query("""
+            SELECT p FROM ProjectEntity p
+            WHERE p.id in :ids
+            ORDER BY p.id DESC
+            """)
+
+    List<ProjectEntity> findAllByIdsInDesc(@Param("ids")List<Long> projectIds);
 }

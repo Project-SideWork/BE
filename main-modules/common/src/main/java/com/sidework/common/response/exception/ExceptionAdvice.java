@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -40,13 +41,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
         String errorMessage = e.getConstraintViolations()
                 .stream()
-                .map((ConstraintViolation<?> violation) ->
-                        String.format(
-                                "prop '%s' | val '%s' | msg %s",
-                                violation.getPropertyPath(),
-                                violation.getInvalidValue(),
-                                violation.getMessage()
-                        )
+                .map(ConstraintViolation::getMessage
                 )
                 .findFirst()
                 .orElseThrow(() ->

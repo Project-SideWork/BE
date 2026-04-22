@@ -59,6 +59,16 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
     }
 
     @Override
+    public List<Project> findByIdInDesc(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        return repo.findAllByIdsInDesc(ids).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<ProjectTitleDto> findAllTitles(List<Long> projectIds) {
         if (projectIds == null || projectIds.isEmpty()) {
             return List.of();

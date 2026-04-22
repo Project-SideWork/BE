@@ -4,6 +4,7 @@ import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.persistence.entity.ProjectUserEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +22,15 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
             """
     )
     List<Long> findAllIdsByUserId(@Param("userId") Long userId);
+
+    @Query(
+            """
+            SELECT DISTINCT pu.projectId FROM ProjectUserEntity pu
+            WHERE pu.userId = :userId
+            ORDER BY pu.projectId DESC
+            """
+    )
+    List<Long> pageIdsByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query(
             """
@@ -62,5 +72,12 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
 		"""
     )
     List<ProjectTitleDto> findFinishedProjectTitlesByUserId(@Param("userId") Long userId);
+
+    @Query("""
+    SELECT COUNT(DISTINCT pu.projectId)
+    FROM ProjectUserEntity pu
+    WHERE pu.userId = :userId
+    """)
+    Long findProjectCountByUserId(@Param("userId") Long userId);
 
 }

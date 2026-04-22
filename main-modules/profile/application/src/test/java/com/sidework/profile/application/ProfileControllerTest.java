@@ -6,6 +6,7 @@ import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.profile.application.adapter.ProfileController;
 import com.sidework.profile.application.adapter.UserProfileResponse;
 import com.sidework.profile.application.adapter.UserProfileListResponse;
+import com.sidework.profile.application.adapter.UserProjectDto;
 import com.sidework.profile.application.exception.ProfileNotFoundException;
 import com.sidework.profile.application.port.in.ProfileCommandUseCase;
 import com.sidework.profile.application.port.in.ProfileLikeCommandUseCase;
@@ -14,10 +15,14 @@ import com.sidework.profile.application.port.in.ProfileUpdateCommand;
 import com.sidework.common.response.PageResponse;
 import com.sidework.profile.domain.PortfolioType;
 import com.sidework.profile.domain.SchoolStateType;
+import com.sidework.project.domain.MeetingType;
+import com.sidework.project.domain.ProjectRole;
+import com.sidework.project.domain.ProjectStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -97,6 +102,88 @@ class ProfileControllerTest {
 
 		verify(profileQueryUseCase).getProfileByUserId(userId);
 	}
+
+    @Test
+    void 내_프로젝트_목록_조회_요청시_성공하면_200을_반환한다() throws Exception {
+        // given
+        Long userId = authenticatedUserDetails.getId();
+
+        List<UserProjectDto> content = List.of(
+                new UserProjectDto(
+                        23L,
+                        "테스트 프로젝트",
+                        "프로젝트 설명",
+                        LocalDate.of(2026, 4, 17),
+                        LocalDate.of(2026, 6, 17),
+                        MeetingType.HYBRID,
+                        ProjectStatus.PREPARING,
+                        List.of("Java"),
+                        List.of(ProjectRole.OWNER, ProjectRole.BACKEND)
+                )
+        );
+
+        PageResponse<List<UserProjectDto>> response = PageResponse.of(
+                content,
+                0,
+                5,
+                16,
+                4
+        );
+
+        when(profileQueryUseCase.getUserProjectList(eq(userId), any(Pageable.class)))
+                .thenReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/profiles/me/projects")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "1")
+                        .param("size", "5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.page").value(1))
+                .andExpect(jsonPath("$.result.size").value(5))
+                .andExpect(jsonPath("$.result.totalElements").value(16))
+                .andExpect(jsonPath("$.result.totalPages").value(4))
+                .andExpect(jsonPath("$.result.content[0].projectId").value(23L))
+                .andExpect(jsonPath("$.result.content[0].title").value("테스트 프로젝트"));
+
+        verify(profileQueryUseCase).getUserProjectList(eq(userId), any(Pageable.class));
+    }
+
+    @Test
+    void 내_프로젝트_목록_조회시_page가_1보다_작으면_400을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/profiles/me/projects")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "0")
+                        .param("size", "5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 내_프로젝트_목록_조회시_size가_1보다_작으면_400을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/profiles/me/projects")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "1")
+                        .param("size", "0")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 내_프로젝트_목록_조회시_size가_100보다_크면_400을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/profiles/me/projects")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "1")
+                        .param("size", "101")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
 
 	@Test
 	void 프로필_수정_요청시_성공하면_200을_반환한다() throws Exception {
@@ -233,9 +320,7 @@ class ProfileControllerTest {
 			1L,
 			null,
 			null,
-			0,
-			4.0,
-			new ArrayList<>(),
+			0.0,
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
@@ -254,10 +339,8 @@ class ProfileControllerTest {
 			null,
 			null,
 			null,
-			0,
+			0.0,
 			null,
-			new ArrayList<>(),
-			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),

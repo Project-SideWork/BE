@@ -20,13 +20,11 @@ public record UserProfileResponse(
 	Long profileId,
 	String selfIntroduction,
 	String residence,
-	Integer projectCounts,
 	Double score,
 	List<RoleInfo> roles, //직군 정보
 	List<SchoolInfo> schools, // 학교 장보
 	List<SkillInfo> skills, //기술 스택
 	List<PortfolioInfo> portfolios, // 포폴 정보
-	List<ProjectInfo> projects, // 프로젝트 정보
 	List<ProjectReviewInfo> reviews // 프로젝트 리뷰 정보
 ) {
 	public record RoleInfo(
@@ -57,17 +55,6 @@ public record UserProfileResponse(
 		LocalDate endDate,
 		String content,
 		String organizationName
-	) {}
-	public record ProjectInfo(
-		Long projectId,
-		String title,
-		String description,
-		LocalDate startDate,
-		LocalDate endDate,
-		MeetingType meetingType,
-		ProjectStatus status,
-		List<String> projectStacks,
-		List<ProjectRole> role
 	) {}
 
 	public record ProjectReviewInfo(
