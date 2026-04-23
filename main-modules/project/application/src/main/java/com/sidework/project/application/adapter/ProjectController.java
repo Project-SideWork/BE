@@ -103,7 +103,7 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(user.getId(), projectId)));
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectListResponse>>>> getProjectList(
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PageableDefault(size = 20) Pageable pageable,
@@ -121,6 +121,14 @@ public class ProjectController implements ProjectControllerDocs {
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("projectId") Long projectId) {
         likeCommandService.like(user.getId(), projectId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
+    }
+
+    @DeleteMapping("/{projectId}/likes")
+    public ResponseEntity<ApiResponse<Void>> deleteLikeProject(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("projectId") Long projectId) {
+        likeCommandService.delete(user.getId(), projectId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
     }
 

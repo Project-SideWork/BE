@@ -6,15 +6,10 @@ import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.project.application.adapter.ProjectController;
-import com.sidework.project.application.exception.ProjectAlreadyAppliedException;
-import com.sidework.project.application.exception.ProjectDeleteAuthorityException;
-import com.sidework.project.application.exception.ProjectNotRecruitingException;
+import com.sidework.project.application.exception.*;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
-import com.sidework.project.application.exception.ProjectNotFoundException;
-import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.dto.ProjectPromotionCommand;
 import com.sidework.project.application.dto.ProjectUserReviewCommand;
-import com.sidework.project.application.exception.ProjectPromotionNotFoundException;
 import com.sidework.project.application.adapter.MyProjectSummaryResponse;
 import com.sidework.project.application.port.in.*;
 import com.sidework.project.domain.*;
@@ -951,6 +946,57 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.isSuccess").value(true));
 
         verify(projectLikeCommandUseCase).like(authenticatedUserDetails.getId(), projectId);
+    }
+
+
+    @Test
+    void 프로젝트_좋아요_요청시_이미_좋아요한_프로젝트면_400을_반환한다() throws Exception {
+        Long projectId = 1L;
+
+        doThrow(new ProjectLikeExistException())
+                .when(projectLikeCommandUseCase)
+                .like(authenticatedUserDetails.getId(), projectId);
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/likes", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void 프로젝트_좋아요_취소_요청시_성공하면_200을_반환한다() throws Exception {
+        Long userId = 1L;
+        Long projectId = 1L;
+
+        doNothing().when(projectLikeCommandUseCase).delete(userId, projectId);
+
+        mockMvc.perform(delete("/api/v1/projects/{projectId}/likes", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true));
+
+        verify(projectLikeCommandUseCase).delete(userId, projectId);
+    }
+
+    @Test
+    void 프로젝트_좋아요_취소_요청시_좋아요가_없으면_404를_반환한다() throws Exception {
+        Long userId = 1L;
+        Long projectId = 1L;
+
+        doThrow(new ProjectLikeNotFoundException())
+                .when(projectLikeCommandUseCase)
+                .delete(userId, projectId);
+
+        mockMvc.perform(delete("/api/v1/projects/{projectId}/likes", projectId)
+                        .with(user(authenticatedUserDetails))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+
+        verify(projectLikeCommandUseCase).delete(userId, projectId);
     }
 
     @Test
