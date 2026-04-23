@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sidework.profile.application.port.out.ProfileLikeOutPort;
 import com.sidework.profile.domain.ProfileLike;
+import com.sidework.profile.persistence.entity.ProfileLikeEntity;
 import com.sidework.profile.persistence.mapper.ProfileLikeMapper;
 import com.sidework.profile.persistence.repository.ProfileLikeRepository;
 
@@ -24,16 +25,13 @@ public class ProfileLikePersistenceAdapter implements ProfileLikeOutPort {
 
 	@Override
 	public void like(ProfileLike like) {
-		// atomic toggle: DELETE first, then INSERT IGNORE if nothing deleted
-		int deleted = profileLikeRepository.deleteByUserIdAndProfileId(like.getUserId(), like.getProfileId());
-		if (deleted == 0) {
-			profileLikeRepository.insertIgnore(like.getUserId(), like.getProfileId());
-		}
+		ProfileLikeEntity entity = profileLikeMapper.toEntity(like);
+		profileLikeRepository.save(entity);
 	}
 
 	@Override
-	public void unlike(ProfileLike like) {
-		profileLikeRepository.deleteByUserIdAndProfileId(like.getUserId(), like.getProfileId());
+	public int unlike(Long userId, Long profileId) {
+		return profileLikeRepository.deleteByUserIdAndProfileId(userId, profileId);
 	}
 
 	@Override
