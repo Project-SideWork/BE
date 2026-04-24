@@ -300,6 +300,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			.toList();
 
 		return new UserProfileListResponse(
+			profileId,
 			userId,
 			userIdToName.get(userId),
 			profile.getSelfIntroduction(),
