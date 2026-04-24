@@ -168,9 +168,26 @@ public interface ProfileControllerDocs {
 
     @Operation(description = "사용자 프로필 조회")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                        name = "401 예시",
+                        value = """
+                                    {
+                                        "code": "COMMON_401",
+                                        "message": "인증이 필요합니다.",
+                                        "isSuccess": false,
+                                        "path": "/error"
+                                    }
+                                    """
+                )
+            )
+        )
     })
     ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
+        @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PathVariable("userId") Long userId
     );
 

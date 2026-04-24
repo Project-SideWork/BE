@@ -25,7 +25,8 @@ public record UserProfileResponse(
 	List<SchoolInfo> schools, // 학교 장보
 	List<SkillInfo> skills, //기술 스택
 	List<PortfolioInfo> portfolios, // 포폴 정보
-	List<ProjectReviewInfo> reviews // 프로젝트 리뷰 정보
+	List<ProjectReviewInfo> reviews, // 프로젝트 리뷰 정보
+	Boolean isLiked
 ) {
 	public record RoleInfo(
 		Long roleId,

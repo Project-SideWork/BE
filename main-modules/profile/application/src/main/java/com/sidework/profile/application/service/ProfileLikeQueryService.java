@@ -27,5 +27,10 @@ public class ProfileLikeQueryService implements ProfileLikeQueryUseCase {
 	public List<Long> findLikedProfileIds(Long userId) {
 		return profileLikeOutPort.findLikedProfileIds(userId);
 	}
+
+	@Override
+	public boolean isLiked(Long viewerUserId, Long profileId) {
+		return profileLikeOutPort.isLiked(viewerUserId, profileId);
+	}
 }
 
