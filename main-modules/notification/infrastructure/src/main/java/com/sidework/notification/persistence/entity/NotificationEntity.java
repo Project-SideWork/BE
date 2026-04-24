@@ -1,8 +1,5 @@
 package com.sidework.notification.persistence.entity;
 
-import java.time.LocalDateTime;
-
-
 import com.sidework.common.entity.BaseEntity;
 import com.sidework.notification.domain.NotificationType;
 
