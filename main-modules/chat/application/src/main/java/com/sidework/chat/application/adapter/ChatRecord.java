@@ -1,7 +1,7 @@
 package com.sidework.chat.application.adapter;
 
 public record ChatRecord(
-        Long chatId,
+        Long chatRoomId,
         String content,
         String sentTime
 ) {
