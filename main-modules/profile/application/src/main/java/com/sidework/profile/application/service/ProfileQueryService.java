@@ -63,19 +63,28 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 	private final SchoolQueryUseCase schoolQueryUseCase;
 	private final ProfileLikeQueryUseCase profileLikeQueryUseCase;
 
+
 	@Override
-	public UserProfileResponse getProfileByUserId(Long userId) {
+	public UserProfileResponse getMyProfile(Long viewerUserId) {
+		return getProfileByUserId(viewerUserId, viewerUserId);
+	}
+
+	@Override
+	public UserProfileResponse getProfileByUserId(Long viewerUserId, Long targetUserId) {
         // TODO: 리뷰도 페이지네이션 적용 필요해서 아예 별도 함수로 분리. 최종적으로는 이 함수에 project, ctx를 사용하는 부분이 없도록 리팩터링하는 게 목표
-		User user = userQueryUseCase.findById(userId);
-        List<Project> projects = projectQueryUseCase.queryByUserId(userId);
+		User user = userQueryUseCase.findById(targetUserId);
+        List<Project> projects = projectQueryUseCase.queryByUserId(targetUserId);
 
-        ProjectContext ctx = loadProjectContext(userId, projects);
+        ProjectContext ctx = loadProjectContext(targetUserId, projects);
 
-        Profile profile = profileRepository.getProfileByUserId(userId);
+        Profile profile = profileRepository.getProfileByUserId(targetUserId);
 		if (profile == null) {
 			return buildResponseWhenNoProfile(user, ctx);
 		}
-		return buildProfileResponse(user, profile, ctx);
+
+		boolean isLiked = profileLikeQueryUseCase.isLiked(viewerUserId, profile.getId());
+
+		return buildProfileResponse(user, profile, ctx, isLiked);
 	}
 
 	@Override
@@ -133,7 +142,8 @@ public class ProfileQueryService implements ProfileQueryUseCase {
     private UserProfileResponse buildProfileResponse(
 		User user,
 		Profile profile,
-		ProjectContext ctx
+		ProjectContext ctx,
+		boolean isLiked
 	) {
 		return new UserProfileResponse(
 			user.getId(),
@@ -149,7 +159,8 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			buildSchoolInfos(profile.getId()),
 			buildSkillInfos(profile.getId()),
 			buildPortfolioInfos(profile.getId()),
-			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle())
+			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle()),
+			isLiked
 		);
 	}
 
@@ -172,7 +183,8 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			List.of(),
 			List.of(),
 			List.of(),
-			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle())
+			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle()),
+			null
 		);
 	}
 

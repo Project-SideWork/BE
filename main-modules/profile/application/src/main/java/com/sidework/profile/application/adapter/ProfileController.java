@@ -44,7 +44,7 @@ public class ProfileController implements ProfileControllerDocs {
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
 		@AuthenticationPrincipal AuthenticatedUserDetails user) {
-		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(user.getId())));
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getMyProfile(user.getId())));
 	}
 
     @GetMapping("/me/projects")
@@ -74,8 +74,10 @@ public class ProfileController implements ProfileControllerDocs {
 	}
 
 	@GetMapping("/{userId}")
-	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(@PathVariable("userId") Long userId) {
-		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(userId)));
+	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
+		@PathVariable("userId") Long userId) {
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(user.getId(), userId)));
 	}
 
 	@PostMapping("/{profileId}/likes")

@@ -7,5 +7,7 @@ public interface ProfileLikeQueryUseCase {
 	Map<Long, Boolean> isLikedByProfileIds(Long userId, List<Long> profileIds);
 
 	List<Long> findLikedProfileIds(Long userId);
+
+	boolean isLiked(Long viewerUserId, Long profileId);
 }
 
