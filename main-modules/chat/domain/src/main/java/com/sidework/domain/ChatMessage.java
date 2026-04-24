@@ -20,15 +20,17 @@ public class ChatMessage {
 
     private String content;
 
+    private LocalDateTime sendTime;
+
     private Boolean isDeleted;
 
-    private LocalDateTime createdAt;
 
-    public static ChatMessage create(Long chatRoomId, Long senderId, String content) {
+    public static ChatMessage create(Long chatRoomId, Long senderId, String content, LocalDateTime sendTime) {
         return ChatMessage.builder()
                 .chatRoomId(chatRoomId)
                 .senderId(senderId)
                 .content(content)
+                .sendTime(sendTime)
                 .isDeleted(false)
                 .build();
     }
