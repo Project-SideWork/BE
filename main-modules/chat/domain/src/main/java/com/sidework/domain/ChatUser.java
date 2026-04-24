@@ -18,11 +18,14 @@ public class ChatUser {
 
     private Long lastReadChatId;
 
+    private boolean isConnected;
+
     public static ChatUser create(Long chatRoomId, Long userId, Long chatId) {
         return ChatUser.builder()
                 .chatRoomId(chatRoomId)
                 .userId(userId)
                 .lastReadChatId(chatId)
+                .isConnected(true)
                 .build();
     }
 }

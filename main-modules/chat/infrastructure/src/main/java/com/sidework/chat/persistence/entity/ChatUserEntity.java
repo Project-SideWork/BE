@@ -23,4 +23,6 @@ public class ChatUserEntity {
     private Long userId;
 
     private Long lastReadChatId;
+
+    private boolean isConnected;
 }
