@@ -18,7 +18,16 @@ public class ChatRoom {
 
     private LocalDateTime lastMessageSentTime;
 
+    private Long lastMessageId;
+
+    private Long lastMessageSenderId;
+
     public static ChatRoom create(String initMessage) {
-        return new ChatRoom(null, initMessage, LocalDateTime.now());
+        return new ChatRoom(null, initMessage, LocalDateTime.now(), null, null);
+    }
+
+    public void changeLastMessage(Long lastMessageId, Long lastMessageSenderId) {
+        this.lastMessageId = lastMessageId;
+        this.lastMessageSenderId = lastMessageSenderId;
     }
 }

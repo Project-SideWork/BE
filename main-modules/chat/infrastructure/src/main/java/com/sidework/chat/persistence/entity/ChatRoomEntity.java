@@ -24,4 +24,8 @@ public class ChatRoomEntity extends BaseEntity {
     private String lastMessageContent;
 
     private Instant lastMessageSentTime;
+
+    private Long lastMessageId;
+
+    private Long lastMessageSenderId;
 }
