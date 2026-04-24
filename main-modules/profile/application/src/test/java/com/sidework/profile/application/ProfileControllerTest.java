@@ -242,6 +242,24 @@ class ProfileControllerTest {
 	}
 
 	@Test
+	void 프로필_좋아요_취소_요청시_성공하면_200을_반환한다() throws Exception {
+		// given
+		Long profileId = 2L;
+
+		doNothing().when(profileLikeCommandUseCase).delete(1L, profileId);
+
+		// when & then
+		mockMvc.perform(delete("/api/v1/profiles/{profileId}/likes", profileId)
+				.with(user(authenticatedUserDetails))
+				.with(csrf()))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true));
+
+		verify(profileLikeCommandUseCase).delete(1L, profileId);
+	}
+
+	@Test
 	void 프로필_좋아요_목록_조회시_성공하면_liked를_반환한다() throws Exception {
 		// given
 		Long userId = authenticatedUserDetails.getId();

@@ -177,6 +177,7 @@ public interface ProfileControllerDocs {
     @Operation(description = "프로필 좋아요")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 좋아요한 프로필"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
                     content = @Content(
                             mediaType = "application/json",
@@ -197,6 +198,32 @@ public interface ProfileControllerDocs {
     ResponseEntity<ApiResponse<Void>> likeUser(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PathVariable("profileId") Long profileId
+    );
+
+    @Operation(description = "프로필 좋아요 취소")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "처리 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "좋아요 내역을 찾을 수 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                            {
+                                              "code": "COMMON_401",
+                                              "message": "인증이 필요합니다.",
+                                              "isSuccess": false,
+                                              "path": "/error"
+                                            }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> deleteLikeUser(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("profileId") Long profileId
     );
 
     @Operation(description = "좋아요한 프로필 목록 조회")
