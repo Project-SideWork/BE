@@ -8,6 +8,9 @@ import com.sidework.domain.ChatRoom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 @Component
 @RequiredArgsConstructor
 public class ChatRoomPersistenceAdapter implements ChatRoomOutPort {
@@ -23,5 +26,12 @@ public class ChatRoomPersistenceAdapter implements ChatRoomOutPort {
     @Override
     public boolean existsById(Long chatRoomId) {
         return repo.existsById(chatRoomId);
+    }
+
+    @Override
+    public int updateChatRoomLatest(String messageContent, LocalDateTime messageSendTime, Long lastMessageId, Long lastMessageSenderId) {
+        return repo.updateLastMessage(messageContent,
+                messageSendTime.atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+                lastMessageId, lastMessageSenderId);
     }
 }
