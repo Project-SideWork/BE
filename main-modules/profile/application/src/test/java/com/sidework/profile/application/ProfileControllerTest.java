@@ -68,7 +68,7 @@ class ProfileControllerTest {
 		// given
 		Long userId = 1L;
 		UserProfileResponse response = createUserProfileResponse(userId);
-		when(profileQueryUseCase.getProfileByUserId(userId)).thenReturn(response);
+		when(profileQueryUseCase.getMyProfile(userId)).thenReturn(response);
 
 		// when & then
 		mockMvc.perform(get("/api/v1/profiles/me")
@@ -81,7 +81,7 @@ class ProfileControllerTest {
 			.andExpect(jsonPath("$.result.email").value("test@test.com"))
 			.andExpect(jsonPath("$.result.name").value("홍길동"));
 
-		verify(profileQueryUseCase).getProfileByUserId(userId);
+		verify(profileQueryUseCase).getMyProfile(userId);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ class ProfileControllerTest {
 		// given
 		Long userId = 1L;
 		UserProfileResponse response = createUserProfileResponseWithoutProfile(userId);
-		when(profileQueryUseCase.getProfileByUserId(userId)).thenReturn(response);
+		when(profileQueryUseCase.getMyProfile(userId)).thenReturn(response);
 
 		// when & then
 		mockMvc.perform(get("/api/v1/profiles/me")
@@ -100,7 +100,27 @@ class ProfileControllerTest {
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.result.profileId").value(nullValue()));
 
-		verify(profileQueryUseCase).getProfileByUserId(userId);
+		verify(profileQueryUseCase).getMyProfile(userId);
+	}
+
+	@Test
+	void 사용자_프로필_조회_요청시_성공하면_200을_반환한다() throws Exception {
+		// given
+		Long viewerUserId = authenticatedUserDetails.getId();
+		Long targetUserId = 2L;
+		UserProfileResponse response = createUserProfileResponse(targetUserId);
+		when(profileQueryUseCase.getProfileByUserId(viewerUserId, targetUserId)).thenReturn(response);
+
+		// when & then
+		mockMvc.perform(get("/api/v1/profiles/{userId}", targetUserId)
+				.with(user(authenticatedUserDetails))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.result.userId").value(targetUserId));
+
+		verify(profileQueryUseCase).getProfileByUserId(viewerUserId, targetUserId);
 	}
 
     @Test
@@ -242,12 +262,31 @@ class ProfileControllerTest {
 	}
 
 	@Test
+	void 프로필_좋아요_취소_요청시_성공하면_200을_반환한다() throws Exception {
+		// given
+		Long profileId = 2L;
+
+		doNothing().when(profileLikeCommandUseCase).delete(1L, profileId);
+
+		// when & then
+		mockMvc.perform(delete("/api/v1/profiles/{profileId}/likes", profileId)
+				.with(user(authenticatedUserDetails))
+				.with(csrf()))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true));
+
+		verify(profileLikeCommandUseCase).delete(1L, profileId);
+	}
+
+	@Test
 	void 프로필_좋아요_목록_조회시_성공하면_liked를_반환한다() throws Exception {
 		// given
 		Long userId = authenticatedUserDetails.getId();
 		List<Long> skillIds = List.of(1L, 2L);
 
 		UserProfileListResponse item = new UserProfileListResponse(
+			1L,
 			10L,           // userId
 			"테스트유저",
 			null,          // description
@@ -325,7 +364,8 @@ class ProfileControllerTest {
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
-			new ArrayList<>()
+			new ArrayList<>(),
+			true
 		);
 	}
 
@@ -345,6 +385,7 @@ class ProfileControllerTest {
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>()
+			,true
 		);
 	}
 }

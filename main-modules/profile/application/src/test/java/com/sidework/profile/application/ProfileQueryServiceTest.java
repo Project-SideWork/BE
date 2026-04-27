@@ -250,7 +250,7 @@ class ProfileQueryServiceTest {
 		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
 
 		// when
-		UserProfileResponse response = service.getProfileByUserId(userId);
+		UserProfileResponse response = service.getMyProfile(userId);
 
 		// then
 		assertNotNull(response);
@@ -304,9 +304,10 @@ class ProfileQueryServiceTest {
 			.thenReturn(Map.of(1L, List.of(ProjectRole.BACKEND), 2L, List.of(ProjectRole.FRONTEND)));
 		when(requiredSkillUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
 			.thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
+		when(profileLikeQueryUseCase.isLiked(userId, profileId)).thenReturn(false);
 
 		// when
-		UserProfileResponse response = service.getProfileByUserId(userId);
+		UserProfileResponse response = service.getMyProfile(userId);
 
 		// then
 		assertNotNull(response);
@@ -343,9 +344,10 @@ class ProfileQueryServiceTest {
 		when(profileRepository.getProfileSkills(profileId)).thenReturn(new ArrayList<>());
 		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(new ArrayList<>());
 		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
+		when(profileLikeQueryUseCase.isLiked(userId, profileId)).thenReturn(false);
 
 		// when
-		UserProfileResponse response = service.getProfileByUserId(userId);
+		UserProfileResponse response = service.getMyProfile(userId);
 
 		// then
 		assertNotNull(response);
@@ -372,7 +374,7 @@ class ProfileQueryServiceTest {
 			.thenReturn(Map.of(1L, List.of(), 2L, List.of()));
 
 		// when
-		UserProfileResponse response = service.getProfileByUserId(userId);
+		UserProfileResponse response = service.getMyProfile(userId);
 
 		// then
 		assertNotNull(response);
@@ -399,9 +401,10 @@ class ProfileQueryServiceTest {
 		when(profileRepository.getProfileSkills(profileId)).thenReturn(new ArrayList<>());
 		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(new ArrayList<>());
 		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
+		when(profileLikeQueryUseCase.isLiked(userId, profileId)).thenReturn(false);
 
 		// when
-		UserProfileResponse response = service.getProfileByUserId(userId);
+		UserProfileResponse response = service.getMyProfile(userId);
 
 		// then
 		assertNotNull(response);

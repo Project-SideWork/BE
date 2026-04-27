@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +44,7 @@ public class ProfileController implements ProfileControllerDocs {
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
 		@AuthenticationPrincipal AuthenticatedUserDetails user) {
-		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(user.getId())));
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getMyProfile(user.getId())));
 	}
 
     @GetMapping("/me/projects")
@@ -73,8 +74,10 @@ public class ProfileController implements ProfileControllerDocs {
 	}
 
 	@GetMapping("/{userId}")
-	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(@PathVariable("userId") Long userId) {
-		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(userId)));
+	public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
+		@PathVariable("userId") Long userId) {
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getProfileByUserId(user.getId(), userId)));
 	}
 
 	@PostMapping("/{profileId}/likes")
@@ -82,6 +85,14 @@ public class ProfileController implements ProfileControllerDocs {
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PathVariable("profileId") Long profileId) {
 		profileLikeCommandUseCase.like(user.getId(), profileId);
+		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
+	}
+
+	@DeleteMapping("/{profileId}/likes")
+	public ResponseEntity<ApiResponse<Void>> deleteLikeUser(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
+		@PathVariable("profileId") Long profileId) {
+		profileLikeCommandUseCase.delete(user.getId(), profileId);
 		return ResponseEntity.ok(ApiResponse.onSuccessVoid());
 	}
 

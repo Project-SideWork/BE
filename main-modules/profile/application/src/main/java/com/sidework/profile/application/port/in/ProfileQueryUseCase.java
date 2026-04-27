@@ -10,7 +10,8 @@ import com.sidework.profile.application.adapter.UserProfileListResponse;
 import com.sidework.profile.application.adapter.UserProfileResponse;
 
 public interface ProfileQueryUseCase {
-	UserProfileResponse getProfileByUserId(Long userId);
+	UserProfileResponse getMyProfile(Long viewerUserId);
+	UserProfileResponse getProfileByUserId(Long viewerUserId, Long targetUserId);
 	boolean existsByIdAndUserId(Long profileId,Long userId);
 	PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable);
 	PageResponse<List<UserProfileListResponse>> getLikedUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable);

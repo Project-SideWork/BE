@@ -7,7 +7,7 @@ import com.sidework.profile.domain.ProfileLike;
 
 public interface ProfileLikeOutPort {
 	void like(ProfileLike like);
-	void unlike(ProfileLike like);
+	int unlike(Long userId, Long profileId);
 	boolean isLiked(Long userId, Long profileId);
 	Map<Long, Boolean> getLikes(Long userId, List<Long> profileIds);
 

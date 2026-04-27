@@ -60,6 +60,8 @@ public enum ErrorStatus implements BaseStatusCode {
     // PROFILE
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROFILE_001", "해당 프로필을 찾을 수 없습니다."),
     PROFILE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "PROFILE_002", "이미 프로필이 존재합니다."),
+    PROFILE_LIKE_ALREADY_EXISTS(HttpStatus.CONFLICT, "PROFILE_003", "이미 좋아요를 한 프로필입니다."),
+    PROFILE_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "PROFILE_004", "해당 프로필 좋아요 내역을 찾을 수 없습니다."),
 
     // ROLE
     ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROLE_001", "해당 역할을 찾을 수 없습니다."),

@@ -1,5 +1,7 @@
 package com.sidework.profile.application;
 
+import com.sidework.profile.application.exception.ProfileLikeExistException;
+import com.sidework.profile.application.exception.ProfileLikeNotFoundException;
 import com.sidework.profile.application.exception.ProfileNotFoundException;
 import com.sidework.profile.application.port.out.ProfileLikeOutPort;
 import com.sidework.profile.application.port.out.ProfileOutPort;
@@ -42,6 +44,7 @@ class ProfileLikeCommandServiceTest {
 		Long userId = 1L;
 		Long profileId = 2L;
 		when(profileOutPort.existsById(profileId)).thenReturn(true);
+		when(profileLikeOutPort.isLiked(userId, profileId)).thenReturn(false);
 
 		// when
 		service.like(userId, profileId);
@@ -49,10 +52,31 @@ class ProfileLikeCommandServiceTest {
 		// then
 		verify(userQueryUseCase).validateExists(userId);
 		verify(profileOutPort).existsById(profileId);
+		verify(profileLikeOutPort).isLiked(userId, profileId);
 		verify(profileLikeOutPort).like(profileLikeCaptor.capture());
 		ProfileLike saved = profileLikeCaptor.getValue();
 		assertEquals(userId, saved.getUserId());
 		assertEquals(profileId, saved.getProfileId());
+	}
+
+	@Test
+	void 이미_좋아요한_프로필에_다시_좋아요_시도_시_ProfileLikeExistException을_던진다() {
+		// given
+		Long userId = 1L;
+		Long profileId = 2L;
+		when(profileOutPort.existsById(profileId)).thenReturn(true);
+		when(profileLikeOutPort.isLiked(userId, profileId)).thenReturn(true);
+
+		// when & then
+		assertThrows(
+			ProfileLikeExistException.class,
+			() -> service.like(userId, profileId)
+		);
+
+		verify(userQueryUseCase).validateExists(userId);
+		verify(profileOutPort).existsById(profileId);
+		verify(profileLikeOutPort).isLiked(userId, profileId);
+		verify(profileLikeOutPort, never()).like(any(ProfileLike.class));
 	}
 
 	@Test
@@ -70,6 +94,43 @@ class ProfileLikeCommandServiceTest {
 
 		verify(userQueryUseCase).validateExists(userId);
 		verify(profileOutPort).existsById(profileId);
+		verify(profileLikeOutPort, never()).isLiked(anyLong(), anyLong());
 		verify(profileLikeOutPort, never()).like(any(ProfileLike.class));
+	}
+
+	@Test
+	void 프로필_좋아요_취소에_성공한다() {
+		// given
+		Long userId = 1L;
+		Long profileId = 2L;
+		when(profileOutPort.existsById(profileId)).thenReturn(true);
+		when(profileLikeOutPort.unlike(userId, profileId)).thenReturn(1);
+
+		// when
+		service.delete(userId, profileId);
+
+		// then
+		verify(userQueryUseCase).validateExists(userId);
+		verify(profileOutPort).existsById(profileId);
+		verify(profileLikeOutPort).unlike(userId, profileId);
+	}
+
+	@Test
+	void 좋아요_내역이_없는데_취소_시도_시_ProfileLikeNotFoundException을_던진다() {
+		// given
+		Long userId = 1L;
+		Long profileId = 2L;
+		when(profileOutPort.existsById(profileId)).thenReturn(true);
+		when(profileLikeOutPort.unlike(userId, profileId)).thenReturn(0);
+
+		// when & then
+		assertThrows(
+			ProfileLikeNotFoundException.class,
+			() -> service.delete(userId, profileId)
+		);
+
+		verify(userQueryUseCase).validateExists(userId);
+		verify(profileOutPort).existsById(profileId);
+		verify(profileLikeOutPort).unlike(userId, profileId);
 	}
 }
