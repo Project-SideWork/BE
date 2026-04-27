@@ -57,4 +57,13 @@ public class ChatController implements ChatControllerDocs {
         CursorResponse<ChatRecord> res = new CursorResponse<>(queryRes.items(), queryRes.nextCursor(), queryRes.hasNext());
         return ResponseEntity.ok().body(ApiResponse.onSuccess(res));
     }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<CursorResponse<ChatRoomRecord>>> getChatRooms(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @RequestParam(required = false, value = "cursor") String cursor) {
+        ChatRoomQueryResult queryRes = chatQueryService.queryRoomsByUserId(user.getId(), cursor);
+        CursorResponse<ChatRoomRecord> res = new CursorResponse<>(queryRes.items(), queryRes.nextCursor(), queryRes.hasNext());
+        return ResponseEntity.ok().body(ApiResponse.onSuccess(res));
+    }
 }
