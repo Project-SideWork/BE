@@ -35,20 +35,20 @@ public class ChatCommandService implements ChatCommandUseCase {
 
     @Override
     public void processStartNewChat(Long senderId, NewChatCommand chatCommand) {
-        Long newChatRoom = createNewChatRoom(chatCommand.content());
+        Long newChatRoomId = createNewChatRoom(chatCommand.content());
         LocalDateTime sendTime = Instant.now()
                 .atZone(ZoneId.of("Asia/Seoul"))
                 .toLocalDateTime();
-        Long messageId = createNewChatMessage(newChatRoom, senderId, chatCommand.content(), sendTime);
+        Long messageId = createNewChatMessage(newChatRoomId, senderId, chatCommand.content(), sendTime);
 
-        createNewChatUser(newChatRoom, senderId, messageId);
-        createNewChatUser(newChatRoom, chatCommand.receiverId(), null);
+        createNewChatUser(newChatRoomId, senderId, messageId);
+        createNewChatUser(newChatRoomId, chatCommand.receiverId(), null);
 
-        if(chatRoomRepository.updateChatRoomLatest(chatCommand.content(), sendTime, messageId, senderId) == 0) {
+        if(chatRoomRepository.updateChatRoomLatest(chatCommand.content(), sendTime, messageId, senderId, newChatRoomId) == 0) {
             throw new ResourceUpdateFailedException(ErrorStatus.CHATROOM_UPDATE_ERROR);
         }
 
-        sseSendAdapter.sendToUser(chatCommand.receiverId(), chatCommand.content());
+        sseSendAdapter.sendToUser(chatCommand.receiverId(), "MESSAGE_ARRIVED");
         eventPublisher.publishEvent(new ChatMessageSendEvent(chatCommand.receiverId(), chatCommand.content()));
     }
 
@@ -60,7 +60,7 @@ public class ChatCommandService implements ChatCommandUseCase {
         Long messageId = createNewChatMessage(chatRoomId, senderId, chatCommand.content(), sendTime);
         Long pairUserId = chatUserRepository.findChatPairInRoom(senderId, chatRoomId);
 
-        if(chatRoomRepository.updateChatRoomLatest(chatCommand.content(), sendTime, messageId, senderId) == 0) {
+        if(chatRoomRepository.updateChatRoomLatest(chatCommand.content(), sendTime, messageId, senderId, chatRoomId) == 0) {
             throw new ResourceUpdateFailedException(ErrorStatus.CHATROOM_UPDATE_ERROR);
         }
 
@@ -68,10 +68,27 @@ public class ChatCommandService implements ChatCommandUseCase {
             throw new ResourceUpdateFailedException(ErrorStatus.CHATUSER_UPDATE_ERROR);
         }
 
-        sseSendAdapter.sendToChatRoom(chatRoomId, new ChatMessageData(messageId, chatCommand.content(), sendTime.toString(), senderId));
+        // 수신자가 채팅방에 접속해있으면 알림 X
+        if(chatUserRepository.isChatRoomConnected(pairUserId, chatRoomId)) {
+            sseSendAdapter.sendToChatRoom(chatRoomId, new ChatMessageData(messageId, chatCommand.content(), sendTime.toString(), senderId));
+        }
+
+        // 수신자가 채팅방에 없으면 알림 전송
+        else{
+            sseSendAdapter.sendToUser(pairUserId, "MESSAGE_ARRIVED");
+        }
+
         if(chatUserRepository.existsByUserAndRoom(pairUserId, chatRoomId)){
             eventPublisher.publishEvent(new ChatMessageSendEvent(pairUserId, chatCommand.content()));
         }
+    }
+
+    public void enterChatRoom(Long userId, Long chatRoomId) {
+        chatUserRepository.updateIsConnected(userId, chatRoomId, true);
+    }
+
+    public void leaveChatRoom(Long userId, Long chatRoomId) {
+        chatUserRepository.updateIsConnected(userId, chatRoomId, false);
     }
 
     public Long createNewChatRoom(String messageContent) {
@@ -87,10 +104,5 @@ public class ChatCommandService implements ChatCommandUseCase {
     public void createNewChatUser(Long chatRoomId, Long userId, Long lastReadChatId) {
         ChatUser chatUser = ChatUser.create(chatRoomId, userId, lastReadChatId);
         chatUserRepository.save(chatUser);
-    }
-
-    public void updateLastMessage(ChatRoom chatRoom, Long lastMessageId, Long lastMessageSenderId) {
-        chatRoom.changeLastMessage(lastMessageId, lastMessageSenderId);
-        chatRoomRepository.save(chatRoom);
     }
 }
