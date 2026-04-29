@@ -1,11 +1,12 @@
 package com.sidework.chat.application.adapter;
 
 public record ChatRecord(
-        Long chatRoomId,
+        Long chatMessageId,
+        Long senderId,
         String content,
         String sentTime
 ) {
-    public static ChatRecord create(Long chatId, String content, String sentTime) {
-        return new ChatRecord(chatId, content, sentTime);
+    public static ChatRecord create(Long chatMessageId, Long senderId, String content, String sentTime) {
+        return new ChatRecord(chatMessageId, senderId, content, sentTime);
     }
 }
