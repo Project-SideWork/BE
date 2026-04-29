@@ -29,9 +29,10 @@ public class ChatRoomPersistenceAdapter implements ChatRoomOutPort {
     }
 
     @Override
-    public int updateChatRoomLatest(String messageContent, LocalDateTime messageSendTime, Long lastMessageId, Long lastMessageSenderId) {
+    public int updateChatRoomLatest(String messageContent, LocalDateTime messageSendTime,
+                                    Long lastMessageId, Long lastMessageSenderId, Long chatRoomId) {
         return repo.updateLastMessage(messageContent,
                 messageSendTime.atZone(ZoneId.of("Asia/Seoul")).toInstant(),
-                lastMessageId, lastMessageSenderId);
+                lastMessageId, lastMessageSenderId, chatRoomId);
     }
 }

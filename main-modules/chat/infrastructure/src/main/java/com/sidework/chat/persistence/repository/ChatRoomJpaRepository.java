@@ -18,12 +18,14 @@ public interface ChatRoomJpaRepository extends JpaRepository<ChatRoomEntity, Lon
             UPDATE ChatRoomEntity cr
             SET cr.lastMessageContent = :content, cr.lastMessageSentTime = :sendTime,
             cr.lastMessageId = :lastMessageId, cr.lastMessageSenderId = :lastMessageSenderId
+            WHERE cr.id = :chatRoomId
             """
     )
     int updateLastMessage(
             @Param("content") String messageContent,
             @Param("sendTime") Instant messageSendTime,
             @Param("lastMessageId") Long lastMessageId,
-            @Param("lastMessageSenderId")Long lastMessageSenderId
+            @Param("lastMessageSenderId")Long lastMessageSenderId,
+            @Param("chatRoomId") Long chatRoomId
     );
 }

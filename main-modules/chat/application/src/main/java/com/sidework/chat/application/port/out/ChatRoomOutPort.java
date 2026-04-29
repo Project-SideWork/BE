@@ -8,6 +8,7 @@ public interface ChatRoomOutPort {
     Long save(ChatRoom chatRoom);
     boolean existsById(Long chatRoomId);
     int updateChatRoomLatest(
-            String messageContent, LocalDateTime messageSendTime, Long lastMessageId, Long lastMessageSenderId
+            String messageContent, LocalDateTime messageSendTime,
+            Long lastMessageId, Long lastMessageSenderId, Long chatRoomId
     );
 }
