@@ -14,7 +14,7 @@ import com.sidework.domain.ChatMessage;
 import com.sidework.domain.ChatRoom;
 import com.sidework.domain.ChatUser;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +30,6 @@ public class ChatCommandService implements ChatCommandUseCase {
     private final ChatUserOutPort chatUserRepository;
     private final ChatRoomOutPort chatRoomRepository;
     private final SseSendOutPort sseSendAdapter;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void processStartNewChat(Long senderId, NewChatCommand chatCommand) {
