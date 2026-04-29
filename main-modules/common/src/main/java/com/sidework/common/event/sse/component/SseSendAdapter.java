@@ -12,7 +12,7 @@ public class SseSendAdapter implements SseSendOutPort {
     private final UserSseEmitter userSseEmitter;
 
     @Override
-    public void sendToUser(Long userId, Object data) {
+    public void sendToUser(Long userId, String data) {
         userSseEmitter.sendTo(userId, data);
     }
 
