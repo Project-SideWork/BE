@@ -55,18 +55,34 @@ public class ChatUserPersistenceAdapter implements ChatUserOutPort {
     }
 
     @Override
-    public ChatUserSummaryPage findByUserIdAndIdGreaterThan(Long userId, Instant cursorCreatedAt, Long cursorId, int size) {
-        List<ChatUserSummary> summaries = repo.findChatUserSummary(userId, cursorCreatedAt , cursorId, PageRequest.of(0, size));
+    public ChatUserSummaryPage findByUserIdAndIdGreaterThan(
+            Long userId,
+            Instant cursorCreatedAt,
+            Long cursorId,
+            int size
+    ) {
+        List<ChatUserSummary> summaries = repo.findChatUserSummary(
+                userId,
+                cursorCreatedAt,
+                cursorId,
+                PageRequest.of(0, size + 1)
+        );
+
         boolean hasNext = summaries.size() > size;
-        ChatUserSummary last = hasNext && !summaries.isEmpty()
-                ? summaries.getLast()
-                : null;
+
+        List<ChatUserSummary> content = hasNext
+                ? summaries.subList(0, size)
+                : summaries;
+
+        ChatUserSummary last = content.isEmpty()
+                ? null
+                : content.getLast();
 
         return new ChatUserSummaryPage(
-                summaries,
+                content,
                 hasNext,
                 last != null
-                        ? LocalDateTime.ofInstant(Instant.from(last.createdAt()), ZoneOffset.UTC)
+                        ? LocalDateTime.ofInstant(last.createdAt(), ZoneOffset.UTC)
                         : null,
                 last != null ? last.chatRoomId() : null
         );
