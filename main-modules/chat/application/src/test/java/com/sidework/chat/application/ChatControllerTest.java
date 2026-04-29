@@ -3,11 +3,8 @@ package com.sidework.chat.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sidework.chat.application.adapter.ChatController;
 import com.sidework.chat.application.adapter.ChatRecord;
-import com.sidework.chat.application.port.in.ExistChatCommand;
-import com.sidework.chat.application.port.in.NewChatCommand;
-import com.sidework.chat.application.port.in.ChatCommandUseCase;
-import com.sidework.chat.application.port.in.ChatMessageQueryResult;
-import com.sidework.chat.application.port.in.ChatQueryUseCase;
+import com.sidework.chat.application.adapter.ChatRoomRecord;
+import com.sidework.chat.application.port.in.*;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
 import com.sidework.common.exception.ForbiddenAccessException;
@@ -29,8 +26,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -294,9 +290,9 @@ public class ChatControllerTest {
     @Test
     void getMessages를_cursor없이_요청성공시_200을_반환한다() throws Exception {
 
-        when(chatQueryService.queryMessagesByChatRoomId(1L, null)).thenReturn(
+        when(chatQueryService.queryMessagesByChatRoomId(1L, 1L, null)).thenReturn(
                 new ChatMessageQueryResult(
-                        List.of(new ChatRecord(1L, "테스트", "12:00")),
+                        List.of(new ChatRecord(1L, 1L, "테스트", "12:00")),
                         "testcursor", true
                 )
         );
@@ -321,9 +317,9 @@ public class ChatControllerTest {
 
     @Test
     void getMessages를_cursor와_같이_요청성공시_200을_반환한다() throws Exception {
-        when(chatQueryService.queryMessagesByChatRoomId(1L, "inputCursor")).thenReturn(
+        when(chatQueryService.queryMessagesByChatRoomId(1L, 1L, "inputCursor")).thenReturn(
                 new ChatMessageQueryResult(
-                        List.of(new ChatRecord(1L, "테스트", "12:00")),
+                        List.of(new ChatRecord(1L, 1L, "테스트", "12:00")),
                         "testcursor", true
                 )
         );
@@ -357,6 +353,144 @@ public class ChatControllerTest {
                 .andExpect(status().isUnauthorized());
 
         verify(chatQueryService, never())
-                .queryMessagesByChatRoomId(anyLong(), anyString());
+                .queryMessagesByChatRoomId(anyLong(), anyLong(), anyString());
+    }
+
+    @Test
+    void getChatRooms_성공시_200을_반환한다() throws Exception {
+        when(chatQueryService.queryRoomsByUserId(1L, null)).thenReturn(
+                new ChatRoomQueryResult(
+                        List.of(
+                                new ChatRoomRecord(
+                                        1L,
+                                        "마지막 메시지",
+                                        "12:00",
+                                        3L
+                                )
+                        ),
+                        "nextCursor",
+                        true
+                )
+        );
+
+        mockMvc.perform(get("/api/v1/chats")
+                        .with(user(new AuthenticatedUserDetails(
+                                1L,
+                                "test@mail.com",
+                                "테스터",
+                                "pw"
+                        )))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content").exists())
+                .andExpect(jsonPath("$.result.nextCursor").value("nextCursor"))
+                .andExpect(jsonPath("$.result.hasNext").value(true));
+
+        verify(chatQueryService).queryRoomsByUserId(1L, null);
+    }
+
+    @Test
+    void getChatRooms_cursor와_같이_요청성공시_200을_반환한다() throws Exception {
+        when(chatQueryService.queryRoomsByUserId(1L, "inputCursor")).thenReturn(
+                new ChatRoomQueryResult(
+                        List.of(
+                                new ChatRoomRecord(
+                                        1L,
+                                        "마지막 메시지",
+                                        "12:00",
+                                        3L
+                                )
+                        ),
+                        "nextCursor",
+                        true
+                )
+        );
+
+        mockMvc.perform(get("/api/v1/chats?cursor=inputCursor")
+                        .with(user(new AuthenticatedUserDetails(
+                                1L,
+                                "test@mail.com",
+                                "테스터",
+                                "pw"
+                        )))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content").exists())
+                .andExpect(jsonPath("$.result.nextCursor").value("nextCursor"))
+                .andExpect(jsonPath("$.result.hasNext").value(true));
+
+        verify(chatQueryService).queryRoomsByUserId(1L, "inputCursor");
+    }
+
+    @Test
+    void getChatRooms_인증정보_없이_요청시_401을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/chats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+
+        verify(chatQueryService, never())
+                .queryRoomsByUserId(anyLong(), any());
+    }
+
+    @Test
+    void leaveChatRoom_성공시_200을_반환한다() throws Exception {
+        doNothing().when(chatCommandService).leaveChatRoom(1L, 1L);
+
+        mockMvc.perform(patch("/api/v1/chats/{chatRoomId}/leave", 1L)
+                        .with(user(new AuthenticatedUserDetails(
+                                1L,
+                                "test@mail.com",
+                                "테스터",
+                                "pw"
+                        )))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true));
+
+        verify(chatCommandService).leaveChatRoom(1L, 1L);
+    }
+
+    @Test
+    void leaveChatRoom_인증정보_없이_요청시_401을_반환한다() throws Exception {
+        mockMvc.perform(patch("/api/v1/chats/{chatRoomId}/leave", 1L)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+
+        verify(chatCommandService, never())
+                .leaveChatRoom(anyLong(), anyLong());
+    }
+
+    @Test
+    void leaveChatRoom_내가_속하지_않은_채팅방이면_403을_반환한다() throws Exception {
+        doThrow(new ForbiddenAccessException())
+                .when(chatCommandService)
+                .leaveChatRoom(anyLong(), anyLong());
+
+        mockMvc.perform(patch("/api/v1/chats/{chatRoomId}/leave", 1L)
+                        .with(user(new AuthenticatedUserDetails(
+                                1L,
+                                "test@mail.com",
+                                "테스터",
+                                "pw"
+                        )))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isForbidden());
+
+        verify(chatCommandService).leaveChatRoom(1L, 1L);
     }
 }

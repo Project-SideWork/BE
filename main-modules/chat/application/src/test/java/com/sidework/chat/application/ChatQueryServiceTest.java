@@ -1,10 +1,8 @@
 package com.sidework.chat.application;
 
 import com.sidework.chat.application.port.in.ChatMessageQueryResult;
-import com.sidework.chat.application.port.out.ChatMessageOutPort;
-import com.sidework.chat.application.port.out.ChatMessagePage;
-import com.sidework.chat.application.port.out.ChatRoomOutPort;
-import com.sidework.chat.application.port.out.ChatUserOutPort;
+import com.sidework.chat.application.port.in.ChatRoomQueryResult;
+import com.sidework.chat.application.port.out.*;
 import com.sidework.chat.application.service.ChatQueryService;
 import com.sidework.common.exception.ForbiddenAccessException;
 import com.sidework.common.exception.InvalidCommandException;
@@ -23,11 +21,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ChatQueryServiceTest {
+
     @Mock
     private ChatMessageOutPort chatMessageRepository;
 
@@ -41,53 +39,175 @@ public class ChatQueryServiceTest {
     private ChatQueryService service;
 
     @Test
-    void queryMessagesByChatRoomId는_chatRoomId와_cursor로_메시지를_조회한다() {
+    void queryMessagesByChatRoomId는_chatRoomId와_cursor로_메시지를_조회하고_lastReadChatId를_업데이트한다() {
         Instant now = Instant.now();
         Long cursorId = 10L;
 
-        String encodedCursor =
-                CursorUtil.encode(new CursorWrapper(now, cursorId));
+        String encodedCursor = CursorUtil.encode(new CursorWrapper(now, cursorId));
 
         when(chatMessageRepository.findByChatRoomIdAndIdGreaterThan(
                 anyLong(),
                 any(),
                 anyLong(),
                 anyInt()
-        )).thenReturn(createPage());
+        )).thenReturn(createMessagePage());
+
+        when(chatUserRepository.updateLastReadChat(1L, 1L, 1L))
+                .thenReturn(1);
 
         ChatMessageQueryResult result =
-                service.queryMessagesByChatRoomId(1L, encodedCursor);
+                service.queryMessagesByChatRoomId(1L, 1L, encodedCursor);
 
         assertEquals(1, result.items().size());
         assertTrue(result.hasNext());
         assertNotNull(result.nextCursor());
+
+        verify(chatMessageRepository).findByChatRoomIdAndIdGreaterThan(
+                eq(1L),
+                any(),
+                eq(10L),
+                eq(3)
+        );
+
+        verify(chatUserRepository).updateLastReadChat(1L, 1L, 1L);
     }
 
     @Test
-    void queryMessagesByChatRoomId는_조회대상이_더_안남아있으면_cursor정보를_null로_반환한다() {
+    void queryMessagesByChatRoomId는_cursor가_null이어도_메시지를_조회한다() {
+        when(chatMessageRepository.findByChatRoomIdAndIdGreaterThan(
+                anyLong(),
+                any(),
+                any(),
+                anyInt()
+        )).thenReturn(createMessagePage());
+
+        when(chatUserRepository.updateLastReadChat(1L, 1L, 1L))
+                .thenReturn(1);
+
+        ChatMessageQueryResult result =
+                service.queryMessagesByChatRoomId(1L, 1L, null);
+
+        assertEquals(1, result.items().size());
+        assertTrue(result.hasNext());
+
+        verify(chatMessageRepository).findByChatRoomIdAndIdGreaterThan(
+                eq(1L),
+                any(),
+                any(),
+                eq(3)
+        );
+
+        verify(chatUserRepository).updateLastReadChat(1L, 1L, 1L);
+    }
+
+    @Test
+    void queryMessagesByChatRoomId는_조회대상이_더_안남아있으면_hasNext_false를_반환한다() {
         Instant now = Instant.now();
         Long cursorId = 10L;
 
-        String encodedCursor =
-                CursorUtil.encode(new CursorWrapper(now, cursorId));
+        String encodedCursor = CursorUtil.encode(new CursorWrapper(now, cursorId));
 
         when(chatMessageRepository.findByChatRoomIdAndIdGreaterThan(
                 anyLong(),
                 any(),
                 anyLong(),
                 anyInt()
-        )).thenReturn(createLastPage());
+        )).thenReturn(createLastMessagePage());
+
+        when(chatUserRepository.updateLastReadChat(1L, 1L, 1L))
+                .thenReturn(1);
 
         ChatMessageQueryResult result =
-                service.queryMessagesByChatRoomId(1L, encodedCursor);
+                service.queryMessagesByChatRoomId(1L, 1L, encodedCursor);
 
         assertEquals(1, result.items().size());
         assertFalse(result.hasNext());
-        assertNull(result.nextCursor());
+
+        verify(chatUserRepository).updateLastReadChat(1L, 1L, 1L);
     }
 
     @Test
-    void checkSubscribeValidation은_존재하지_않는_chatRoomId를_받으면_InvalidCommandException을_던진다() {
+    void queryRoomsByUserId는_userId와_cursor로_채팅방목록을_조회한다() {
+        Instant now = Instant.now();
+        Long cursorId = 10L;
+
+        String encodedCursor = CursorUtil.encode(new CursorWrapper(now, cursorId));
+
+        when(chatUserRepository.findByUserIdAndIdGreaterThan(
+                anyLong(),
+                any(),
+                anyLong(),
+                anyInt()
+        )).thenReturn(createChatUserSummaryPage());
+
+        ChatRoomQueryResult result =
+                service.queryRoomsByUserId(1L, encodedCursor);
+
+        assertEquals(1, result.items().size());
+        assertTrue(result.hasNext());
+        assertNotNull(result.nextCursor());
+
+        verify(chatUserRepository).findByUserIdAndIdGreaterThan(
+                eq(1L),
+                any(),
+                eq(10L),
+                eq(3)
+        );
+    }
+
+    @Test
+    void queryRoomsByUserId는_cursor가_null이어도_채팅방목록을_조회한다() {
+        when(chatUserRepository.findByUserIdAndIdGreaterThan(
+                anyLong(),
+                any(),
+                any(),
+                anyInt()
+        )).thenReturn(createChatUserSummaryPage());
+
+        ChatRoomQueryResult result =
+                service.queryRoomsByUserId(1L, null);
+
+        assertEquals(1, result.items().size());
+        assertTrue(result.hasNext());
+
+        verify(chatUserRepository).findByUserIdAndIdGreaterThan(
+                eq(1L),
+                any(),
+                any(),
+                eq(3)
+        );
+    }
+
+    @Test
+    void queryRoomsByUserId는_조회대상이_더_안남아있으면_hasNext_false를_반환한다() {
+        Instant now = Instant.now();
+        Long cursorId = 10L;
+
+        String encodedCursor = CursorUtil.encode(new CursorWrapper(now, cursorId));
+
+        when(chatUserRepository.findByUserIdAndIdGreaterThan(
+                anyLong(),
+                any(),
+                anyLong(),
+                anyInt()
+        )).thenReturn(createLastChatUserSummaryPage());
+
+        ChatRoomQueryResult result =
+                service.queryRoomsByUserId(1L, encodedCursor);
+
+        assertEquals(1, result.items().size());
+        assertFalse(result.hasNext());
+
+        verify(chatUserRepository).findByUserIdAndIdGreaterThan(
+                eq(1L),
+                any(),
+                eq(10L),
+                eq(3)
+        );
+    }
+
+    @Test
+    void checkChatUserValidation은_존재하지_않는_chatRoomId를_받으면_InvalidCommandException을_던진다() {
         Long chatRoomId = 1L;
 
         when(chatRoomRepository.existsById(chatRoomId)).thenReturn(false);
@@ -96,10 +216,13 @@ public class ChatQueryServiceTest {
                 InvalidCommandException.class,
                 () -> service.checkChatUserValidation(1L, chatRoomId)
         );
+
+        verify(chatRoomRepository).existsById(chatRoomId);
+        verify(chatUserRepository, never()).existsByUserAndRoom(anyLong(), anyLong());
     }
 
     @Test
-    void checkSubscribeValidation은_existsByUserAndRoom가_거짓이면_ForbiddenAccessException을_던진다() {
+    void checkChatUserValidation은_채팅방은_존재하지만_유저가_속하지_않으면_ForbiddenAccessException을_던진다() {
         Long chatRoomId = 1L;
         Long userId = 1L;
 
@@ -110,10 +233,13 @@ public class ChatQueryServiceTest {
                 ForbiddenAccessException.class,
                 () -> service.checkChatUserValidation(userId, chatRoomId)
         );
+
+        verify(chatRoomRepository).existsById(chatRoomId);
+        verify(chatUserRepository).existsByUserAndRoom(userId, chatRoomId);
     }
 
     @Test
-    void checkSubscribeValidation은_existsById와_existsByUserAndRoom가_모두_참이면_예외를_던지지_않는다() {
+    void checkChatUserValidation은_채팅방이_존재하고_유저가_속해있으면_예외를_던지지_않는다() {
         Long chatRoomId = 1L;
         Long userId = 1L;
 
@@ -123,16 +249,19 @@ public class ChatQueryServiceTest {
         assertDoesNotThrow(() ->
                 service.checkChatUserValidation(userId, chatRoomId)
         );
+
+        verify(chatRoomRepository).existsById(chatRoomId);
+        verify(chatUserRepository).existsByUserAndRoom(userId, chatRoomId);
     }
 
-    private ChatMessagePage createPage() {
+    private ChatMessagePage createMessagePage() {
         ChatMessage message = new ChatMessage(
                 1L,
                 1L,
                 1L,
                 "hello",
-                false,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                false
         );
 
         return new ChatMessagePage(
@@ -143,20 +272,54 @@ public class ChatQueryServiceTest {
         );
     }
 
-    private ChatMessagePage createLastPage() {
+    private ChatMessagePage createLastMessagePage() {
         ChatMessage message = new ChatMessage(
                 1L,
                 1L,
                 1L,
                 "hello",
-                false,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                false
         );
 
         return new ChatMessagePage(
                 List.of(message),
                 false,
+                null,
+                null
+        );
+    }
+
+    private ChatUserSummaryPage createChatUserSummaryPage() {
+        ChatUserSummary summary = new ChatUserSummary(
+                1L,
+                "마지막 메시지",
+                Instant.now(),
+                3L,
+                Instant.now()
+        );
+
+        return new ChatUserSummaryPage(
+                List.of(summary),
+                true,
                 LocalDateTime.now(),
+                1L
+        );
+    }
+
+    private ChatUserSummaryPage createLastChatUserSummaryPage() {
+        ChatUserSummary summary = new ChatUserSummary(
+                1L,
+                "마지막 메시지",
+                Instant.now(),
+                0L,
+                Instant.now()
+        );
+
+        return new ChatUserSummaryPage(
+                List.of(summary),
+                false,
+                null,
                 null
         );
     }
