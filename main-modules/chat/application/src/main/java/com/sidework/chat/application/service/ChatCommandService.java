@@ -6,7 +6,6 @@ import com.sidework.chat.application.port.in.ExistChatCommand;
 import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
-import com.sidework.common.event.ChatMessageSendEvent;
 import com.sidework.common.event.sse.port.out.ChatMessageData;
 import com.sidework.common.event.sse.port.out.SseSendOutPort;
 import com.sidework.common.exception.ResourceUpdateFailedException;
@@ -49,7 +48,6 @@ public class ChatCommandService implements ChatCommandUseCase {
         }
 
         sseSendAdapter.sendToUser(chatCommand.receiverId(), "MESSAGE_ARRIVED");
-        eventPublisher.publishEvent(new ChatMessageSendEvent(chatCommand.receiverId(), chatCommand.content()));
     }
 
     @Override
@@ -68,7 +66,7 @@ public class ChatCommandService implements ChatCommandUseCase {
             throw new ResourceUpdateFailedException(ErrorStatus.CHATUSER_UPDATE_ERROR);
         }
 
-        // 수신자가 채팅방에 접속해있으면 알림 X
+        // 수신자가 채팅방에 접속해있으면 알림 전송 X
         if(chatUserRepository.isChatRoomConnected(pairUserId, chatRoomId)) {
             sseSendAdapter.sendToChatRoom(chatRoomId, new ChatMessageData(messageId, chatCommand.content(), sendTime.toString(), senderId));
         }
@@ -76,10 +74,6 @@ public class ChatCommandService implements ChatCommandUseCase {
         // 수신자가 채팅방에 없으면 알림 전송
         else{
             sseSendAdapter.sendToUser(pairUserId, "MESSAGE_ARRIVED");
-        }
-
-        if(chatUserRepository.existsByUserAndRoom(pairUserId, chatRoomId)){
-            eventPublisher.publishEvent(new ChatMessageSendEvent(pairUserId, chatCommand.content()));
         }
     }
 
