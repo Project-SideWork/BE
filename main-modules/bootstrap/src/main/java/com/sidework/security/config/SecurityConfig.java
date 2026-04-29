@@ -11,6 +11,7 @@ import com.sidework.security.oauth.service.CustomOAuth2UserService;
 import com.sidework.security.service.TokenBlackListService;
 import com.sidework.security.util.CookieUtil;
 import com.sidework.security.util.JwtUtil;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,17 +75,22 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 )
+
                 .securityMatcher("/**")
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login","/swagger-ui/**",    // Swagger UI 관련 경로
+                .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/api/v1/login","/swagger-ui/**",    // Swagger UI 관련 경로
                                 "/v3/api-docs/**", "/api/v1/users/email" ,"/api/v1/users", "/api/v1/reissue",
                                 "/firebase-messaging-sw.js", "/fcm-test.html", "/health", "/oauth2/authorization/github", "/api/v1/payments/webhook").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/regions/**", "/login/oauth2/code/github").permitAll()
                         .requestMatchers("/internal/**")
+
                         .access(new WebExpressionAuthorizationManager(
                                 "hasIpAddress('10.0.2.41/32')"
                         ))
                         .anyRequest().authenticated()
-                ).headers(headers -> headers
+                )
+                .headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())
                 )
                 .oauth2Login(configure ->
