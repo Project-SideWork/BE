@@ -29,16 +29,20 @@ public class ChatQueryService implements ChatQueryUseCase {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-
     @Override
-    public ChatMessageQueryResult queryMessagesByChatRoomId(Long chatRoomId, String cursor) {
+    @Transactional(readOnly = false)
+    public ChatMessageQueryResult queryMessagesByChatRoomId(Long chatRoomId, Long userId, String cursor) {
         CursorWrapper decoded = CursorUtil.decode(cursor);
         ChatMessagePage page = chatMessageRepository.findByChatRoomIdAndIdGreaterThan(chatRoomId,
                 decoded.cursorCreatedAt(), decoded.cursorId(), 3);
 
+        Long lastChatId = page.items().getFirst().getId();
+
         List<ChatRecord> records = page.items().stream().map(
-                chatMessage -> ChatRecord.create(chatMessage.getId(), chatMessage.getContent(), chatMessage.getSendTime().format(TIME_FORMATTER))
+                chatMessage -> ChatRecord.create(chatMessage.getId(), chatMessage.getSenderId(), chatMessage.getContent(), chatMessage.getSendTime().format(TIME_FORMATTER))
         ).toList();
+
+        chatUserRepository.updateLastReadChat(userId, chatRoomId, lastChatId);
 
 
         Instant nextCursorCreatedAt = page.nextCursorCreatedAt() != null
