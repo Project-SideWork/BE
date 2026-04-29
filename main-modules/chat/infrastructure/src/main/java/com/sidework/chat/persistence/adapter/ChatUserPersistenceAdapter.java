@@ -35,6 +35,11 @@ public class ChatUserPersistenceAdapter implements ChatUserOutPort {
     }
 
     @Override
+    public void updateIsConnected(Long userId, Long chatRoomId, boolean isConnected) {
+        repo.updateIsConnected(userId, chatRoomId, isConnected);
+    }
+
+    @Override
     public boolean existsByUserAndRoom(Long userId, Long chatRoomId) {
         return repo.existsByUserAndChatRoom(userId, chatRoomId);
     }

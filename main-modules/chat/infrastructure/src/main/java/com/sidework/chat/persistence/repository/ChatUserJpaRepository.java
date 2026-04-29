@@ -18,13 +18,30 @@ public interface ChatUserJpaRepository extends JpaRepository<ChatUserEntity, Lon
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
             UPDATE ChatUserEntity cu
-            SET cu.lastReadChatId = :chatMessageId
+            SET cu.lastReadChatId =
+                CASE WHEN cu.lastReadChatId IS NULL THEN :chatMessageId
+                    WHEN cu.lastReadChatId < :chatMessageId THEN :chatMessageId
+                    ELSE cu.lastReadChatId
+                END
             WHERE cu.userId = :userId AND cu.chatRoomId = :chatRoomId
             """)
 
     int updateLastRead(@Param("userId") Long userId,
                         @Param("chatRoomId") Long chatRoomId,
                         @Param("chatMessageId") Long chatMessageId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+    UPDATE ChatUserEntity cu
+       SET cu.isConnected = :connected
+     WHERE cu.userId = :userId
+       AND cu.chatRoomId = :chatRoomId
+    """)
+    void updateIsConnected(
+            @Param("userId") Long userId,
+            @Param("chatRoomId") Long chatRoomId,
+            @Param("connected") boolean connected
+    );
 
 
     @Query("""
