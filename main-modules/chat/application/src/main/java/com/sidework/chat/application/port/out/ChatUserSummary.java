@@ -1,10 +1,10 @@
 package com.sidework.chat.application.port.out;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record ChatUserSummary(Long chatRoomId,
                               String lastMessageContent,
-                              Instant lastMessageSentTime,
+                              LocalDateTime lastMessageSentTime,
                               Long unreadCount,
-                              Instant createdAt) {
+                              LocalDateTime createdAt) {
 }
