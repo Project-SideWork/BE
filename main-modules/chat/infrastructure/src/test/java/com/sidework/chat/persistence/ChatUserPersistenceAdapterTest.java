@@ -134,30 +134,30 @@ public class ChatUserPersistenceAdapterTest {
                 createSummary(
                         1L,
                         "메시지1",
-                        Instant.parse("2026-04-29T06:00:00Z"),
+                        LocalDateTime.parse("2026-04-29T06:00:00"),
                         0L,
-                        Instant.parse("2026-04-29T06:00:00Z")
+                        LocalDateTime.parse("2026-04-29T06:00:00")
                 ),
                 createSummary(
                         2L,
                         "메시지2",
-                        Instant.parse("2026-04-29T05:00:00Z"),
+                        LocalDateTime.parse("2026-04-29T05:00:00"),
                         1L,
-                        Instant.parse("2026-04-29T05:00:00Z")
+                        LocalDateTime.parse("2026-04-29T05:00:00")
                 ),
                 createSummary(
                         3L,
                         "메시지3",
-                        Instant.parse("2026-04-29T04:00:00Z"),
+                        LocalDateTime.parse("2026-04-29T04:00:00"),
                         2L,
-                        Instant.parse("2026-04-29T04:00:00Z")
+                        LocalDateTime.parse("2026-04-29T04:00:00")
                 ),
                 createSummary(
                         4L,
                         "메시지4",
-                        Instant.parse("2026-04-29T03:00:00Z"),
+                        LocalDateTime.parse("2026-04-29T03:00:00"),
                         3L,
-                        Instant.parse("2026-04-29T03:00:00Z")
+                        LocalDateTime.parse("2026-04-29T03:00:00")
                 )
         );
 
@@ -193,9 +193,9 @@ public class ChatUserPersistenceAdapterTest {
         int size = 3;
 
         List<ChatUserSummary> summaries = List.of(
-                new ChatUserSummary(1L, "메시지1", Instant.now(), 0L, Instant.now()),
-                new ChatUserSummary(2L, "메시지2", Instant.now(), 1L, Instant.now()),
-                new ChatUserSummary(3L, "메시지3", Instant.now(), 2L, Instant.now())
+                new ChatUserSummary(1L, "메시지1", LocalDateTime.now(), 0L, LocalDateTime.now()),
+                new ChatUserSummary(2L, "메시지2", LocalDateTime.now(), 1L, LocalDateTime.now()),
+                new ChatUserSummary(3L, "메시지3", LocalDateTime.now(), 2L, LocalDateTime.now())
         );
 
         when(repo.findChatUserSummary(
@@ -210,7 +210,8 @@ public class ChatUserPersistenceAdapterTest {
 
         assertEquals(3, result.items().size());
         assertFalse(result.hasNext());
-        assertEquals(3L, result.nextCursorId());
+        assertNull(result.nextCursorCreatedAt());
+        assertNull(result.nextCursorId());
     }
 
     @Test
@@ -257,9 +258,9 @@ public class ChatUserPersistenceAdapterTest {
     private ChatUserSummary createSummary(
             Long chatRoomId,
             String lastMessageContent,
-            Instant lastMessageSendTime,
+            LocalDateTime lastMessageSendTime,
             Long unreadCount,
-            Instant createdAt
+            LocalDateTime createdAt
     ) {
         return new ChatUserSummary(
                 chatRoomId,

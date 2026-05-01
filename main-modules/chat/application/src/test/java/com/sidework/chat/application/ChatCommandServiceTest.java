@@ -6,8 +6,11 @@ import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
 import com.sidework.chat.application.service.ChatCommandService;
+import com.sidework.common.event.ChatRoomSseSendEvent;
+import com.sidework.common.event.UserSseSendEvent;
 import com.sidework.common.event.sse.port.out.ChatMessageData;
 import com.sidework.common.event.sse.port.out.SseSendOutPort;
+import com.sidework.common.exception.ResourceNotFoundException;
 import com.sidework.common.exception.ResourceUpdateFailedException;
 import com.sidework.domain.ChatMessage;
 import com.sidework.domain.ChatRoom;
@@ -19,6 +22,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 
@@ -39,13 +43,19 @@ public class ChatCommandServiceTest {
     private ChatRoomOutPort chatRoomRepository;
 
     @Mock
-    private SseSendOutPort sseSendAdapter;
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private ChatCommandService service;
 
     @Captor
     ArgumentCaptor<ChatUser> chatUserArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<UserSseSendEvent> userSseSendEventCaptor;
+
+    @Captor
+    ArgumentCaptor<ChatRoomSseSendEvent> chatRoomSseSendEventCaptor;
 
     @Test
     void createNewChatRoom은_ChatRoom을_저장_후_ID를_반환한다() {
@@ -99,7 +109,7 @@ public class ChatCommandServiceTest {
     }
 
     @Test
-    void processStartNewChat은_모든_로직_성공_시_수신자에게_sse_알림을_전송한다() {
+    void processStartNewChat은_모든_로직_성공_시_수신자에게_UserSseSendEvent를_발행한다() {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(1L);
         when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
         when(chatRoomRepository.updateChatRoomLatest(
@@ -114,7 +124,6 @@ public class ChatCommandServiceTest {
 
         verify(chatRoomRepository).save(any(ChatRoom.class));
         verify(chatMessageRepository).save(any(ChatMessage.class));
-
         verify(chatUserRepository, times(2)).save(any(ChatUser.class));
 
         verify(chatRoomRepository).updateChatRoomLatest(
@@ -125,11 +134,16 @@ public class ChatCommandServiceTest {
                 eq(1L)
         );
 
-        verify(sseSendAdapter).sendToUser(2L, "MESSAGE_ARRIVED");
+        verify(eventPublisher).publishEvent(userSseSendEventCaptor.capture());
+
+        UserSseSendEvent event = userSseSendEventCaptor.getValue();
+
+        assertEquals(2L, event.userId());
+        assertEquals("MESSAGE_ARRIVED", event.data());
     }
 
     @Test
-    void processStartNewChat은_채팅방_최신정보_업데이트_실패시_예외를_던진다() {
+    void processStartNewChat은_채팅방_최신정보_업데이트_실패시_예외를_던지고_이벤트를_발행하지_않는다() {
         when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(1L);
         when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
         when(chatRoomRepository.updateChatRoomLatest(
@@ -143,12 +157,30 @@ public class ChatCommandServiceTest {
         assertThrows(ResourceUpdateFailedException.class,
                 () -> service.processStartNewChat(1L, new NewChatCommand(2L, "테스트")));
 
-        verify(sseSendAdapter, never()).sendToUser(anyLong(), any());
-        verify(sseSendAdapter, never()).sendToChatRoom(anyLong(), any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test
-    void processResumeChat은_수신자가_채팅방에_접속중이면_채팅방으로_sse_메시지를_전송한다() {
+    void processResumeChat은_상대_사용자를_찾지_못하면_ResourceNotFoundException을_던진다() {
+        when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
+        when(chatUserRepository.findChatPairInRoom(1L, 1L)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.processResumeChat(1L, 1L, new ExistChatCommand("테스트")));
+
+        verify(chatRoomRepository, never()).updateChatRoomLatest(
+                anyString(),
+                any(LocalDateTime.class),
+                anyLong(),
+                anyLong(),
+                anyLong()
+        );
+        verify(chatUserRepository, never()).updateLastReadChat(anyLong(), anyLong(), anyLong());
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void processResumeChat은_수신자가_채팅방에_접속중이면_ChatRoomSseSendEvent를_발행한다() {
         when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
         when(chatUserRepository.findChatPairInRoom(1L, 1L)).thenReturn(2L);
         when(chatRoomRepository.updateChatRoomLatest(
@@ -175,12 +207,21 @@ public class ChatCommandServiceTest {
 
         verify(chatUserRepository).updateLastReadChat(1L, 1L, 1L);
 
-        verify(sseSendAdapter).sendToChatRoom(eq(1L), any(ChatMessageData.class));
-        verify(sseSendAdapter, never()).sendToUser(anyLong(), any());
+        verify(eventPublisher).publishEvent(chatRoomSseSendEventCaptor.capture());
+
+        ChatRoomSseSendEvent event = chatRoomSseSendEventCaptor.getValue();
+
+        assertEquals(1L, event.chatRoomId());
+        assertNotNull(event.data());
+        assertEquals(1L, event.data().messageId());
+        assertEquals("테스트", event.data().content());
+        assertEquals(1L, event.data().senderUserId());
+        assertNotNull(event.data().sendTime());
+
     }
 
     @Test
-    void processResumeChat은_수신자가_채팅방에_없으면_수신자에게_sse_알림을_전송한다() {
+    void processResumeChat은_수신자가_채팅방에_없으면_UserSseSendEvent를_발행한다() {
         when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
         when(chatUserRepository.findChatPairInRoom(1L, 1L)).thenReturn(2L);
         when(chatRoomRepository.updateChatRoomLatest(
@@ -195,12 +236,17 @@ public class ChatCommandServiceTest {
 
         service.processResumeChat(1L, 1L, new ExistChatCommand("테스트"));
 
-        verify(sseSendAdapter).sendToUser(2L, "MESSAGE_ARRIVED");
-        verify(sseSendAdapter, never()).sendToChatRoom(anyLong(), any());
+        verify(eventPublisher).publishEvent(userSseSendEventCaptor.capture());
+
+        UserSseSendEvent event = userSseSendEventCaptor.getValue();
+
+        assertEquals(2L, event.userId());
+        assertEquals("MESSAGE_ARRIVED", event.data());
+
     }
 
     @Test
-    void processResumeChat은_채팅방_최신정보_업데이트_실패시_예외를_던진다() {
+    void processResumeChat은_채팅방_최신정보_업데이트_실패시_예외를_던지고_이벤트를_발행하지_않는다() {
         when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
         when(chatUserRepository.findChatPairInRoom(1L, 1L)).thenReturn(2L);
         when(chatRoomRepository.updateChatRoomLatest(
@@ -215,12 +261,11 @@ public class ChatCommandServiceTest {
                 () -> service.processResumeChat(1L, 1L, new ExistChatCommand("테스트")));
 
         verify(chatUserRepository, never()).updateLastReadChat(anyLong(), anyLong(), anyLong());
-        verify(sseSendAdapter, never()).sendToUser(anyLong(), any());
-        verify(sseSendAdapter, never()).sendToChatRoom(anyLong(), any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test
-    void processResumeChat은_보낸사람_lastReadChat_업데이트_실패시_예외를_던진다() {
+    void processResumeChat은_보낸사람_lastReadChat_업데이트_실패시_예외를_던지고_이벤트를_발행하지_않는다() {
         when(chatMessageRepository.save(any(ChatMessage.class))).thenReturn(1L);
         when(chatUserRepository.findChatPairInRoom(1L, 1L)).thenReturn(2L);
         when(chatRoomRepository.updateChatRoomLatest(
@@ -235,8 +280,7 @@ public class ChatCommandServiceTest {
         assertThrows(ResourceUpdateFailedException.class,
                 () -> service.processResumeChat(1L, 1L, new ExistChatCommand("테스트")));
 
-        verify(sseSendAdapter, never()).sendToUser(anyLong(), any());
-        verify(sseSendAdapter, never()).sendToChatRoom(anyLong(), any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test

@@ -207,7 +207,7 @@ public class ChatMessagePersistenceAdapterTest {
                 entity.getChatRoomId(),
                 entity.getSenderId(),
                 entity.getContent(),
-                LocalDateTime.now(),
+                LocalDateTime.ofInstant(entity.getCreatedAt(), ZoneOffset.UTC),
                 entity.getIsDeleted()
         );
     }
