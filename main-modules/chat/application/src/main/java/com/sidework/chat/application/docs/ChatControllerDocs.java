@@ -1,6 +1,7 @@
 package com.sidework.chat.application.docs;
 
 import com.sidework.chat.application.port.in.ChatRecord;
+import com.sidework.chat.application.port.in.ChatRoomRecord;
 import com.sidework.chat.application.port.in.ExistChatCommand;
 import com.sidework.chat.application.port.in.NewChatCommand;
 import com.sidework.common.auth.AuthenticatedUserDetails;
@@ -217,5 +218,87 @@ public interface ChatControllerDocs {
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PathVariable("chatRoomId") Long chatRoomId,
             @RequestParam(required = false, value = "cursor") String cursor
+    );
+
+    @Operation(description = "내 채팅방 목록 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                        {
+                                          "code": "COMMON_401",
+                                          "message": "인증이 필요합니다.",
+                                          "isSuccess": false,
+                                          "path": "/error"
+                                        }
+                                """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<CursorResponse<ChatRoomRecord>>> getChatRooms(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @RequestParam(required = false, value = "cursor") String cursor
+    );
+
+    @Operation(description = "채팅방 나가기")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "채팅방 나가기 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                        {
+                                          "code": "COMMON_401",
+                                          "message": "인증이 필요합니다.",
+                                          "isSuccess": false,
+                                          "path": "/error"
+                                        }
+                                """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "채팅방 접근 권한 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "403 예시",
+                                    value = """
+                                        {
+                                          "code": "COMMON_403",
+                                          "message": "권한이 부족합니다.",
+                                          "isSuccess": false,
+                                          "path": "/error"
+                                        }
+                                """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "채팅방 또는 채팅 사용자 정보 없음",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "404 예시",
+                                    value = """
+                                        {
+                                          "code": "COMMON_404",
+                                          "message": "요청한 리소스를 찾을 수 없습니다.",
+                                          "isSuccess": false,
+                                          "path": "/error"
+                                        }
+                                """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Void>> leaveChatRoom(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+            @PathVariable("chatRoomId") Long chatRoomId
     );
 }
