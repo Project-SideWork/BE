@@ -1,6 +1,6 @@
 package com.sidework.chat.application.docs;
 
-import com.sidework.chat.application.adapter.ChatRecord;
+import com.sidework.chat.application.port.in.ChatRecord;
 import com.sidework.chat.application.port.in.ExistChatCommand;
 import com.sidework.chat.application.port.in.NewChatCommand;
 import com.sidework.common.auth.AuthenticatedUserDetails;

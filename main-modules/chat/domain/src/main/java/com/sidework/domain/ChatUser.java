@@ -25,7 +25,7 @@ public class ChatUser {
                 .chatRoomId(chatRoomId)
                 .userId(userId)
                 .lastReadChatId(chatId)
-                .isConnected(true)
+                .isConnected(false)
                 .build();
     }
 }

@@ -6,8 +6,10 @@ import com.sidework.chat.application.port.in.ExistChatCommand;
 import com.sidework.chat.application.port.out.ChatMessageOutPort;
 import com.sidework.chat.application.port.out.ChatRoomOutPort;
 import com.sidework.chat.application.port.out.ChatUserOutPort;
+import com.sidework.common.event.ChatRoomSseSendEvent;
+import com.sidework.common.event.UserSseSendEvent;
 import com.sidework.common.event.sse.port.out.ChatMessageData;
-import com.sidework.common.event.sse.port.out.SseSendOutPort;
+import com.sidework.common.exception.ResourceNotFoundException;
 import com.sidework.common.exception.ResourceUpdateFailedException;
 import com.sidework.common.response.status.ErrorStatus;
 import com.sidework.domain.ChatMessage;
@@ -15,6 +17,7 @@ import com.sidework.domain.ChatRoom;
 import com.sidework.domain.ChatUser;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +32,7 @@ public class ChatCommandService implements ChatCommandUseCase {
     private final ChatMessageOutPort chatMessageRepository;
     private final ChatUserOutPort chatUserRepository;
     private final ChatRoomOutPort chatRoomRepository;
-    private final SseSendOutPort sseSendAdapter;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void processStartNewChat(Long senderId, NewChatCommand chatCommand) {
@@ -46,7 +49,9 @@ public class ChatCommandService implements ChatCommandUseCase {
             throw new ResourceUpdateFailedException(ErrorStatus.CHATROOM_UPDATE_ERROR);
         }
 
-        sseSendAdapter.sendToUser(chatCommand.receiverId(), "MESSAGE_ARRIVED");
+        eventPublisher.publishEvent(
+                new UserSseSendEvent(chatCommand.receiverId(), "MESSAGE_ARRIVED")
+        );
     }
 
     @Override
@@ -56,6 +61,10 @@ public class ChatCommandService implements ChatCommandUseCase {
                 .toLocalDateTime();
         Long messageId = createNewChatMessage(chatRoomId, senderId, chatCommand.content(), sendTime);
         Long pairUserId = chatUserRepository.findChatPairInRoom(senderId, chatRoomId);
+
+        if(pairUserId == null) {
+            throw new ResourceNotFoundException(ErrorStatus.CHATUSER_NOT_FOUND);
+        }
 
         if(chatRoomRepository.updateChatRoomLatest(chatCommand.content(), sendTime, messageId, senderId, chatRoomId) == 0) {
             throw new ResourceUpdateFailedException(ErrorStatus.CHATROOM_UPDATE_ERROR);
@@ -67,12 +76,17 @@ public class ChatCommandService implements ChatCommandUseCase {
 
         // 수신자가 채팅방에 접속해있으면 알림 전송 X
         if(chatUserRepository.isChatRoomConnected(pairUserId, chatRoomId)) {
-            sseSendAdapter.sendToChatRoom(chatRoomId, new ChatMessageData(messageId, chatCommand.content(), sendTime.toString(), senderId));
+            Instant sendInstant = sendTime.atZone(ZoneId.of("Asia/Seoul")).toInstant();
+            eventPublisher.publishEvent(
+                    new ChatRoomSseSendEvent(chatRoomId, new ChatMessageData(messageId, chatCommand.content(), sendInstant, senderId))
+            );
         }
 
         // 수신자가 채팅방에 없으면 알림 전송
         else{
-            sseSendAdapter.sendToUser(pairUserId, "MESSAGE_ARRIVED");
+            eventPublisher.publishEvent(
+                    new UserSseSendEvent(pairUserId, "MESSAGE_ARRIVED")
+            );
         }
     }
 

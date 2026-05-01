@@ -74,15 +74,15 @@ public class ChatUserPersistenceAdapter implements ChatUserOutPort {
                 ? summaries.subList(0, size)
                 : summaries;
 
-        ChatUserSummary last = content.isEmpty()
-                ? null
-                : content.getLast();
+        ChatUserSummary last = hasNext && !content.isEmpty()
+                ? content.getLast()
+                : null;
 
         return new ChatUserSummaryPage(
                 content,
                 hasNext,
                 last != null
-                        ? LocalDateTime.ofInstant(last.createdAt(), ZoneOffset.UTC)
+                        ? last.lastMessageSentTime()
                         : null,
                 last != null ? last.chatRoomId() : null
         );

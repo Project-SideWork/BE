@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Getter
 @Builder
@@ -23,6 +24,6 @@ public class ChatRoom {
     private Long lastMessageSenderId;
 
     public static ChatRoom create(String initMessage) {
-        return new ChatRoom(null, initMessage, LocalDateTime.now(), null, null);
+        return new ChatRoom(null, initMessage, LocalDateTime.now(ZoneId.of("Asia/Seoul")), null, null);
     }
 }

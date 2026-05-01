@@ -1,13 +1,15 @@
 package com.sidework.chat.application.service;
 
-import com.sidework.chat.application.adapter.ChatRecord;
-import com.sidework.chat.application.adapter.ChatRoomRecord;
+import com.sidework.chat.application.port.in.ChatRecord;
+import com.sidework.chat.application.port.in.ChatRoomRecord;
 import com.sidework.chat.application.port.in.ChatMessageQueryResult;
 import com.sidework.chat.application.port.in.ChatQueryUseCase;
 import com.sidework.chat.application.port.in.ChatRoomQueryResult;
 import com.sidework.chat.application.port.out.*;
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.exception.ForbiddenAccessException;
+import com.sidework.common.exception.ResourceUpdateFailedException;
+import com.sidework.common.response.status.ErrorStatus;
 import com.sidework.common.util.CursorUtil;
 import com.sidework.common.util.CursorWrapper;
 import lombok.RequiredArgsConstructor;
@@ -36,13 +38,15 @@ public class ChatQueryService implements ChatQueryUseCase {
         ChatMessagePage page = chatMessageRepository.findByChatRoomIdAndIdGreaterThan(chatRoomId,
                 decoded.cursorCreatedAt(), decoded.cursorId(), 3);
 
-        Long lastChatId = page.items().getFirst().getId();
+        Long lastChatId = page.items().isEmpty() ? null : page.items().getFirst().getId();
 
         List<ChatRecord> records = page.items().stream().map(
                 chatMessage -> ChatRecord.create(chatMessage.getId(), chatMessage.getSenderId(), chatMessage.getContent(), chatMessage.getSendTime().format(TIME_FORMATTER))
         ).toList();
 
-        chatUserRepository.updateLastReadChat(userId, chatRoomId, lastChatId);
+        if (lastChatId != null && chatUserRepository.updateLastReadChat(userId, chatRoomId, lastChatId) == 0) {
+            throw new ResourceUpdateFailedException(ErrorStatus.CHATUSER_UPDATE_ERROR);
+        }
 
 
         Instant nextCursorCreatedAt = page.nextCursorCreatedAt() != null
@@ -67,7 +71,8 @@ public class ChatQueryService implements ChatQueryUseCase {
 
         List<ChatRoomRecord> records = page.items().stream().map(
                 summary -> ChatRoomRecord.create(summary.chatRoomId(), summary.lastMessageContent(),
-                        summary.lastMessageSentTime().toString(), summary.unreadCount())
+                        summary.lastMessageSentTime().format(TIME_FORMATTER), summary.unreadCount()
+                )
         ).toList();
 
 

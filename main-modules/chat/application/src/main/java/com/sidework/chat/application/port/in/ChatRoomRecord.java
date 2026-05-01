@@ -1,4 +1,4 @@
-package com.sidework.chat.application.adapter;
+package com.sidework.chat.application.port.in;
 
 public record ChatRoomRecord(
         Long chatRoomId,

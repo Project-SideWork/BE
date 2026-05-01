@@ -19,6 +19,7 @@ public interface ChatRoomJpaRepository extends JpaRepository<ChatRoomEntity, Lon
             SET cr.lastMessageContent = :content, cr.lastMessageSentTime = :sendTime,
             cr.lastMessageId = :lastMessageId, cr.lastMessageSenderId = :lastMessageSenderId
             WHERE cr.id = :chatRoomId
+            AND (cr.lastMessageId IS NULL OR cr.lastMessageId < :lastMessageId)
             """
     )
     int updateLastMessage(
