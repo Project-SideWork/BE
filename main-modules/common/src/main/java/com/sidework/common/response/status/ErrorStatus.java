@@ -85,6 +85,7 @@ public enum ErrorStatus implements BaseStatusCode {
     // CHAT
     CHATROOM_UPDATE_ERROR(HttpStatus.CONFLICT, "CHAT_001", "채팅방 상태 업데이트가 적용되지 않았습니다."),
     CHATUSER_UPDATE_ERROR(HttpStatus.CONFLICT, "CHAT_002", "채팅유저 상태 업데이트가 적용되지 않았습니다."),
+    CHATUSER_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT_003", "채팅 상대를 찾을 수 없습니다."),
 
     // PAYMENT
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT_001", "해당 결제내역을 찾을 수 없습니다."),
