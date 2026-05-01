@@ -1,0 +1,2 @@
+ALTER TABLE chat_user
+ADD COLUMN is_connected TINYINT(1) NOT NULL DEFAULT 0;

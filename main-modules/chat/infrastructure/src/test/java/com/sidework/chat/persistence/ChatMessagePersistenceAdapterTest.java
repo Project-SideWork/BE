@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ChatMessagePersistenceAdapterTest {
+
     @Mock
     private ChatMessageJpaRepository repo;
 
@@ -38,9 +39,9 @@ public class ChatMessagePersistenceAdapterTest {
     @Test
     void save는_도메인_객체를_영속성_객체로_변환해_저장한다() {
         ChatMessage created = createValidDomain(null);
-        ChatMessageEntity beforeSaved = createValidEntity(null);
+        ChatMessageEntity beforeSaved = createValidEntity(null, Instant.parse("2026-04-29T00:00:00Z"));
+        ChatMessageEntity saved = createValidEntity(1L, Instant.parse("2026-04-29T00:00:01Z"));
         ChatMessage savedDomain = createValidDomain(1L);
-        ChatMessageEntity saved = createValidEntity(1L);
 
         when(mapper.toEntity(created)).thenReturn(beforeSaved);
         when(repo.save(beforeSaved)).thenReturn(saved);
@@ -56,128 +57,173 @@ public class ChatMessagePersistenceAdapterTest {
     }
 
     @Test
-    void findByChatRoomIdAndIdGreaterThan은_조회하고자_하는_크기와_조회한_데이터의_길이가_같을_때_커서_정보를_null로_반환한다() {
+    void findByChatRoomIdAndIdGreaterThan은_조회결과가_size와_같으면_hasNext_false와_cursor_null을_반환한다() {
         Long chatRoomId = 1L;
-        Instant cursorCreatedAt = Instant.now();
+        Instant cursorCreatedAt = Instant.parse("2026-04-29T00:00:00Z");
         Long cursorId = 1L;
         int size = 3;
 
         List<ChatMessageEntity> entities = List.of(
-                createValidEntity(1L), createValidEntity(2L), createValidEntity(3L)
+                createValidEntity(1L, Instant.parse("2026-04-29T00:00:01Z")),
+                createValidEntity(2L, Instant.parse("2026-04-29T00:00:02Z")),
+                createValidEntity(3L, Instant.parse("2026-04-29T00:00:03Z"))
         );
 
-        when(repo.pageBy(chatRoomId, cursorCreatedAt, cursorId, PageRequest.of(0, size + 1))).thenReturn(entities);
+        when(repo.pageBy(
+                chatRoomId,
+                cursorCreatedAt,
+                cursorId,
+                PageRequest.of(0, size + 1)
+        )).thenReturn(entities);
+
         when(mapper.toDomain(any(ChatMessageEntity.class)))
                 .thenAnswer(invocation -> {
-                    ChatMessageEntity e = invocation.getArgument(0);
-                    return new ChatMessage(
-                            e.getId(),
-                            1L,
-                            1L,
-                            "테스트",
-                            false,
-                            LocalDateTime.ofInstant(e.getCreatedAt(), ZoneOffset.UTC)
-                    );
+                    ChatMessageEntity entity = invocation.getArgument(0);
+                    return createDomainFromEntity(entity);
                 });
-        ChatMessagePage page = adapter.findByChatRoomIdAndIdGreaterThan(chatRoomId, cursorCreatedAt, cursorId, size);
 
+        ChatMessagePage page =
+                adapter.findByChatRoomIdAndIdGreaterThan(chatRoomId, cursorCreatedAt, cursorId, size);
 
         assertEquals(size, page.items().size());
         assertFalse(page.hasNext());
         assertNull(page.nextCursorCreatedAt());
         assertNull(page.nextCursorId());
 
-        verify(repo).pageBy(chatRoomId, cursorCreatedAt, cursorId, PageRequest.of(0, size + 1));
+        verify(repo).pageBy(
+                chatRoomId,
+                cursorCreatedAt,
+                cursorId,
+                PageRequest.of(0, size + 1)
+        );
     }
 
     @Test
-    void findByChatRoomIdAndIdGreaterThan은_조회하고자_하는_크기가_조회한_데이터의_길이보다_클_때_커서_정보를_null로_반환한다() {
+    void findByChatRoomIdAndIdGreaterThan은_조회결과가_size보다_작으면_hasNext_false와_cursor_null을_반환한다() {
         Long chatRoomId = 1L;
-        Instant cursorCreatedAt = Instant.now();
+        Instant cursorCreatedAt = Instant.parse("2026-04-29T00:00:00Z");
         Long cursorId = 1L;
         int size = 3;
 
         List<ChatMessageEntity> entities = List.of(
-                createValidEntity(1L)
+                createValidEntity(1L, Instant.parse("2026-04-29T00:00:01Z"))
         );
 
-        when(repo.pageBy(chatRoomId, cursorCreatedAt, cursorId, PageRequest.of(0, size + 1))).thenReturn(entities);
+        when(repo.pageBy(
+                chatRoomId,
+                cursorCreatedAt,
+                cursorId,
+                PageRequest.of(0, size + 1)
+        )).thenReturn(entities);
+
         when(mapper.toDomain(any(ChatMessageEntity.class)))
                 .thenAnswer(invocation -> {
-                    ChatMessageEntity e = invocation.getArgument(0);
-                    return new ChatMessage(
-                            e.getId(),
-                            1L,
-                            1L,
-                            "테스트",
-                            false,
-                            LocalDateTime.ofInstant(e.getCreatedAt(), ZoneOffset.UTC)
-                    );
+                    ChatMessageEntity entity = invocation.getArgument(0);
+                    return createDomainFromEntity(entity);
                 });
 
-        ChatMessagePage page = adapter.findByChatRoomIdAndIdGreaterThan(chatRoomId, cursorCreatedAt, cursorId, size);
+        ChatMessagePage page =
+                adapter.findByChatRoomIdAndIdGreaterThan(chatRoomId, cursorCreatedAt, cursorId, size);
 
-        assertNotEquals(size, page.items().size());
+        assertEquals(1, page.items().size());
         assertFalse(page.hasNext());
         assertNull(page.nextCursorCreatedAt());
         assertNull(page.nextCursorId());
 
-        verify(repo).pageBy(chatRoomId, cursorCreatedAt, cursorId, PageRequest.of(0, size + 1));
+        verify(repo).pageBy(
+                chatRoomId,
+                cursorCreatedAt,
+                cursorId,
+                PageRequest.of(0, size + 1)
+        );
     }
 
     @Test
-    void findByChatRoomIdAndIdGreaterThan은_조회하고자_하는_크기가_조회한_데이터의_길이보다_작을_때_커서_정보를_반환한다() {
+    void findByChatRoomIdAndIdGreaterThan은_size보다_1개_더_조회되면_hasNext_true와_다음커서를_반환한다() {
         Long chatRoomId = 1L;
-        Instant cursorCreatedAt = Instant.now();
+        Instant cursorCreatedAt = Instant.parse("2026-04-29T00:00:00Z");
         Long cursorId = 1L;
         int size = 3;
 
+        Instant t1 = Instant.parse("2026-04-29T00:00:01Z");
+        Instant t2 = Instant.parse("2026-04-29T00:00:02Z");
+        Instant t3 = Instant.parse("2026-04-29T00:00:03Z");
+        Instant t4 = Instant.parse("2026-04-29T00:00:04Z");
+
         List<ChatMessageEntity> entities = List.of(
-                createValidEntity(1L), createValidEntity(2L), createValidEntity(3L), createValidEntity(4L)
+                createValidEntity(1L, t1),
+                createValidEntity(2L, t2),
+                createValidEntity(3L, t3),
+                createValidEntity(4L, t4)
         );
 
-        when(repo.pageBy(chatRoomId, cursorCreatedAt, cursorId, PageRequest.of(0, size + 1))).thenReturn(entities);
+        when(repo.pageBy(
+                chatRoomId,
+                cursorCreatedAt,
+                cursorId,
+                PageRequest.of(0, size + 1)
+        )).thenReturn(entities);
+
         when(mapper.toDomain(any(ChatMessageEntity.class)))
                 .thenAnswer(invocation -> {
-                    ChatMessageEntity e = invocation.getArgument(0);
-                    return new ChatMessage(
-                            e.getId(),
-                            1L,
-                            1L,
-                            "테스트",
-                            false,
-                            LocalDateTime.ofInstant(e.getCreatedAt(), ZoneOffset.UTC)
-                    );
+                    ChatMessageEntity entity = invocation.getArgument(0);
+                    return createDomainFromEntity(entity);
                 });
 
-        ChatMessagePage page = adapter.findByChatRoomIdAndIdGreaterThan(chatRoomId, cursorCreatedAt, cursorId, size);
+        ChatMessagePage page =
+                adapter.findByChatRoomIdAndIdGreaterThan(chatRoomId, cursorCreatedAt, cursorId, size);
 
         assertEquals(size, page.items().size());
         assertTrue(page.hasNext());
-        assertNotNull(page.nextCursorCreatedAt());
-        assertEquals(page.items().getLast().getId(), page.nextCursorId());
 
-        verify(repo).pageBy(chatRoomId, cursorCreatedAt, cursorId, PageRequest.of(0, size + 1));
+        assertEquals(
+                LocalDateTime.ofInstant(t3, ZoneOffset.UTC),
+                page.nextCursorCreatedAt()
+        );
+        assertEquals(3L, page.nextCursorId());
+
+        verify(repo).pageBy(
+                chatRoomId,
+                cursorCreatedAt,
+                cursorId,
+                PageRequest.of(0, size + 1)
+        );
     }
 
     private ChatMessage createValidDomain(Long id) {
-        return new ChatMessage(id, 1L, 1L, "테스트", false, LocalDateTime.now());
+        return new ChatMessage(
+                id,
+                1L,
+                1L,
+                "테스트",
+                LocalDateTime.now(),
+                true
+        );
     }
 
-    private ChatMessageEntity createValidEntity(Long id) {
-        ChatMessageEntity entity = new ChatMessageEntity(id, 1L, 1L, "테스트", false);
-        ReflectionTestUtils.setField(entity, "createdAt", Instant.now());
+    private ChatMessage createDomainFromEntity(ChatMessageEntity entity) {
+        return new ChatMessage(
+                entity.getId(),
+                entity.getChatRoomId(),
+                entity.getSenderId(),
+                entity.getContent(),
+                LocalDateTime.ofInstant(entity.getCreatedAt(), ZoneOffset.UTC),
+                entity.getIsDeleted()
+        );
+    }
+
+    private ChatMessageEntity createValidEntity(Long id, Instant createdAt) {
+        ChatMessageEntity entity = new ChatMessageEntity(
+                id,
+                1L,
+                1L,
+                "테스트",
+                Instant.now(),
+                false
+        );
+
+        ReflectionTestUtils.setField(entity, "createdAt", createdAt);
 
         return entity;
-    }
-
-
-    private ChatMessagePage createPage() {
-        return new ChatMessagePage(
-                List.of(createValidDomain(1L), createValidDomain(2L), createValidDomain(3L)),
-                true,
-                LocalDateTime.now(),
-                4L
-        );
     }
 }

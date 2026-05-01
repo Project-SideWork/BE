@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "chat_message")
 @Getter
@@ -24,6 +26,8 @@ public class ChatMessageEntity extends BaseEntity {
     private Long senderId;
 
     private String content;
+
+    private Instant sendTime;
 
     private Boolean isDeleted;
 }
