@@ -2,8 +2,8 @@ package com.sidework.chat.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sidework.chat.application.adapter.ChatController;
-import com.sidework.chat.application.adapter.ChatRecord;
-import com.sidework.chat.application.adapter.ChatRoomRecord;
+import com.sidework.chat.application.port.in.ChatRecord;
+import com.sidework.chat.application.port.in.ChatRoomRecord;
 import com.sidework.chat.application.port.in.*;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.event.sse.port.in.SseSubscribeUseCase;
