@@ -82,7 +82,7 @@ public class ChatUserPersistenceAdapter implements ChatUserOutPort {
                 content,
                 hasNext,
                 last != null
-                        ? last.lastMessageSentTime()
+                        ? LocalDateTime.ofInstant(last.lastMessageSentTime(), ZoneOffset.UTC)
                         : null,
                 last != null ? last.chatRoomId() : null
         );
