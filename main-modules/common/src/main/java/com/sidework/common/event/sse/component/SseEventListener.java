@@ -9,11 +9,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Component
-
 @RequiredArgsConstructor
-
 public class SseEventListener {
-
     private final SseSendOutPort sseSendOutPort;
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
