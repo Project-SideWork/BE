@@ -294,9 +294,9 @@ public class ChatQueryServiceTest {
         ChatUserSummary summary = new ChatUserSummary(
                 1L,
                 "마지막 메시지",
-                LocalDateTime.now(),
+                Instant.now(),
                 3L,
-                LocalDateTime.now()
+                Instant.now()
         );
 
         return new ChatUserSummaryPage(
@@ -311,9 +311,9 @@ public class ChatQueryServiceTest {
         ChatUserSummary summary = new ChatUserSummary(
                 1L,
                 "마지막 메시지",
-                LocalDateTime.now(),
+                Instant.now(),
                 0L,
-                LocalDateTime.now()
+                Instant.now()
         );
 
         return new ChatUserSummaryPage(
