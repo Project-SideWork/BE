@@ -77,9 +77,9 @@ public class ChatQueryService implements ChatQueryUseCase {
                 .map(summary -> ChatRoomRecord.create(
                         summary.chatRoomId(),
                         summary.lastMessageContent(),
-                        summary.lastMessageSentTime()
-                                .atZone(KST)
-                                .format(TIME_FORMATTER),
+                        summary.lastMessageSentTime() != null
+                                ? summary.lastMessageSentTime().atZone(KST).format(TIME_FORMATTER)
+                                : null,
                         summary.unreadCount()
                 ))
                 .toList();
