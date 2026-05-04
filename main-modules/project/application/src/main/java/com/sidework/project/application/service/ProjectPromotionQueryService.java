@@ -144,7 +144,7 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 		if (meetRegionId == null) {
 			return null;
 		}
-		return regionQueryUseCase.getRegion(meetRegionId);
+		return regionQueryUseCase.getRegion(meetRegionId).name();
 	}
 
 	private Map<Long, Double> buildAverageReviewScoresByUserIds(List<Long> userIds) {

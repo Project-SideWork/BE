@@ -1,5 +1,6 @@
 package com.sidework.region.application.service;
 
+import com.sidework.region.application.dto.RegionResidenceInfo;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
 import com.sidework.region.application.port.out.RegionOutPort;
 import com.sidework.region.domain.Region;
@@ -24,17 +25,30 @@ public class RegionQueryService implements RegionQueryUseCase {
     }
 
     @Override
-    public String getRegion(Long id) {
+    public RegionResidenceInfo getRegion(Long id) {
         Region region = repo.findById(id);
         if (region == null) {
             return null;
         }
-
-        Region parentRegion = repo.findById(region.getParentRegionId());
+        Long parentId = region.getParentRegionId();
+        Region parent = (parentId == null) ? null : repo.findById(parentId);
+        return buildRegionResidenceInfo(region, parent);
+    }
+    private RegionResidenceInfo buildRegionResidenceInfo(Region region, Region parentRegion) {
+        String regionName = region.getRegionName();
         if (parentRegion == null) {
-            return region.getRegionName();
+            return new RegionResidenceInfo(
+                regionName,
+                region.getId(),
+                null
+            );
         }
-        return parentRegion.getRegionName()+ " " + region.getRegionName();
-
+        String parentName = parentRegion.getRegionName();
+        String display = parentName + " " + regionName;
+        return new RegionResidenceInfo(
+            display,
+            region.getId(),
+            parentRegion.getId()
+        );
     }
 }

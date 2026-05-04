@@ -7,6 +7,7 @@ import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.dto.ProjectUserReviewSummary;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
+import com.sidework.region.application.dto.RegionResidenceInfo;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
 import com.sidework.school.application.port.in.SchoolQueryUseCase;
 import com.sidework.school.domain.School;
@@ -145,15 +146,20 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 		ProjectContext ctx,
 		boolean isLiked
 	) {
+		RegionResidenceInfo r = loadResidence(user.getResidenceRegionId());
+
 		return new UserProfileResponse(
 			user.getId(),
 			user.getEmail(),
 			user.getName(),
 			user.getNickname(),
 			user.getAge(),
+			user.getTel(),
+			r != null ? r.regionId() : null,
+			r != null ? r.parentRegionId() : null,
 			profile.getId(),
 			profile.getSelfIntroduction(),
-			buildResidenceText(user.getResidenceRegionId()),
+			r != null ? r.name() : null,
 			buildScoreInfo(user.getId()),
 			buildRoleInfos(profile.getId()),
 			buildSchoolInfos(profile.getId()),
@@ -169,15 +175,19 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 		User user,
 		ProjectContext ctx
 	) {
+		RegionResidenceInfo r = loadResidence(user.getResidenceRegionId());
 		return new UserProfileResponse(
 			user.getId(),
 			user.getEmail(),
 			user.getName(),
 			user.getNickname(),
 			user.getAge(),
+			user.getTel(),
+			r != null ? r.regionId() : null,
+			r != null ? r.parentRegionId() : null,
 			null,
 			null,
-			null,
+			r != null ? r.name() : null,
 			buildScoreInfo(user.getId()),
 			List.of(),
 			List.of(),
@@ -445,12 +455,6 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			.collect(Collectors.toList());
 	}
 
-	private String buildResidenceText(Long subRegionId) {
-		if (subRegionId == null) {
-			return null;
-		}
-		return regionQueryUseCase.getRegion(subRegionId);
-	}
 
 	private Double buildScoreInfo(Long userId)
 	{
@@ -477,5 +481,11 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 		return stat.score() / stat.count();
 	}
 
+	private RegionResidenceInfo loadResidence(Long regionId) {
+		if (regionId == null) {
+			return null;
+		}
+		return regionQueryUseCase.getRegion(regionId);
+	}
 
 }
