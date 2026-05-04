@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -26,18 +27,25 @@ public class UserPersistenceAdapterTest {
     @Mock
     private UserJpaRepository repo;
 
-    UserMapper mapper = Mappers.getMapper(UserMapper.class);
+    @Mock
+    private UserMapper mapper;
+
+    @InjectMocks
     private UserPersistenceAdapter adapter;
 
-    @BeforeEach
-    void setUp() {
-        adapter = new UserPersistenceAdapter(repo, mapper);
-    }
 
     @Test
     void save는_도메인_객체를_영속성_객체로_변환해_저장한다() {
         User domain = createUser(createCommand());
-        adapter.save(domain);
+        UserEntity entity = createUserEntity(null);
+        UserEntity saved = createUserEntity(1L);
+
+        when(mapper.toEntity(domain)).thenReturn(entity);
+        when(repo.save(entity)).thenReturn(saved);
+
+        Long savedId = adapter.save(domain);
+        assertEquals(1L, savedId);
+
         verify(repo).save(any(UserEntity.class));
     }
 
@@ -96,8 +104,10 @@ public class UserPersistenceAdapterTest {
     @Test
     void findById는_Id로_사용자를_조회해_도메인_객체로_변환한다() {
         UserEntity entity = createUserEntity(1L);
+        User domain = createSavedUser();
 
         when(repo.findById(1L)).thenReturn(Optional.of(entity));
+        when(mapper.toDomain(entity)).thenReturn(domain);
 
         User user = adapter.findById(1L);
 
@@ -105,6 +115,7 @@ public class UserPersistenceAdapterTest {
         assertEquals(1L, user.getId());
 
         verify(repo).findById(1L);
+        verify(mapper).toDomain(entity);
     }
 
     @Test
@@ -148,6 +159,20 @@ public class UserPersistenceAdapterTest {
                 command.tel(),
                 1L,
                 UserType.LOCAL);
+    }
+
+    private User createSavedUser(){
+        return new User(1L,
+                1L,"test", "token",
+                "test@test.com",
+                "테스트",
+                "테스트1",
+                "password123!",
+                20,
+                "010-1234-5678",
+                1L,
+                UserType.LOCAL,
+                true);
     }
 
     private UserEntity createUserEntity(Long id){

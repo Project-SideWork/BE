@@ -5,7 +5,7 @@ import java.util.List;
 import com.sidework.user.domain.User;
 
 public interface UserOutPort {
-    void save(User user);
+    Long save(User user);
     boolean existsById(Long id);
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);

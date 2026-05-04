@@ -19,8 +19,9 @@ public class UserPersistenceAdapter implements UserOutPort {
     private final UserMapper mapper;
 
     @Override
-    public void save(User user) {
-        repo.save(mapper.toEntity(user));
+    public Long save(User user) {
+        UserEntity saved = repo.save(mapper.toEntity(user));
+        return saved.getId();
     }
 
     @Override
