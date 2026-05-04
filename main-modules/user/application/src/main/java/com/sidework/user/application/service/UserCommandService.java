@@ -1,5 +1,6 @@
 package com.sidework.user.application.service;
 
+import com.sidework.common.event.SignUpCompleteEvent;
 import com.sidework.common.response.status.ErrorStatus;
 import com.sidework.region.application.exception.InvalidRegionLevelException;
 import com.sidework.region.application.exception.RegionNotFoundException;
@@ -11,6 +12,7 @@ import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ public class UserCommandService implements UserCommandUseCase {
     private final RegionOutPort regionRepository;
     private final UserOutPort userRepository;
     private final PasswordEncoder encoder;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void signUp(SignUpCommand command) {
@@ -31,7 +34,8 @@ public class UserCommandService implements UserCommandUseCase {
         User user = User.create(command.email(), command.name(), command.nickname(), encodePassword(command.password())
                 , command.age(), command.tel(), residenceRegionId, UserType.LOCAL);
 
-        userRepository.save(user);
+        Long userId = userRepository.save(user);
+        eventPublisher.publishEvent(new SignUpCompleteEvent(userId));
     }
 
     @Override
