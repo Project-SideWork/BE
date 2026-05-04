@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.util.AesEncryptor;
+import com.sidework.user.application.adapter.UserSummaryResponse;
 import com.sidework.user.application.exception.GithubInfoNotFoundException;
 import com.sidework.user.application.exception.UserNotFoundException;
 import com.sidework.user.application.port.in.GithubInfoResponse;
@@ -70,5 +71,15 @@ public class UserQueryService implements UserQueryUseCase {
         }
         return userRepository.findAllByUserIdIn(userIds).stream()
             .collect(Collectors.toMap(User::getId, User::getName, (a, b) -> a));
+    }
+
+    @Override
+    public UserSummaryResponse queryUserSummary(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
+
+        String name= userRepository.findNameById(id);
+        return new UserSummaryResponse(id, name);
     }
 }

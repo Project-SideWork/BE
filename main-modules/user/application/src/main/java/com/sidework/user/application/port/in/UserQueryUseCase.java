@@ -3,6 +3,7 @@ package com.sidework.user.application.port.in;
 import java.util.List;
 import java.util.Map;
 
+import com.sidework.user.application.adapter.UserSummaryResponse;
 import com.sidework.user.application.port.out.GithubInfoDto;
 import com.sidework.user.domain.User;
 
@@ -13,4 +14,5 @@ public interface UserQueryUseCase {
     Map<Long, String> findNamesByUserIds(List<Long> userIds);
     void validateExists(Long id);
     GithubInfoResponse queryGithubInformation(Long id);
+    UserSummaryResponse queryUserSummary(Long id);
 }

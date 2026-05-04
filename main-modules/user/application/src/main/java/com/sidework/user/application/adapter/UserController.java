@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,5 +40,10 @@ public class UserController implements UserControllerDocs {
     @GetMapping("/github")
     public GithubInfoResponse getMyGithubToken(@RequestHeader("X-User-Id") Long userId) {
         return queryService.queryGithubInformation(userId);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserSummaryResponse>> getCurrentUser(@AuthenticationPrincipal AuthenticatedUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryUserSummary(user.getId())));
     }
 }
