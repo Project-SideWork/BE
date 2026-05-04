@@ -15,6 +15,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class ProfileEventListener {
     private final ProfileOutPort profileRepository;
 
+    // TODO: OUTBOX
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleSignUpSuccess(SignUpCompleteEvent event){
