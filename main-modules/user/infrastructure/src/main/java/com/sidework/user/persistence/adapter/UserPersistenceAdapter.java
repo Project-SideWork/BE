@@ -81,4 +81,9 @@ public class UserPersistenceAdapter implements UserOutPort {
     public GithubInfoDto findGithubInfoProjection(Long userId) {
         return repo.findGithubInfoById(userId);
     }
+
+    @Override
+    public String findNameById(Long id) {
+        return repo.findNameById(id);
+    }
 }
