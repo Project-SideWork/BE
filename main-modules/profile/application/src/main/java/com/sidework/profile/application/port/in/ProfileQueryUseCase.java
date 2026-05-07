@@ -3,6 +3,7 @@ package com.sidework.profile.application.port.in;
 import java.util.List;
 
 import com.sidework.profile.application.adapter.UserProjectDto;
+import com.sidework.profile.application.adapter.UserReviewDto;
 import org.springframework.data.domain.Pageable;
 
 import com.sidework.common.response.PageResponse;
@@ -16,4 +17,5 @@ public interface ProfileQueryUseCase {
 	PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable);
 	PageResponse<List<UserProfileListResponse>> getLikedUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable);
     PageResponse<List<UserProjectDto>> getUserProjectList(Long viewerUserId, Pageable pageable);
+    PageResponse<List<UserReviewDto>> getUserReviewList(Long viewerUserId, Pageable pageable);
 }
