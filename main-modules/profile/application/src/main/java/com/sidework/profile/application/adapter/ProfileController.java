@@ -56,6 +56,15 @@ public class ProfileController implements ProfileControllerDocs {
 		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProjectList(user.getId(), pageable)));
 	}
 
+    @GetMapping("/me/reviews")
+	public ResponseEntity<ApiResponse<PageResponse<List<UserReviewDto>>>> getUserReview(
+		@AuthenticationPrincipal AuthenticatedUserDetails user,
+        @RequestParam(name = "page", defaultValue = "1") Integer page,
+        @RequestParam(name = "size", defaultValue = "5") Integer size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserReviewList(user.getId(), pageable)));
+	}
+
 	@PutMapping("/me")
 	public ResponseEntity<ApiResponse<Void>> updateUserProfile(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,

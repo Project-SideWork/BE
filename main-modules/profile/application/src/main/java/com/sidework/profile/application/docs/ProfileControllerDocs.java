@@ -6,6 +6,7 @@ import com.sidework.common.response.PageResponse;
 import com.sidework.profile.application.adapter.UserProfileListResponse;
 import com.sidework.profile.application.adapter.UserProfileResponse;
 import com.sidework.profile.application.adapter.UserProjectDto;
+import com.sidework.profile.application.adapter.UserReviewDto;
 import com.sidework.profile.application.port.in.ProfileUpdateCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -93,6 +94,55 @@ public interface ProfileControllerDocs {
             @Parameter(description = "페이지 번호")
             @Min(value = 1, message = "page는 1보다 작을 수 없습니다.")
             @RequestParam(name = "page", defaultValue = "1") Integer page,
+            @Parameter(description = "페이지 크기")
+            @Min(value = 1, message = "size는 1보다 작을 수 없습니다.")
+            @Max(value = 100, message = "size는 100보다 클 수 없습니다.")
+            @RequestParam(name = "size", defaultValue = "5") Integer size
+    );
+
+    @Operation(description = "내 리뷰 목록 조회")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "400 예시",
+                                    value = """
+                                    {
+                                      "code": "COMMON_400",
+                                      "message": "잘못된 요청입니다.",
+                                      "isSuccess": false,
+                                      "path": "/error"
+                                    }
+                            """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "401 예시",
+                                    value = """
+                                    {
+                                      "code": "COMMON_401",
+                                      "message": "인증이 필요합니다.",
+                                      "isSuccess": false,
+                                      "path": "/error"
+                                    }
+                            """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<PageResponse<List<UserReviewDto>>>> getUserReview(
+            @AuthenticationPrincipal AuthenticatedUserDetails user,
+
+            @Parameter(description = "페이지 번호")
+            @Min(value = 1, message = "page는 1보다 작을 수 없습니다.")
+            @RequestParam(name = "page", defaultValue = "1") Integer page,
+
             @Parameter(description = "페이지 크기")
             @Min(value = 1, message = "size는 1보다 작을 수 없습니다.")
             @Max(value = 100, message = "size는 100보다 클 수 없습니다.")

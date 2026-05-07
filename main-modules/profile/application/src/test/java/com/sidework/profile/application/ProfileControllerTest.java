@@ -3,10 +3,7 @@ package com.sidework.profile.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.response.exception.ExceptionAdvice;
-import com.sidework.profile.application.adapter.ProfileController;
-import com.sidework.profile.application.adapter.UserProfileResponse;
-import com.sidework.profile.application.adapter.UserProfileListResponse;
-import com.sidework.profile.application.adapter.UserProjectDto;
+import com.sidework.profile.application.adapter.*;
 import com.sidework.profile.application.exception.ProfileNotFoundException;
 import com.sidework.profile.application.port.in.ProfileCommandUseCase;
 import com.sidework.profile.application.port.in.ProfileLikeCommandUseCase;
@@ -317,6 +314,120 @@ class ProfileControllerTest {
 		verify(profileQueryUseCase).getLikedUserProfileList(eq(userId), eq(skillIds), any());
 	}
 
+    @Test
+    void 내_리뷰_목록_조회_요청시_성공하면_200을_반환한다() throws Exception {
+        // given
+        Long userId = authenticatedUserDetails.getId();
+
+        List<UserReviewDto> content = List.of(
+                new UserReviewDto(
+                        "테스트 프로젝트",
+                        "좋은 팀원이었습니다.",
+                        4.5,
+                        LocalDate.of(2026, 5, 1)
+                )
+        );
+
+        PageResponse<List<UserReviewDto>> response = PageResponse.of(
+                content,
+                0,
+                5,
+                12,
+                3
+        );
+
+        when(profileQueryUseCase.getUserReviewList(eq(userId), any(Pageable.class)))
+                .thenReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/profiles/me/reviews")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "1")
+                        .param("size", "5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.page").value(1))
+                .andExpect(jsonPath("$.result.size").value(5))
+                .andExpect(jsonPath("$.result.totalElements").value(12))
+                .andExpect(jsonPath("$.result.totalPages").value(3))
+                .andExpect(jsonPath("$.result.content[0].title").value("테스트 프로젝트"))
+                .andExpect(jsonPath("$.result.content[0].comment").value("좋은 팀원이었습니다."))
+                .andExpect(jsonPath("$.result.content[0].score").value(4.5))
+                .andExpect(jsonPath("$.result.content[0].reviewDt").value("2026-05-01"));
+
+        verify(profileQueryUseCase).getUserReviewList(eq(userId), any(Pageable.class));
+    }
+
+    @Test
+    void 내_리뷰_목록_조회시_리뷰가_없으면_빈_리스트를_반환한다() throws Exception {
+        // given
+        Long userId = authenticatedUserDetails.getId();
+
+        PageResponse<List<UserReviewDto>> response = PageResponse.of(
+                List.of(),
+                0,
+                5,
+                0,
+                0
+        );
+
+        when(profileQueryUseCase.getUserReviewList(eq(userId), any(Pageable.class)))
+                .thenReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/profiles/me/reviews")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "1")
+                        .param("size", "5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.page").value(1))
+                .andExpect(jsonPath("$.result.size").value(5))
+                .andExpect(jsonPath("$.result.totalElements").value(0))
+                .andExpect(jsonPath("$.result.totalPages").value(0))
+                .andExpect(jsonPath("$.result.content").isArray())
+                .andExpect(jsonPath("$.result.content").isEmpty());
+
+        verify(profileQueryUseCase).getUserReviewList(eq(userId), any(Pageable.class));
+    }
+
+    @Test
+    void 내_리뷰_목록_조회시_page가_1보다_작으면_400을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/profiles/me/reviews")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "0")
+                        .param("size", "5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 내_리뷰_목록_조회시_size가_1보다_작으면_400을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/profiles/me/reviews")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "1")
+                        .param("size", "0")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 내_리뷰_목록_조회시_size가_100보다_크면_400을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/profiles/me/reviews")
+                        .with(user(authenticatedUserDetails))
+                        .param("page", "1")
+                        .param("size", "101")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
 	private ProfileUpdateCommand createProfileUpdateCommand() {
 		return new ProfileUpdateCommand(
 			"test@test.com", // email
@@ -368,7 +479,6 @@ class ProfileControllerTest {
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
-			new ArrayList<>(),
 			true
 		);
 	}
@@ -388,7 +498,6 @@ class ProfileControllerTest {
 			null,
 			0.0,
 			null,
-			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>()
