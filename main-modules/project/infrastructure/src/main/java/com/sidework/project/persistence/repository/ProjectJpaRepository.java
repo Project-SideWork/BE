@@ -1,5 +1,6 @@
 package com.sidework.project.persistence.repository;
 
+import com.sidework.project.application.dto.ProjectIdTitleProjection;
 import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.project.persistence.entity.ProjectEntity;
@@ -50,4 +51,14 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Long>
             """)
 
     List<ProjectEntity> findAllByIdsInDesc(@Param("ids")List<Long> projectIds);
+
+    @Query("""
+            SELECT new com.sidework.project.application.dto.ProjectIdTitleProjection(p.id, p.title) FROM ProjectEntity p
+            WHERE p.id in :ids
+            ORDER BY p.id DESC
+            """)
+
+    List<ProjectIdTitleProjection> findIdTitleProjectionByIdsIn(@Param("ids") List<Long> projectIds);
+
+
 }

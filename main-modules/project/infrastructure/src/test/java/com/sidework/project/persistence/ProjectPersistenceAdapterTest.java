@@ -1,5 +1,6 @@
 package com.sidework.project.persistence;
 
+import com.sidework.project.application.dto.ProjectIdTitleProjection;
 import com.sidework.project.application.port.in.ProjectCommand;
 import com.sidework.project.application.port.in.ProjectScheduleCommand;
 import com.sidework.project.application.port.in.RecruitPosition;
@@ -176,6 +177,41 @@ public class ProjectPersistenceAdapterTest {
                 ProjectStatus.RECRUITING          // status
         );
     }
+    @Test
+    void findIdTitleProjections는_projectIds가_null이면_빈_리스트를_반환한다() {
+        List<ProjectIdTitleProjection> result = adapter.findIdTitleProjections(null);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findIdTitleProjections는_projectIds로_프로젝트_ID와_제목_프로젝션을_조회한다() {
+        List<Long> projectIds = List.of(1L, 2L);
+
+        List<ProjectIdTitleProjection> projections = List.of(
+                new ProjectIdTitleProjection(1L, "프로젝트1"),
+                new ProjectIdTitleProjection(2L, "프로젝트2")
+        );
+
+        when(repo.findIdTitleProjectionByIdsIn(projectIds))
+                .thenReturn(projections);
+
+        List<ProjectIdTitleProjection> result =
+                adapter.findIdTitleProjections(projectIds);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(1L, result.get(0).id());
+        assertEquals("프로젝트1", result.get(0).title());
+        assertEquals(2L, result.get(1).id());
+        assertEquals("프로젝트2", result.get(1).title());
+
+        verify(repo).findIdTitleProjectionByIdsIn(projectIds);
+    }
+
+
+
 
     private Project createProject(
             ProjectCommand command
