@@ -17,6 +17,7 @@ import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.project.domain.ProjectUser;
 import com.sidework.project.domain.ProjectUserReviewStat;
+import com.sidework.region.application.dto.RegionResidenceInfo;
 import com.sidework.region.application.port.in.RegionQueryUseCase;
 import com.sidework.skill.application.port.in.ProjectPromotionSkillQueryUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;
@@ -132,7 +133,7 @@ class ProjectPromotionQueryServiceTest {
 		when(projectPromotionOutPort.findById(promotionId)).thenReturn(promotion);
 		when(projectOutPort.findById(projectId)).thenReturn(project);
 		when(projectPromotionSkillQueryUseCase.queryNamesByPromotionId(promotionId)).thenReturn(List.of("Go"));
-		when(regionQueryUseCase.getRegion(7L)).thenReturn("부산");
+		when(regionQueryUseCase.getRegion(7L)).thenReturn(new RegionResidenceInfo("부산", 1L, 100L));
 		when(projectUserOutPort.findAllByProjectId(projectId)).thenReturn(List.of(member));
 		when(projectUserReviewStatOutPort.getAllReviewStatsByUserIds(List.of(5L)))
 			.thenReturn(List.of(ProjectUserReviewStat.create(5L, 10.0, 2)));

@@ -1,5 +1,6 @@
 package com.sidework.project.application.port.out;
 
+import com.sidework.project.application.dto.ProjectIdTitleProjection;
 import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRecruitPosition;
@@ -25,4 +26,5 @@ public interface ProjectOutPort {
     Page<Project> searchLiked(String keyword, List<Long> skillIds, Long userId, Pageable pageable);
     Map<Long, List<ProjectRecruitPosition>> getProjectRecruitPositionsByProjectIds(List<Long> projectIds);
     ProjectStatus getProjectStatus(Long projectId);
+    List<ProjectIdTitleProjection> findIdTitleProjections(List<Long> projectIds);
 }

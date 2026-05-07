@@ -11,6 +11,7 @@ import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.MyProjectSummaryResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
+import com.sidework.project.application.dto.ProjectIdTitleProjection;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.dto.ProjectUserReviewSummary;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
@@ -50,7 +51,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     private final ProjectUserOutPort projectUserRepository;
     private final ProjectRecruitPositionOutPort projectRecruitPositionRepository;
     private final ProjectUserReviewStatOutPort projectUserReviewStatRepository;
-    private final ProjectUserReviewOutPort projectUserReviewOutPort;
+    private final ProjectUserReviewOutPort projectUserReviewRepository;
     private final ProjectRetrospectiveOutPort projectRetrospectiveOutPort;
 
     private final ProjectPreferredSkillQueryUseCase projectPreferredSkillQueryUseCase;
@@ -71,15 +72,6 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             return List.of();
         }
         return projectRepository.findByIdInDesc(projectIds);
-    }
-
-    @Override
-    public List<Project> queryByUserId(Long userId) {
-        List<Long> projectIds = projectUserRepository.queryAllProjectIds(userId);
-        if (projectIds == null || projectIds.isEmpty()) {
-            return List.of();
-        }
-        return projectRepository.findByIdIn(projectIds);
     }
 
     @Override
@@ -163,27 +155,17 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     @Override
-    public List<ProjectUserReviewSummary> queryReviewSummaryByProjectIds(Long userId, List<Long> projectIds) {
-        List<ProjectUserReview> reviews = projectUserReviewOutPort.getReviewsByUserIdAndProjectIds(userId,projectIds);
+    public List<ProjectUserReviewSummary> queryReviewSummaryByUserId(Long userId, Pageable pageable) {
+        List<ProjectUserReview> reviews = projectUserReviewRepository.getReviewsByUserId(userId, pageable);
         if(reviews == null || reviews.isEmpty()) {
             return List.of();
         }
-        List<Long> userIds = reviews.stream()
-            .map(ProjectUserReview::getReviewerUserId)
-            .distinct()
-            .toList();
-
-        Map<Long, String> userNames = userQueryUseCase.findNamesByUserIds(userIds);
 
         return reviews.stream()
             .map(review -> {
                 double score = calculateScore(review);
-                String reviewerName =
-                    userNames.getOrDefault(review.getReviewerUserId(), "unknown");
-
                 return ProjectUserReviewSummary.of(
                     review,
-                    reviewerName,
                     score
                 );
             })
@@ -201,6 +183,20 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     public Long queryProjectCount(Long userId) {
         return projectUserRepository.findProjectCountByUserId(userId);
     }
+
+    @Override
+    public Long queryReviewCount(Long userId) {
+        return projectUserReviewRepository.findReviewCountByUserId(userId);
+    }
+
+    @Override
+    public List<ProjectIdTitleProjection> queryUserProjectIdTitlePairs(List<Long> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) {
+            return List.of();
+        }
+        return projectRepository.findIdTitleProjections(projectIds);
+    }
+
 
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {
         List<Project> projects = page.getContent();

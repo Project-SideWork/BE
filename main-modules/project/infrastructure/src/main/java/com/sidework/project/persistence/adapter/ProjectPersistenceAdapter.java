@@ -1,5 +1,6 @@
 package com.sidework.project.persistence.adapter;
 
+import com.sidework.project.application.dto.ProjectIdTitleProjection;
 import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.domain.Project;
@@ -145,4 +146,10 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
 		if(projectId == null) return null;
 		return repo.findStatusById(projectId);
 	}
+
+    @Override
+    public List<ProjectIdTitleProjection> findIdTitleProjections(List<Long> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) return List.of();
+        return repo.findIdTitleProjectionByIdsIn(projectIds);
+    }
 }

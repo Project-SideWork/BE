@@ -3,10 +3,13 @@ package com.sidework.profile.application;
 import com.sidework.profile.application.adapter.UserProfileResponse;
 import com.sidework.profile.application.adapter.UserProfileListResponse;
 import com.sidework.profile.application.adapter.UserProjectDto;
+import com.sidework.profile.application.adapter.UserReviewDto;
 import com.sidework.profile.application.port.out.PortfolioOutPort;
 import com.sidework.profile.application.port.out.ProfileOutPort;
 import com.sidework.profile.application.port.out.RoleOutPort;
 import com.sidework.profile.application.port.in.ProfileLikeQueryUseCase;
+import com.sidework.project.application.dto.ProjectIdTitleProjection;
+import com.sidework.project.application.dto.ProjectUserReviewSummary;
 import com.sidework.school.application.port.in.SchoolQueryUseCase;
 import com.sidework.profile.application.service.ProfileQueryService;
 import com.sidework.profile.domain.Portfolio;
@@ -19,7 +22,6 @@ import com.sidework.profile.domain.ProjectPortfolio;
 import com.sidework.profile.domain.Role;
 import com.sidework.school.domain.School;
 import com.sidework.profile.domain.SchoolStateType;
-import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.port.in.ProjectQueryUseCase;
 import com.sidework.project.domain.MeetingType;
 import com.sidework.project.domain.Project;
@@ -34,7 +36,6 @@ import com.sidework.user.domain.UserType;
 import com.sidework.common.response.PageResponse;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +52,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,13 +87,6 @@ class ProfileQueryServiceTest {
 	@InjectMocks
 	private ProfileQueryService service;
 
-	@BeforeEach
-	void setUp() {
-		lenient().when(projectQueryUseCase.queryStatSummaryByUserId(anyLong()))
-			.thenReturn(new ProjectUserReviewStatSummary(8.0, 2L));
-		lenient().when(projectQueryUseCase.queryReviewSummaryByProjectIds(anyLong(), anyList()))
-			.thenReturn(List.of());
-	}
 
 	@Test
 	void 프로필_목록_조회시_liked를_반환한다() {
@@ -240,176 +234,114 @@ class ProfileQueryServiceTest {
 		assertTrue(res.content().isEmpty());
 	}
 
-	@Test
-	void 프로필이_없을_때_기본_사용자_정보만_반환한다() {
-		// given
-		Long userId = 1L;
-		User user = createUser(userId);
-		when(profileRepository.getProfileByUserId(userId)).thenReturn(null);
-		when(userQueryUseCase.findById(userId)).thenReturn(user);
-		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
+    @Test
+    void 프로필이_없을_때_기본_사용자_정보만_반환한다() {
+        // given
+        Long userId = 1L;
+        User user = createUser(userId);
 
-		// when
-		UserProfileResponse response = service.getMyProfile(userId);
+        when(profileRepository.getProfileByUserId(userId)).thenReturn(null);
+        when(userQueryUseCase.findById(userId)).thenReturn(user);
 
-		// then
-		assertNotNull(response);
-		assertEquals(userId, response.userId());
-		assertEquals(user.getEmail(), response.email());
-		assertEquals(user.getName(), response.name());
-		assertNull(response.profileId());
-		assertTrue(response.roles().isEmpty());
-		assertTrue(response.schools().isEmpty());
-		assertTrue(response.skills().isEmpty());
-		assertTrue(response.portfolios().isEmpty());
+        // when
+        UserProfileResponse response = service.getMyProfile(userId);
 
-		verify(profileRepository).getProfileByUserId(userId);
-		verify(userQueryUseCase).findById(userId);
-		verify(projectQueryUseCase).queryByUserId(userId);
-	}
+        // then
+        assertNotNull(response);
+        assertEquals(userId, response.userId());
+        assertEquals(user.getEmail(), response.email());
+        assertEquals(user.getName(), response.name());
+        assertNull(response.profileId());
+        assertTrue(response.roles().isEmpty());
+        assertTrue(response.schools().isEmpty());
+        assertTrue(response.skills().isEmpty());
+        assertTrue(response.portfolios().isEmpty());
 
-	@Test
-	void 프로필이_있을_때_전체_정보를_반환한다() {
-		// given
-		Long userId = 1L;
-		Long profileId = 1L;
-		User user = createUser(userId);
-		Profile profile = createProfile(profileId, userId);
+        verify(profileRepository).getProfileByUserId(userId);
+        verify(userQueryUseCase).findById(userId);
+    }
 
-		// Profile 관련 데이터
-		List<ProfileRole> profileRoles = createProfileRoles(profileId);
-		List<ProfileSchool> profileSchools = createProfileSchools(profileId);
-		List<ProfileSkill> profileSkills = createProfileSkills(profileId);
-		List<ProjectPortfolio> projectPortfolios = createProjectPortfolios(profileId);
+    @Test
+    void 프로필이_있을_때_전체_정보를_반환한다() {
+        // given
+        Long userId = 1L;
+        Long profileId = 1L;
+        User user = createUser(userId);
+        Profile profile = createProfile(profileId, userId);
 
-		// 마스터 데이터
-		List<Role> roles = createRoles();
-		List<School> schools = createSchools();
-		List<Skill> skills = createSkills();
-		List<Portfolio> portfolios = createPortfolios();
-		List<Project> projects = createProjects();
+        List<ProfileRole> profileRoles = createProfileRoles(profileId);
+        List<ProfileSchool> profileSchools = createProfileSchools(profileId);
+        List<ProfileSkill> profileSkills = createProfileSkills(profileId);
+        List<ProjectPortfolio> projectPortfolios = createProjectPortfolios(profileId);
 
-		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
-		when(userQueryUseCase.findById(userId)).thenReturn(user);
-		when(profileRepository.getProfileRoles(profileId)).thenReturn(profileRoles);
-		when(profileRepository.getProfileSchools(profileId)).thenReturn(profileSchools);
-		when(profileRepository.getProfileSkills(profileId)).thenReturn(profileSkills);
-		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(projectPortfolios);
-		when(roleRepository.findByIdIn(anyList())).thenReturn(roles);
-		when(schoolQueryUseCase.findByIdIn(anyList())).thenReturn(schools);
-		when(skillRepository.findByIdIn(anyList())).thenReturn(skills);
-		when(portfolioRepository.findByIdIn(anyList())).thenReturn(portfolios);
-		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
-		when(projectQueryUseCase.queryUserRolesByProjects(userId, List.of(1L, 2L)))
-			.thenReturn(Map.of(1L, List.of(ProjectRole.BACKEND), 2L, List.of(ProjectRole.FRONTEND)));
-		when(requiredSkillUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
-			.thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
-		when(profileLikeQueryUseCase.isLiked(userId, profileId)).thenReturn(false);
+        List<Role> roles = createRoles();
+        List<School> schools = createSchools();
+        List<Skill> skills = createSkills();
+        List<Portfolio> portfolios = createPortfolios();
 
-		// when
-		UserProfileResponse response = service.getMyProfile(userId);
+        when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
+        when(userQueryUseCase.findById(userId)).thenReturn(user);
+        when(profileRepository.getProfileRoles(profileId)).thenReturn(profileRoles);
+        when(profileRepository.getProfileSchools(profileId)).thenReturn(profileSchools);
+        when(profileRepository.getProfileSkills(profileId)).thenReturn(profileSkills);
+        when(profileRepository.getProjectPortfolios(profileId)).thenReturn(projectPortfolios);
+        when(roleRepository.findByIdIn(anyList())).thenReturn(roles);
+        when(schoolQueryUseCase.findByIdIn(anyList())).thenReturn(schools);
+        when(skillRepository.findByIdIn(anyList())).thenReturn(skills);
+        when(portfolioRepository.findByIdIn(anyList())).thenReturn(portfolios);
+        when(profileLikeQueryUseCase.isLiked(userId, profileId)).thenReturn(false);
 
-		// then
-		assertNotNull(response);
-		assertEquals(userId, response.userId());
-		assertEquals(profileId, response.profileId());
-		assertEquals(2, response.roles().size());
-		assertEquals(1, response.schools().size());
-		assertEquals(3, response.skills().size());
-		assertEquals(2, response.portfolios().size());
+        // when
+        UserProfileResponse response = service.getMyProfile(userId);
 
-		verify(profileRepository).getProfileByUserId(userId);
-		verify(userQueryUseCase).findById(userId);
-		verify(profileRepository).getProfileRoles(profileId);
-		verify(profileRepository).getProfileSchools(profileId);
-		verify(profileRepository).getProfileSkills(profileId);
-		verify(profileRepository).getProjectPortfolios(profileId);
-		verify(projectQueryUseCase).queryByUserId(userId);
-		verify(requiredSkillUseCase).queryNamesByProjectIds(anyList());
-		verify(projectQueryUseCase).queryUserRolesByProjects(anyLong(), anyList());
-	}
+        // then
+        assertNotNull(response);
+        assertEquals(userId, response.userId());
+        assertEquals(profileId, response.profileId());
+        assertEquals(2, response.roles().size());
+        assertEquals(1, response.schools().size());
+        assertEquals(3, response.skills().size());
+        assertEquals(2, response.portfolios().size());
 
-	@Test
-	void 프로필은_있지만_연관_데이터가_없을_때_빈_리스트를_반환한다() {
-		// given
-		Long userId = 1L;
-		Long profileId = 1L;
-		User user = createUser(userId);
-		Profile profile = createProfile(profileId, userId);
+        verify(profileRepository).getProfileByUserId(userId);
+        verify(userQueryUseCase).findById(userId);
+        verify(profileRepository).getProfileRoles(profileId);
+        verify(profileRepository).getProfileSchools(profileId);
+        verify(profileRepository).getProfileSkills(profileId);
+        verify(profileRepository).getProjectPortfolios(profileId);
 
-		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
-		when(userQueryUseCase.findById(userId)).thenReturn(user);
-		when(profileRepository.getProfileRoles(profileId)).thenReturn(new ArrayList<>());
-		when(profileRepository.getProfileSchools(profileId)).thenReturn(new ArrayList<>());
-		when(profileRepository.getProfileSkills(profileId)).thenReturn(new ArrayList<>());
-		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(new ArrayList<>());
-		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
-		when(profileLikeQueryUseCase.isLiked(userId, profileId)).thenReturn(false);
+        verify(requiredSkillUseCase, never()).queryNamesByProjectIds(anyList());
+        verify(projectQueryUseCase, never()).queryUserRolesByProjects(anyLong(), anyList());
+    }
 
-		// when
-		UserProfileResponse response = service.getMyProfile(userId);
+    @Test
+    void 프로필은_있지만_연관_데이터가_없을_때_빈_리스트를_반환한다() {
+        // given
+        Long userId = 1L;
+        Long profileId = 1L;
+        User user = createUser(userId);
+        Profile profile = createProfile(profileId, userId);
 
-		// then
-		assertNotNull(response);
-		assertEquals(profileId, response.profileId());
-		assertTrue(response.roles().isEmpty());
-		assertTrue(response.schools().isEmpty());
-		assertTrue(response.skills().isEmpty());
-		assertTrue(response.portfolios().isEmpty());
-	}
+        when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
+        when(userQueryUseCase.findById(userId)).thenReturn(user);
+        when(profileRepository.getProfileRoles(profileId)).thenReturn(new ArrayList<>());
+        when(profileRepository.getProfileSchools(profileId)).thenReturn(new ArrayList<>());
+        when(profileRepository.getProfileSkills(profileId)).thenReturn(new ArrayList<>());
+        when(profileRepository.getProjectPortfolios(profileId)).thenReturn(new ArrayList<>());
+        when(profileLikeQueryUseCase.isLiked(userId, profileId)).thenReturn(false);
 
-	@Test
-	void 프로필이_없을_때_프로젝트_정보도_포함하여_반환한다() {
-		// given
-		Long userId = 1L;
-		User user = createUser(userId);
-		List<Project> projects = createProjects();
+        // when
+        UserProfileResponse response = service.getMyProfile(userId);
 
-		when(profileRepository.getProfileByUserId(userId)).thenReturn(null);
-		when(userQueryUseCase.findById(userId)).thenReturn(user);
-		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(projects);
-		when(projectQueryUseCase.queryUserRolesByProjects(userId, List.of(1L, 2L)))
-			.thenReturn(Map.of(1L, List.of(), 2L, List.of()));
-		when(requiredSkillUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
-			.thenReturn(Map.of(1L, List.of(), 2L, List.of()));
+        // then
+        assertNotNull(response);
+        assertEquals(profileId, response.profileId());
+        assertTrue(response.roles().isEmpty());
+        assertTrue(response.schools().isEmpty());
+        assertTrue(response.skills().isEmpty());
+        assertTrue(response.portfolios().isEmpty());
+    }
 
-		// when
-		UserProfileResponse response = service.getMyProfile(userId);
-
-		// then
-		assertNotNull(response);
-		assertEquals(userId, response.userId());
-		assertNull(response.profileId());
-
-		verify(projectQueryUseCase).queryByUserId(userId);
-		verify(requiredSkillUseCase).queryNamesByProjectIds(anyList());
-		verify(projectQueryUseCase).queryUserRolesByProjects(anyLong(), anyList());
-	}
-
-	@Test
-	void 프로젝트가_없을_때_빈_리스트를_반환한다() {
-		// given
-		Long userId = 1L;
-		Long profileId = 1L;
-		User user = createUser(userId);
-		Profile profile = createProfile(profileId, userId);
-
-		when(profileRepository.getProfileByUserId(userId)).thenReturn(profile);
-		when(userQueryUseCase.findById(userId)).thenReturn(user);
-		when(profileRepository.getProfileRoles(profileId)).thenReturn(new ArrayList<>());
-		when(profileRepository.getProfileSchools(profileId)).thenReturn(new ArrayList<>());
-		when(profileRepository.getProfileSkills(profileId)).thenReturn(new ArrayList<>());
-		when(profileRepository.getProjectPortfolios(profileId)).thenReturn(new ArrayList<>());
-		when(projectQueryUseCase.queryByUserId(userId)).thenReturn(new ArrayList<>());
-		when(profileLikeQueryUseCase.isLiked(userId, profileId)).thenReturn(false);
-
-		// when
-		UserProfileResponse response = service.getMyProfile(userId);
-
-		// then
-		assertNotNull(response);
-		verify(projectQueryUseCase).queryByUserId(userId);
-	}
 
     @Test
     void 내_프로젝트_목록_조회시_페이지_메타와_프로젝트_정보를_반환한다() {
@@ -567,6 +499,138 @@ class ProfileQueryServiceTest {
         // then
         assertEquals(2, response.totalPages()); // 6 / 5 = 1.2 -> 올림 2
     }
+
+
+    @Test
+    void 내_리뷰_목록_조회시_페이지_메타와_리뷰_정보를_반환한다() {
+        // given
+        Long viewerUserId = 1L;
+        var pageable = PageRequest.of(0, 5);
+
+        List<ProjectUserReviewSummary> reviews = List.of(
+                new ProjectUserReviewSummary(
+                        10L,
+                        "좋은 팀원이었습니다.",
+                        4.5,
+                        LocalDateTime.of(2026, 5, 1, 12, 30)
+                ),
+                new ProjectUserReviewSummary(
+                        20L,
+                        "소통이 좋았습니다.",
+                        4.25,
+                        LocalDateTime.of(2026, 5, 1, 12, 30)
+                )
+        );
+
+        List<ProjectIdTitleProjection> projections = List.of(
+                new ProjectIdTitleProjection(10L, "프로젝트 A"),
+                new ProjectIdTitleProjection(20L, "프로젝트 B")
+        );
+
+        when(projectQueryUseCase.queryReviewSummaryByUserId(viewerUserId, pageable))
+                .thenReturn(reviews);
+        when(projectQueryUseCase.queryUserProjectIdTitlePairs(List.of(10L, 20L)))
+                .thenReturn(projections);
+        when(projectQueryUseCase.queryReviewCount(viewerUserId))
+                .thenReturn(12L);
+
+        // when
+        PageResponse<List<UserReviewDto>> response =
+                service.getUserReviewList(viewerUserId, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.page());
+        assertEquals(5, response.size());
+        assertEquals(12L, response.totalElements());
+        assertEquals(3, response.totalPages());
+
+        assertNotNull(response.content());
+        assertEquals(2, response.content().size());
+
+        UserReviewDto first = response.content().getFirst();
+        assertEquals("프로젝트 A", first.projectTitle());
+        assertEquals("좋은 팀원이었습니다.", first.comment());
+        assertEquals(4.5, first.score());
+        assertEquals(LocalDate.of(2026, 5, 1), first.reviewDt());
+
+        UserReviewDto second = response.content().get(1);
+        assertEquals("프로젝트 B", second.projectTitle());
+        assertEquals("소통이 좋았습니다.", second.comment());
+        assertEquals(4.25, second.score());
+        assertEquals(LocalDate.of(2026, 5, 1), second.reviewDt());
+
+        verify(projectQueryUseCase).queryReviewSummaryByUserId(viewerUserId, pageable);
+        verify(projectQueryUseCase).queryUserProjectIdTitlePairs(List.of(10L, 20L));
+        verify(projectQueryUseCase).queryReviewCount(viewerUserId);
+    }
+
+    @Test
+    void 내_리뷰_목록_조회시_리뷰가_없으면_빈_리스트를_반환한다() {
+        // given
+        Long viewerUserId = 1L;
+        var pageable = PageRequest.of(0, 5);
+
+        when(projectQueryUseCase.queryReviewSummaryByUserId(viewerUserId, pageable))
+                .thenReturn(List.of());
+        when(projectQueryUseCase.queryUserProjectIdTitlePairs(List.of()))
+                .thenReturn(List.of());
+        when(projectQueryUseCase.queryReviewCount(viewerUserId))
+                .thenReturn(0L);
+
+        // when
+        PageResponse<List<UserReviewDto>> response =
+                service.getUserReviewList(viewerUserId, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.page());
+        assertEquals(5, response.size());
+        assertEquals(0L, response.totalElements());
+        assertEquals(0, response.totalPages());
+
+        assertNotNull(response.content());
+        assertTrue(response.content().isEmpty());
+
+        verify(projectQueryUseCase).queryReviewSummaryByUserId(viewerUserId, pageable);
+        verify(projectQueryUseCase).queryUserProjectIdTitlePairs(List.of());
+        verify(projectQueryUseCase).queryReviewCount(viewerUserId);
+    }
+
+    @Test
+    void 내_리뷰_목록_조회시_프로젝트_제목을_찾지_못하면_빈_문자열을_반환한다() {
+        // given
+        Long viewerUserId = 1L;
+        var pageable = PageRequest.of(0, 5);
+
+        List<ProjectUserReviewSummary> reviews = List.of(
+                new ProjectUserReviewSummary(
+                        10L,
+                        "좋은 팀원이었습니다.",
+                        5.0,
+                        LocalDateTime.of(2026, 5, 1, 12, 30)
+                )
+        );
+
+        when(projectQueryUseCase.queryReviewSummaryByUserId(viewerUserId, pageable))
+                .thenReturn(reviews);
+        when(projectQueryUseCase.queryUserProjectIdTitlePairs(List.of(10L)))
+                .thenReturn(List.of());
+        when(projectQueryUseCase.queryReviewCount(viewerUserId))
+                .thenReturn(1L);
+
+        // when
+        PageResponse<List<UserReviewDto>> response =
+                service.getUserReviewList(viewerUserId, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.content().size());
+        assertEquals("", response.content().getFirst().projectTitle());
+        assertEquals("좋은 팀원이었습니다.", response.content().getFirst().comment());
+        assertEquals(1, response.totalPages());
+    }
+
 
 	private User createUser(Long userId) {
 		User user = User.builder()

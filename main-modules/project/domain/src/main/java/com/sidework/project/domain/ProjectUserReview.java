@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 
 @Getter
 @Builder
@@ -22,6 +24,7 @@ public class ProjectUserReview {
 	private Integer problemSolving;
 
 	private String comment;
+    private LocalDateTime createdAt;
 
 	public static ProjectUserReview create(
 		Long projectId,

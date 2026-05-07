@@ -98,32 +98,6 @@ class ProjectQueryServiceTest {
         verify(projectRepository).findById(projectId);
     }
 
-    @Test
-    void queryByUserId_참여_프로젝트가_있으면_목록을_반환한다() {
-        Long userId = 1L;
-        List<Long> projectIds = List.of(1L, 2L);
-        Project project1 = createProject(1L);
-        Project project2 = createProject(2L);
-
-        when(projectUserRepository.queryAllProjectIds(userId)).thenReturn(projectIds);
-        when(projectRepository.findByIdIn(projectIds)).thenReturn(List.of(project1, project2));
-
-        List<Project> result = queryService.queryByUserId(userId);
-
-        assertEquals(2, result.size());
-        assertEquals(1L, result.get(0).getId());
-        assertEquals(2L, result.get(1).getId());
-    }
-
-    @Test
-    void queryByUserId_참여_프로젝트가_없으면_빈_목록을_반환한다() {
-        Long userId = 1L;
-        when(projectUserRepository.queryAllProjectIds(userId)).thenReturn(List.of());
-
-        List<Project> result = queryService.queryByUserId(userId);
-
-        assertTrue(result.isEmpty());
-    }
 
     @Test
     void queryProjectDetail_정상_조회_시_ProjectDetailResponse를_반환한다() {

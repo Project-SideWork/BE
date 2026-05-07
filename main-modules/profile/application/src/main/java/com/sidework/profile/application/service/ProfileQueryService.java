@@ -2,7 +2,9 @@ package com.sidework.profile.application.service;
 
 import com.sidework.profile.application.adapter.UserProfileListResponse;
 import com.sidework.profile.application.adapter.UserProjectDto;
+import com.sidework.profile.application.adapter.UserReviewDto;
 import com.sidework.profile.application.dto.ProjectContext;
+import com.sidework.project.application.dto.ProjectIdTitleProjection;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.dto.ProjectUserReviewSummary;
 import com.sidework.project.domain.ProjectRole;
@@ -72,20 +74,15 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 
 	@Override
 	public UserProfileResponse getProfileByUserId(Long viewerUserId, Long targetUserId) {
-        // TODO: 리뷰도 페이지네이션 적용 필요해서 아예 별도 함수로 분리. 최종적으로는 이 함수에 project, ctx를 사용하는 부분이 없도록 리팩터링하는 게 목표
 		User user = userQueryUseCase.findById(targetUserId);
-        List<Project> projects = projectQueryUseCase.queryByUserId(targetUserId);
-
-        ProjectContext ctx = loadProjectContext(targetUserId, projects);
-
         Profile profile = profileRepository.getProfileByUserId(targetUserId);
 		if (profile == null) {
-			return buildResponseWhenNoProfile(user, ctx);
+			return buildResponseWhenNoProfile(user);
 		}
 
 		boolean isLiked = profileLikeQueryUseCase.isLiked(viewerUserId, profile.getId());
 
-		return buildProfileResponse(user, profile, ctx, isLiked);
+		return buildProfileResponse(user, profile, isLiked);
 	}
 
 	@Override
@@ -97,7 +94,6 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 	@Override
 	public PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable) {
 		Page<Profile> page = profileRepository.searchProfilesBySkillName(skillIds, pageable);
-
 		return buildProfileListResponse(viewerUserId, page, true);
 	}
 
@@ -118,6 +114,24 @@ public class ProfileQueryService implements ProfileQueryUseCase {
         List<UserProjectDto> items = buildProjectInfos(projects, ctx.skillNamesByProjectId(), ctx.rolesByProjectId());
 
         return PageResponse.of(items, pageable.getPageNumber(), pageable.getPageSize(), projectCount, totalPage);
+    }
+
+    @Override
+    public PageResponse<List<UserReviewDto>> getUserReviewList(Long viewerUserId, Pageable pageable) {
+        List<ProjectUserReviewSummary> reviews =
+                projectQueryUseCase.queryReviewSummaryByUserId(viewerUserId, pageable);
+
+        List<Long> projectIds = reviews.stream().map(ProjectUserReviewSummary::projectId).toList();
+
+        List<ProjectIdTitleProjection> projections = projectQueryUseCase.queryUserProjectIdTitlePairs(projectIds);
+        Long reviewCount = projectQueryUseCase.queryReviewCount(viewerUserId);
+
+        int totalPage = (int) Math.ceil((double) reviewCount / pageable.getPageSize());
+
+
+        List<UserReviewDto> items = buildReviewInfos(reviews, projections);
+
+        return PageResponse.of(items, pageable.getPageNumber(), pageable.getPageSize(), reviewCount, totalPage);
     }
 
     private List<UserProjectDto> buildProjectInfos(
@@ -143,7 +157,6 @@ public class ProfileQueryService implements ProfileQueryUseCase {
     private UserProfileResponse buildProfileResponse(
 		User user,
 		Profile profile,
-		ProjectContext ctx,
 		boolean isLiked
 	) {
 		RegionResidenceInfo r = loadResidence(user.getResidenceRegionId());
@@ -165,15 +178,13 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			buildSchoolInfos(profile.getId()),
 			buildSkillInfos(profile.getId()),
 			buildPortfolioInfos(profile.getId()),
-			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle()),
 			isLiked
 		);
 	}
 
 
 	private UserProfileResponse buildResponseWhenNoProfile(
-		User user,
-		ProjectContext ctx
+		User user
 	) {
 		RegionResidenceInfo r = loadResidence(user.getResidenceRegionId());
 		return new UserProfileResponse(
@@ -193,7 +204,6 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			List.of(),
 			List.of(),
 			List.of(),
-			buildReviewInfos(ctx.reviews(), ctx.projectIdToTitle()),
 			null
 		);
 	}
@@ -204,7 +214,6 @@ public class ProfileQueryService implements ProfileQueryUseCase {
                     List.of(),
                     List.of(),
                     Map.of(),
-                    List.of(),
                     Map.of(),
                     Map.of()
             );
@@ -217,9 +226,6 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 		Map<Long, String> projectIdToTitle = projects.stream()
 			.collect(Collectors.toMap(Project::getId, Project::getTitle));
 
-		List<ProjectUserReviewSummary> reviews =
-			projectQueryUseCase.queryReviewSummaryByProjectIds(userId, projectIds);
-
 		Map<Long, List<String>> skillNamesByProjectId =
 			requiredSkillUseCase.queryNamesByProjectIds(projectIds);
 
@@ -230,7 +236,6 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			projects,
 			projectIds,
 			projectIdToTitle,
-			reviews,
 			skillNamesByProjectId,
 			rolesByProjectId
 		);
@@ -462,17 +467,21 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 		return stat == null ? null : calculateReviewScore(stat);
 	}
 
-	private List<UserProfileResponse.ProjectReviewInfo> buildReviewInfos(
+	private List<UserReviewDto> buildReviewInfos(
 		List<ProjectUserReviewSummary> reviews,
-		Map<Long, String> projectIdToTitle
+		List<ProjectIdTitleProjection> projections
 	) {
+        Map<Long, String> projectTitleMap = projections.stream()
+                .collect(Collectors.toMap(
+                        ProjectIdTitleProjection::id,
+                        ProjectIdTitleProjection::title
+                ));
+
 		return reviews.stream()
-			.map(review -> new UserProfileResponse.ProjectReviewInfo(
-				review.projectId(),
-				projectIdToTitle.getOrDefault(review.projectId(), ""),
-				review.reviewer(),
+			.map(review -> UserReviewDto.from(
+				projectTitleMap.getOrDefault(review.projectId(), ""),
 				review.comment(),
-				review.score()
+				review.score(), review.reviewDt()
 			))
 			.toList();
 	}
