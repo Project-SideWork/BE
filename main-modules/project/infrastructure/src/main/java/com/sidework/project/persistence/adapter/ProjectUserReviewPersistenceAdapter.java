@@ -3,6 +3,7 @@ package com.sidework.project.persistence.adapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sidework.project.application.port.out.ProjectUserReviewOutPort;
@@ -16,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class ProjectUserReviewPersistenceAdapter implements ProjectUserReviewOutPort {
-
 	private final ProjectUserReviewJpaRepository repository;
 	private final ProjectUserReviewMapper mapper;
 
@@ -42,8 +42,38 @@ public class ProjectUserReviewPersistenceAdapter implements ProjectUserReviewOut
 		if (entities == null || entities.isEmpty()) {
 			return new ArrayList<>();
 		}
+
 		return entities.stream()
 			.map(mapper::toDomain)
 			.toList();
 	}
+
+    @Override
+    public List<ProjectUserReview> getReviewsByUserId(Long userId, Pageable pageable) {
+        List<ProjectUserReviewEntity> entities = repository.findAllByRevieweeUserId(userId, pageable);
+        if (entities == null || entities.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return entities.stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Long findReviewCountByUserId(Long userId) {
+        return repository.findReviewCountByUserId(userId);
+    }
+
+    @Override
+    public List<ProjectUserReview> pageReviewByUserId(Long userId, Pageable pageable) {
+        List<ProjectUserReviewEntity> entities = repository.findReviewByUserId(userId, pageable);
+        if (entities == null || entities.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return entities.stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
 }
