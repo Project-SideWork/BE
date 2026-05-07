@@ -478,7 +478,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
                 ));
 
 		return reviews.stream()
-			.map(review -> new UserReviewDto(
+			.map(review -> UserReviewDto.from(
 				projectTitleMap.getOrDefault(review.projectId(), ""),
 				review.comment(),
 				review.score(), review.reviewDt()

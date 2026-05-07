@@ -45,15 +45,4 @@ public interface ProjectUserReviewJpaRepository extends JpaRepository<ProjectUse
     """)
     Long findReviewCountByUserId(@Param("userId")Long userId);
 
-    @Query("""
-    SELECT r
-    FROM ProjectUserReviewEntity r
-    WHERE r.revieweeUserId = :userId
-    """)
-    List<ProjectUserReviewEntity> findReviewByUserId(
-            @Param("userId") Long userId,
-            Pageable pageable
-    );
-
-
 }

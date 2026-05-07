@@ -149,7 +149,7 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
 
     @Override
     public List<ProjectIdTitleProjection> findIdTitleProjections(List<Long> projectIds) {
-        if(projectIds == null) return List.of();
+        if (projectIds == null || projectIds.isEmpty()) return List.of();
         return repo.findIdTitleProjectionByIdsIn(projectIds);
     }
 }

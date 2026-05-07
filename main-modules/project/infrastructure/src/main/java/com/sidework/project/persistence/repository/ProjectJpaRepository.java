@@ -49,7 +49,6 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Long>
             WHERE p.id in :ids
             ORDER BY p.id DESC
             """)
-
     List<ProjectEntity> findAllByIdsInDesc(@Param("ids")List<Long> projectIds);
 
     @Query("""
@@ -57,7 +56,6 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Long>
             WHERE p.id in :ids
             ORDER BY p.id DESC
             """)
-
     List<ProjectIdTitleProjection> findIdTitleProjectionByIdsIn(@Param("ids") List<Long> projectIds);
 
 

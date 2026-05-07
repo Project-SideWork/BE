@@ -11,5 +11,4 @@ public interface ProjectUserReviewOutPort {
 	List<ProjectUserReview> getReviewsByUserIdAndProjectIds(Long userId, List<Long> projectIds);
 	List<ProjectUserReview> getReviewsByUserId(Long userId, Pageable pageable);
     Long findReviewCountByUserId(Long userId);
-    List<ProjectUserReview> pageReviewByUserId(Long userId, Pageable pageable);
 }

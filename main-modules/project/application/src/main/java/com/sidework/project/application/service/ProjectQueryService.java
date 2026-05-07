@@ -191,6 +191,9 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
     @Override
     public List<ProjectIdTitleProjection> queryUserProjectIdTitlePairs(List<Long> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) {
+            return List.of();
+        }
         return projectRepository.findIdTitleProjections(projectIds);
     }
 

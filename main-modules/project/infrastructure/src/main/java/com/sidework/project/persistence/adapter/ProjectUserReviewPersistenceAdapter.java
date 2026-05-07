@@ -64,16 +64,4 @@ public class ProjectUserReviewPersistenceAdapter implements ProjectUserReviewOut
     public Long findReviewCountByUserId(Long userId) {
         return repository.findReviewCountByUserId(userId);
     }
-
-    @Override
-    public List<ProjectUserReview> pageReviewByUserId(Long userId, Pageable pageable) {
-        List<ProjectUserReviewEntity> entities = repository.findReviewByUserId(userId, pageable);
-        if (entities == null || entities.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return entities.stream()
-                .map(mapper::toDomain)
-                .toList();
-    }
 }

@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -200,62 +201,7 @@ class ProjectUserPersistenceAdapterTest {
         verify(repository).findReviewCountByUserId(userId);
     }
 
-    @Test
-    void pageReviewByUserId는_사용자ID와_Pageable로_리뷰를_조회한다() {
-        Long userId = 1L;
-        Pageable pageable = PageRequest.of(0, 10);
 
-        List<ProjectUserReviewEntity> entities = List.of(
-                createReviewEntity(1L),
-                createReviewEntity(2L)
-        );
-
-        when(repository.findReviewByUserId(userId, pageable))
-                .thenReturn(entities);
-
-        List<ProjectUserReview> result =
-                adapter.pageReviewByUserId(userId, pageable);
-
-        assertEquals(2, result.size());
-        assertEquals(1L, result.get(0).getId());
-        assertEquals(2L, result.get(1).getId());
-
-        verify(repository).findReviewByUserId(userId, pageable);
-    }
-
-    @Test
-    void pageReviewByUserId는_조회결과가_null이면_빈_리스트를_반환한다() {
-        Long userId = 1L;
-        Pageable pageable = PageRequest.of(0, 10);
-
-        when(repository.findReviewByUserId(userId, pageable))
-                .thenReturn(null);
-
-        List<ProjectUserReview> result =
-                adapter.pageReviewByUserId(userId, pageable);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-
-        verify(repository).findReviewByUserId(userId, pageable);
-    }
-
-    @Test
-    void pageReviewByUserId는_조회결과가_비어있으면_빈_리스트를_반환한다() {
-        Long userId = 1L;
-        Pageable pageable = PageRequest.of(0, 10);
-
-        when(repository.findReviewByUserId(userId, pageable))
-                .thenReturn(List.of());
-
-        List<ProjectUserReview> result =
-                adapter.pageReviewByUserId(userId, pageable);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-
-        verify(repository).findReviewByUserId(userId, pageable);
-    }
 
     private ProjectUserReview createReview(Long id) {
         return ProjectUserReview.builder()
@@ -268,7 +214,7 @@ class ProjectUserPersistenceAdapterTest {
                 .collaboration(5)
                 .problemSolving(4)
                 .comment("좋은 팀원이었습니다.")
-                .createdAt(LocalDate.now())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
     private ProjectUserReviewEntity createReviewEntity(Long id) {

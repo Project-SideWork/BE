@@ -43,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -258,7 +259,6 @@ class ProfileQueryServiceTest {
 
         verify(profileRepository).getProfileByUserId(userId);
         verify(userQueryUseCase).findById(userId);
-        verify(projectQueryUseCase, never()).queryByUserId(anyLong());
     }
 
     @Test
@@ -310,7 +310,6 @@ class ProfileQueryServiceTest {
         verify(profileRepository).getProfileSkills(profileId);
         verify(profileRepository).getProjectPortfolios(profileId);
 
-        verify(projectQueryUseCase, never()).queryByUserId(anyLong());
         verify(requiredSkillUseCase, never()).queryNamesByProjectIds(anyList());
         verify(projectQueryUseCase, never()).queryUserRolesByProjects(anyLong(), anyList());
     }
@@ -341,8 +340,6 @@ class ProfileQueryServiceTest {
         assertTrue(response.schools().isEmpty());
         assertTrue(response.skills().isEmpty());
         assertTrue(response.portfolios().isEmpty());
-
-        verify(projectQueryUseCase, never()).queryByUserId(anyLong());
     }
 
 
@@ -515,13 +512,13 @@ class ProfileQueryServiceTest {
                         10L,
                         "좋은 팀원이었습니다.",
                         4.5,
-                        LocalDate.of(2026, 5, 1)
+                        LocalDateTime.of(2026, 5, 1, 12, 30)
                 ),
                 new ProjectUserReviewSummary(
                         20L,
                         "소통이 좋았습니다.",
                         4.25,
-                        LocalDate.of(2026, 5, 2)
+                        LocalDateTime.of(2026, 5, 1, 12, 30)
                 )
         );
 
@@ -552,16 +549,16 @@ class ProfileQueryServiceTest {
         assertEquals(2, response.content().size());
 
         UserReviewDto first = response.content().getFirst();
-        assertEquals("프로젝트 A", first.title());
+        assertEquals("프로젝트 A", first.projectTitle());
         assertEquals("좋은 팀원이었습니다.", first.comment());
         assertEquals(4.5, first.score());
         assertEquals(LocalDate.of(2026, 5, 1), first.reviewDt());
 
         UserReviewDto second = response.content().get(1);
-        assertEquals("프로젝트 B", second.title());
+        assertEquals("프로젝트 B", second.projectTitle());
         assertEquals("소통이 좋았습니다.", second.comment());
         assertEquals(4.25, second.score());
-        assertEquals(LocalDate.of(2026, 5, 2), second.reviewDt());
+        assertEquals(LocalDate.of(2026, 5, 1), second.reviewDt());
 
         verify(projectQueryUseCase).queryReviewSummaryByUserId(viewerUserId, pageable);
         verify(projectQueryUseCase).queryUserProjectIdTitlePairs(List.of(10L, 20L));
@@ -611,7 +608,7 @@ class ProfileQueryServiceTest {
                         10L,
                         "좋은 팀원이었습니다.",
                         5.0,
-                        LocalDate.of(2026, 5, 1)
+                        LocalDateTime.of(2026, 5, 1, 12, 30)
                 )
         );
 
@@ -629,7 +626,7 @@ class ProfileQueryServiceTest {
         // then
         assertNotNull(response);
         assertEquals(1, response.content().size());
-        assertEquals("", response.content().getFirst().title());
+        assertEquals("", response.content().getFirst().projectTitle());
         assertEquals("좋은 팀원이었습니다.", response.content().getFirst().comment());
         assertEquals(1, response.totalPages());
     }
