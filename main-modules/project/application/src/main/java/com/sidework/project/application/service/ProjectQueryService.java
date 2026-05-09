@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.MyProjectSummaryResponse;
+import com.sidework.project.application.adapter.ProjectApplicantResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.dto.ProjectIdTitleProjection;
@@ -198,6 +199,32 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         return projectRepository.findIdTitleProjections(projectIds);
     }
 
+    @Override
+    public List<ProjectApplicantResponse> queryProjectApplicants(Long projectId) {
+        Project project = queryById(projectId);
+        if (project == null) {
+            throw new ProjectNotFoundException(projectId);
+        }
+        List<ProjectUser> applicants = projectUserRepository.findAllByProjectIdAndStatusIn(
+            projectId,
+            List.of(ApplyStatus.UNREAD, ApplyStatus.READ)
+        );
+
+        if (applicants == null || applicants.isEmpty()) return List.of();
+
+        List<Long> userIds = applicants.stream().map(ProjectUser::getUserId).distinct().toList();
+        Map<Long, Double> avgScoreByUserId = buildScoreByUserId(userIds);
+        return applicants.stream()
+            .map(a -> ProjectApplicantResponse.of(
+                a.getUserId(),
+                a.getProfileId(),
+                a.getRole(),
+                a.getStatus(),
+                avgScoreByUserId.get(a.getUserId())
+            ))
+            .toList();
+
+    }
 
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {
         List<Project> projects = page.getContent();

@@ -82,4 +82,6 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
     """)
     Long findProjectCountByUserId(@Param("userId") Long userId);
 
+	List<ProjectUserEntity> findAllByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses);
+
 }

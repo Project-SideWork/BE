@@ -25,4 +25,5 @@ public interface ProjectUserOutPort {
 	Optional<ProjectUser> findAcceptedByProjectIdAndUserId(Long projectId, Long userId);
 	List<ProjectTitleDto> getMyProjectSummary(Long userId);
     Long findProjectCountByUserId(Long userId);
+	List<ProjectUser> findAllByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses);
 }

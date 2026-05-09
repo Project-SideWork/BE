@@ -2,6 +2,7 @@ package com.sidework.project.application.port.in;
 
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.MyProjectSummaryResponse;
+import com.sidework.project.application.adapter.ProjectApplicantResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.dto.ProjectIdTitleProjection;
@@ -33,4 +34,6 @@ public interface ProjectQueryUseCase {
     Long queryProjectCount(Long userId);
     Long queryReviewCount(Long userId);
     List<ProjectIdTitleProjection> queryUserProjectIdTitlePairs(List<Long> projectIds);
+    List<ProjectApplicantResponse> queryProjectApplicants(Long projectId);
+
 }
