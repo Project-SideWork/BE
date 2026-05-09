@@ -25,7 +25,7 @@ public class CookieUtil {
     public Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setPath("/");
-        cookie.setDomain("growp.publicvm.com");
+        cookie.setDomain(".growp.publicvm.com");
         cookie.setMaxAge(COOKIE_EXPIRE_TIME);
         cookie.setHttpOnly(true);
         cookie.setSecure(false);  // HTTPS 요청에만 secure 설정
@@ -81,12 +81,11 @@ public class CookieUtil {
         return Optional.empty();
     }
 
-    // TODO: setDomain
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(maxAge);
         cookie.setPath("/");
-        cookie.setDomain("growp.publicvm.com");
+        cookie.setDomain(".growp.publicvm.com");
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
         cookie.setAttribute("SameSite", "Lax");
