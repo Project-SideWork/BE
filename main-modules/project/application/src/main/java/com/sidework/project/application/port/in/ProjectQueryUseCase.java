@@ -34,6 +34,6 @@ public interface ProjectQueryUseCase {
     Long queryProjectCount(Long userId);
     Long queryReviewCount(Long userId);
     List<ProjectIdTitleProjection> queryUserProjectIdTitlePairs(List<Long> projectIds);
-    List<ProjectApplicantResponse> queryProjectApplicants(Long projectId);
+    PageResponse<List<ProjectApplicantResponse>> queryProjectApplicants(Long projectId, Pageable pageable);
 
 }

@@ -5,6 +5,8 @@ import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -26,4 +28,5 @@ public interface ProjectUserOutPort {
 	List<ProjectTitleDto> getMyProjectSummary(Long userId);
     Long findProjectCountByUserId(Long userId);
 	List<ProjectUser> findAllByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses);
+	Page<ProjectUser> findPageByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses, Pageable pageable);
 }

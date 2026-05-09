@@ -200,22 +200,30 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     @Override
-    public List<ProjectApplicantResponse> queryProjectApplicants(Long projectId) {
+    public PageResponse<List<ProjectApplicantResponse>> queryProjectApplicants(Long projectId, Pageable pageable) {
         Project project = queryById(projectId);
-        if (project == null) {
-            throw new ProjectNotFoundException(projectId);
-        }
-        List<ProjectUser> applicants = projectUserRepository.findAllByProjectIdAndStatusIn(
+        if (project == null) throw new ProjectNotFoundException(projectId);
+        Page<ProjectUser> page = projectUserRepository.findPageByProjectIdAndStatusIn(
             projectId,
-            List.of(ApplyStatus.UNREAD, ApplyStatus.READ)
+            List.of(ApplyStatus.UNREAD, ApplyStatus.READ),
+            pageable
         );
 
-        if (applicants == null || applicants.isEmpty()) return List.of();
 
-        List<Long> userIds = applicants.stream().map(ProjectUser::getUserId).distinct().toList();
+        if (page.isEmpty()) {
+            return PageResponse.from(page, List.of());
+        }
+
+        List<ProjectUser> applicants = page.getContent();
+        List<Long> userIds = applicants.stream()
+            .map(ProjectUser::getUserId)
+            .distinct()
+            .toList();
+
         Map<Long, Double> avgScoreByUserId = buildScoreByUserId(userIds);
         Map<Long, String> nameByUserId = userQueryUseCase.findNamesByUserIds(userIds);
-        return applicants.stream()
+
+        List<ProjectApplicantResponse> contents = applicants.stream()
             .map(a -> ProjectApplicantResponse.of(
                 a.getUserId(),
                 nameByUserId.getOrDefault(a.getUserId(), ""),
@@ -227,6 +235,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             ))
             .toList();
 
+        return PageResponse.from(page, contents);
     }
 
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {

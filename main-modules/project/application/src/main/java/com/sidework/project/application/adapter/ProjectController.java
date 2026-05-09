@@ -225,8 +225,10 @@ public class ProjectController implements ProjectControllerDocs {
     }
 
     @GetMapping("/{projectId}/applicants")
-    public ResponseEntity getProjectApplicants(@PathVariable("projectId") Long projectId){
-        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectApplicants(projectId)));
+    public ResponseEntity<ApiResponse<PageResponse<List<ProjectApplicantResponse>>>> getProjectApplicants(
+        @PageableDefault(size = 20) Pageable pageable,
+        @PathVariable("projectId") Long projectId){
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectApplicants(projectId, pageable)));
     }
 
 

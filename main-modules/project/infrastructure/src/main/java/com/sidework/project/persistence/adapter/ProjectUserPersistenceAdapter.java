@@ -9,6 +9,8 @@ import com.sidework.project.persistence.entity.ProjectUserEntity;
 import com.sidework.project.persistence.mapper.ProjectUserMapper;
 import com.sidework.project.persistence.repository.ProjectUserJpaRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -112,5 +114,11 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
     public List<ProjectUser> findAllByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses) {
         List<ProjectUserEntity> entities = repo.findAllByProjectIdAndStatusIn(projectId, statuses);
         return entities.stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public Page<ProjectUser> findPageByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses, Pageable pageable) {
+        Page<ProjectUserEntity> entityPage = repo.findByProjectIdAndStatusIn(projectId, statuses, pageable);
+        return entityPage.map(mapper::toDomain);
     }
 }
