@@ -200,33 +200,64 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     @Override
-    public List<ProjectApplicantResponse> queryProjectApplicants(Long projectId) {
+    public PageResponse<List<ProjectApplicantResponse>> queryProjectApplicants(
+        Long projectId,
+        Pageable pageable
+    ) {
         Project project = queryById(projectId);
+
         if (project == null) {
             throw new ProjectNotFoundException(projectId);
         }
-        List<ProjectUser> applicants = projectUserRepository.findAllByProjectIdAndStatusIn(
+
+        Page<ProjectUser> page = projectUserRepository.findPageByProjectIdAndStatusIn(
             projectId,
-            List.of(ApplyStatus.UNREAD, ApplyStatus.READ)
+            List.of(ApplyStatus.UNREAD, ApplyStatus.READ),
+            pageable
         );
 
-        if (applicants == null || applicants.isEmpty()) return List.of();
+        if (page.isEmpty()) {
+            return PageResponse.from(page, List.of());
+        }
 
-        List<Long> userIds = applicants.stream().map(ProjectUser::getUserId).distinct().toList();
-        Map<Long, Double> avgScoreByUserId = buildScoreByUserId(userIds);
-        Map<Long, String> nameByUserId = userQueryUseCase.findNamesByUserIds(userIds);
-        return applicants.stream()
-            .map(a -> ProjectApplicantResponse.of(
-                a.getUserId(),
-                nameByUserId.getOrDefault(a.getUserId(), ""),
-                a.getProfileId(),
-                a.getRole(),
-                a.getStatus(),
-                avgScoreByUserId.get(a.getUserId()),
-                a.getCreatedAt()
-            ))
+        List<ProjectUser> applicants = page.getContent();
+
+        List<Long> userIds = applicants.stream()
+            .map(ProjectUser::getUserId)
+            .distinct()
             .toList();
 
+        Map<Long, Double> avgScoreByUserId = buildScoreByUserId(userIds);
+
+        Map<Long, String> nameByUserId =
+            userQueryUseCase.findNamesByUserIds(userIds);
+
+        List<ProjectApplicantResponse> contents =
+            buildApplicantResponses(
+                applicants,
+                nameByUserId,
+                avgScoreByUserId
+            );
+
+        return PageResponse.from(page, contents);
+    }
+
+    private List<ProjectApplicantResponse> buildApplicantResponses(
+        List<ProjectUser> applicants,
+        Map<Long, String> nameByUserId,
+        Map<Long, Double> avgScoreByUserId
+    ) {
+        return applicants.stream()
+            .map(applicant -> ProjectApplicantResponse.of(
+                applicant.getUserId(),
+                nameByUserId.getOrDefault(applicant.getUserId(), ""),
+                applicant.getProfileId(),
+                applicant.getRole(),
+                applicant.getStatus(),
+                avgScoreByUserId.get(applicant.getUserId()),
+                applicant.getCreatedAt()
+            ))
+            .toList();
     }
 
     private PageResponse<List<ProjectListResponse>> buildProjectListPageResponse(Long userId, Page<Project> page) {

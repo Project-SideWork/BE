@@ -196,6 +196,7 @@ class ProjectQueryServiceTest {
     @Test
     void queryProjectApplicants_정상_조회_시_지원자목록을_반환한다() {
         Long projectId = 1L;
+        Pageable pageable = PageRequest.of(0, 20);
         Project project = createProject(projectId);
         List<ProjectUser> applicants = List.of(
             ProjectUser.builder().userId(2L).profileId(20L).role(ProjectRole.BACKEND).status(ApplyStatus.UNREAD).build(),
@@ -203,20 +204,20 @@ class ProjectQueryServiceTest {
         );
 
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectIdAndStatusIn(projectId, List.of(ApplyStatus.UNREAD, ApplyStatus.READ)))
-            .thenReturn(applicants);
+        when(projectUserRepository.findPageByProjectIdAndStatusIn(projectId, List.of(ApplyStatus.UNREAD, ApplyStatus.READ), pageable))
+            .thenReturn(new PageImpl<>(applicants, pageable, applicants.size()));
         when(projectUserReviewStatRepository.getAllReviewStatsByUserIds(anyList()))
             .thenReturn(List.of(
                 ProjectUserReviewStat.builder().userId(2L).ratingScore(10.0).ratingCount(2L).build(), // 5.0
                 ProjectUserReviewStat.builder().userId(3L).ratingScore(9.0).ratingCount(3L).build()   // 3.0
             ));
 
-        List<ProjectApplicantResponse> result = queryService.queryProjectApplicants(projectId);
+        PageResponse<List<ProjectApplicantResponse>> result = queryService.queryProjectApplicants(projectId, pageable);
 
         assertNotNull(result);
-        assertEquals(2, result.size());
+        assertEquals(2, result.content().size());
 
-        List<ProjectApplicantResponse> sorted = result.stream()
+        List<ProjectApplicantResponse> sorted = result.content().stream()
             .sorted(Comparator.comparing(ProjectApplicantResponse::userId))
             .toList();
 
@@ -236,24 +237,26 @@ class ProjectQueryServiceTest {
     @Test
     void queryProjectApplicants_프로젝트가_없으면_ProjectNotFoundException을_던진다() {
         Long projectId = 999L;
+        Pageable pageable = PageRequest.of(0, 20);
         when(projectRepository.findById(projectId)).thenReturn(null);
 
-        assertThrows(ProjectNotFoundException.class, () -> queryService.queryProjectApplicants(projectId));
+        assertThrows(ProjectNotFoundException.class, () -> queryService.queryProjectApplicants(projectId, pageable));
     }
 
     @Test
     void queryProjectApplicants_지원자가_없으면_빈_리스트를_반환한다() {
         Long projectId = 1L;
+        Pageable pageable = PageRequest.of(0, 20);
         Project project = createProject(projectId);
 
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectIdAndStatusIn(projectId, List.of(ApplyStatus.UNREAD, ApplyStatus.READ)))
-            .thenReturn(List.of());
+        when(projectUserRepository.findPageByProjectIdAndStatusIn(projectId, List.of(ApplyStatus.UNREAD, ApplyStatus.READ), pageable))
+            .thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
-        List<ProjectApplicantResponse> result = queryService.queryProjectApplicants(projectId);
+        PageResponse<List<ProjectApplicantResponse>> result = queryService.queryProjectApplicants(projectId, pageable);
 
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.content().isEmpty());
         verify(projectUserReviewStatRepository, never()).getAllReviewStatsByUserIds(anyList());
     }
 

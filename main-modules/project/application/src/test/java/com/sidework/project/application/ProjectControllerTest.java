@@ -578,26 +578,27 @@ public class ProjectControllerTest {
             ProjectApplicantResponse.of(3L, "user3", 30L, ProjectRole.FRONTEND, ApplyStatus.READ, 3.0, java.time.Instant.EPOCH)
         );
 
-        when(projectQueryUseCase.queryProjectApplicants(projectId)).thenReturn(applicants);
+        when(projectQueryUseCase.queryProjectApplicants(eq(projectId), any(org.springframework.data.domain.Pageable.class)))
+            .thenReturn(PageResponse.from(new org.springframework.data.domain.PageImpl<>(List.of()), applicants));
 
         mockMvc.perform(get("/api/v1/projects/{projectId}/applicants", projectId)
                 .with(user(authenticatedUserDetails)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.isSuccess").value(true))
-            .andExpect(jsonPath("$.result.length()").value(2))
-            .andExpect(jsonPath("$.result[0].userId").value(2))
-            .andExpect(jsonPath("$.result[0].profileId").value(20))
-            .andExpect(jsonPath("$.result[0].role").value("BACKEND"))
-            .andExpect(jsonPath("$.result[0].status").value("UNREAD"))
-            .andExpect(jsonPath("$.result[0].score").value(4.5));
+            .andExpect(jsonPath("$.result.content.length()").value(2))
+            .andExpect(jsonPath("$.result.content[0].userId").value(2))
+            .andExpect(jsonPath("$.result.content[0].profileId").value(20))
+            .andExpect(jsonPath("$.result.content[0].role").value("BACKEND"))
+            .andExpect(jsonPath("$.result.content[0].status").value("UNREAD"))
+            .andExpect(jsonPath("$.result.content[0].score").value(4.5));
     }
 
     @Test
     void 프로젝트_지원자_조회_요청시_프로젝트가_없으면_404를_반환한다() throws Exception {
         Long projectId = 999L;
 
-        when(projectQueryUseCase.queryProjectApplicants(projectId))
+        when(projectQueryUseCase.queryProjectApplicants(eq(projectId), any(org.springframework.data.domain.Pageable.class)))
             .thenThrow(new ProjectNotFoundException(projectId));
 
         mockMvc.perform(get("/api/v1/projects/{projectId}/applicants", projectId)

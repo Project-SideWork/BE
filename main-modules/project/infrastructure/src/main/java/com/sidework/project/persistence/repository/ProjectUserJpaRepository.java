@@ -4,6 +4,8 @@ import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.persistence.entity.ProjectUserEntity;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -83,5 +85,7 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
     Long findProjectCountByUserId(@Param("userId") Long userId);
 
 	List<ProjectUserEntity> findAllByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses);
+
+	Page<ProjectUserEntity> findByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses, Pageable pageable);
 
 }
