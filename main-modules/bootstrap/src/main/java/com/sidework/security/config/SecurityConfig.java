@@ -114,9 +114,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource AllcorsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:63342", "https://mail.naver.com", "http://180.210.81.232:8080", "https://docktalk.co.kr", "http://localhost:5173" ,"http://localhost:5174", "http://localhost:8080"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:63342", "https://mail.naver.com", "http://180.210.81.232:8080",
+                "https://docktalk.co.kr", "http://localhost:5173" ,"http://localhost:5174",
+                "http://localhost:8080", "http://growp.publicvm.com"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-CSRF-TOKEN"));
         configuration.setExposedHeaders(List.of("access"));

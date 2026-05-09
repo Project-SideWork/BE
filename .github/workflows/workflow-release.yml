@@ -2,7 +2,7 @@ name: CI / CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ feat/#103-add-cors-origins ]
 
 jobs:
   CI:
