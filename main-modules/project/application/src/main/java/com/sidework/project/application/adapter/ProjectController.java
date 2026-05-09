@@ -22,6 +22,7 @@ import com.sidework.project.application.port.in.ProjectUserReviewCommandUseCase;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -226,7 +227,7 @@ public class ProjectController implements ProjectControllerDocs {
 
     @GetMapping("/{projectId}/applicants")
     public ResponseEntity<ApiResponse<PageResponse<List<ProjectApplicantResponse>>>> getProjectApplicants(
-        @PageableDefault(size = 20) Pageable pageable,
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @PathVariable("projectId") Long projectId){
         return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectApplicants(projectId, pageable)));
     }
