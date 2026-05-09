@@ -2,6 +2,7 @@ package com.sidework.project.application;
 
 import com.sidework.common.response.PageResponse;
 import com.sidework.project.application.adapter.MyProjectSummaryResponse;
+import com.sidework.project.application.adapter.ProjectApplicantResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.dto.ProjectTitleDto;
@@ -115,7 +116,7 @@ class ProjectQueryServiceTest {
         List<String> preferredStacks = List.of("Redis");
 
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectId(projectId)).thenReturn(members);
+        when(projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED)).thenReturn(members);
         when(projectRecruitPositionRepository.getProjectRecruitPositions(projectId)).thenReturn(positions);
         when(projectRequiredQueryUseCase.queryNamesByProjectId(projectId)).thenReturn(requiredStacks);
         when(projectPreferredSkillQueryUseCase.queryNamesByProjectId(projectId)).thenReturn(preferredStacks);
@@ -173,7 +174,7 @@ class ProjectQueryServiceTest {
         Long projectId = 1L;
         Project project = createProject(projectId);
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectId(projectId)).thenReturn(List.of());
+        when(projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED)).thenReturn(List.of());
 
         assertThrows(ProjectHasNoMembersException.class, () -> queryService.queryProjectDetail(userId, projectId));
     }
@@ -190,6 +191,70 @@ class ProjectQueryServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(ProjectRole.BACKEND, result.get(0).getRole());
+    }
+
+    @Test
+    void queryProjectApplicants_정상_조회_시_지원자목록을_반환한다() {
+        Long projectId = 1L;
+        Project project = createProject(projectId);
+        List<ProjectUser> applicants = List.of(
+            ProjectUser.builder().userId(2L).profileId(20L).role(ProjectRole.BACKEND).status(ApplyStatus.UNREAD).build(),
+            ProjectUser.builder().userId(3L).profileId(30L).role(ProjectRole.FRONTEND).status(ApplyStatus.READ).build()
+        );
+
+        when(projectRepository.findById(projectId)).thenReturn(project);
+        when(projectUserRepository.findAllByProjectIdAndStatusIn(projectId, List.of(ApplyStatus.UNREAD, ApplyStatus.READ)))
+            .thenReturn(applicants);
+        when(projectUserReviewStatRepository.getAllReviewStatsByUserIds(anyList()))
+            .thenReturn(List.of(
+                ProjectUserReviewStat.builder().userId(2L).ratingScore(10.0).ratingCount(2L).build(), // 5.0
+                ProjectUserReviewStat.builder().userId(3L).ratingScore(9.0).ratingCount(3L).build()   // 3.0
+            ));
+
+        List<ProjectApplicantResponse> result = queryService.queryProjectApplicants(projectId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        List<ProjectApplicantResponse> sorted = result.stream()
+            .sorted(Comparator.comparing(ProjectApplicantResponse::userId))
+            .toList();
+
+        assertEquals(2L, sorted.get(0).userId());
+        assertEquals(20L, sorted.get(0).profileId());
+        assertEquals(ProjectRole.BACKEND, sorted.get(0).role());
+        assertEquals(ApplyStatus.UNREAD, sorted.get(0).status());
+        assertEquals(5.0, sorted.get(0).score());
+
+        assertEquals(3L, sorted.get(1).userId());
+        assertEquals(30L, sorted.get(1).profileId());
+        assertEquals(ProjectRole.FRONTEND, sorted.get(1).role());
+        assertEquals(ApplyStatus.READ, sorted.get(1).status());
+        assertEquals(3.0, sorted.get(1).score());
+    }
+
+    @Test
+    void queryProjectApplicants_프로젝트가_없으면_ProjectNotFoundException을_던진다() {
+        Long projectId = 999L;
+        when(projectRepository.findById(projectId)).thenReturn(null);
+
+        assertThrows(ProjectNotFoundException.class, () -> queryService.queryProjectApplicants(projectId));
+    }
+
+    @Test
+    void queryProjectApplicants_지원자가_없으면_빈_리스트를_반환한다() {
+        Long projectId = 1L;
+        Project project = createProject(projectId);
+
+        when(projectRepository.findById(projectId)).thenReturn(project);
+        when(projectUserRepository.findAllByProjectIdAndStatusIn(projectId, List.of(ApplyStatus.UNREAD, ApplyStatus.READ)))
+            .thenReturn(List.of());
+
+        List<ProjectApplicantResponse> result = queryService.queryProjectApplicants(projectId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(projectUserReviewStatRepository, never()).getAllReviewStatsByUserIds(anyList());
     }
 
     @Test

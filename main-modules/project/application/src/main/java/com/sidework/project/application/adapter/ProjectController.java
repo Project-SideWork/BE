@@ -224,6 +224,11 @@ public class ProjectController implements ProjectControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
     }
 
+    @GetMapping("/{projectId}/applicants")
+    public ResponseEntity getProjectApplicants(@PathVariable("projectId") Long projectId){
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectApplicants(projectId)));
+    }
+
 
 
 

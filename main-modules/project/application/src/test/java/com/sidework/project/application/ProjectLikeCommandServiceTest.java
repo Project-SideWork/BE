@@ -105,15 +105,18 @@ class ProjectLikeCommandServiceTest {
         // given
         Long userId = 10L;
         Long projectId = 10L;
-        when(projectLikeOutPort.isLiked(userId, projectId)).thenReturn(true);
-        doNothing().when(projectLikeOutPort).unlike(userId, projectId);
+		when(projectQueryUseCase.queryById(projectId))
+			.thenReturn(Project.builder().id(projectId).build());
+		doNothing().when(userQueryUseCase).validateExists(userId);
+		when(projectLikeOutPort.unlike(userId, projectId)).thenReturn(1);
 
         // when
         service.delete(userId, projectId);
 
         // then
-        verify(projectLikeOutPort).isLiked(userId, projectId);
-        verify(projectLikeOutPort).unlike(userId, projectId);
+		verify(projectQueryUseCase).queryById(projectId);
+		verify(userQueryUseCase).validateExists(userId);
+		verify(projectLikeOutPort).unlike(userId, projectId);
     }
 
     @Test

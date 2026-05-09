@@ -6,6 +6,7 @@ import com.sidework.common.auth.AuthenticatedUserDetails;
 import com.sidework.common.exception.InvalidCommandException;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.project.application.adapter.ProjectController;
+import com.sidework.project.application.adapter.ProjectApplicantResponse;
 import com.sidework.project.application.exception.*;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.dto.ProjectPromotionCommand;
@@ -567,6 +568,42 @@ public class ProjectControllerTest {
                 .content(objectMapper.writeValueAsString(command)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 프로젝트_지원자_조회_요청시_성공하면_200을_반환한다() throws Exception {
+        Long projectId = 1L;
+        List<ProjectApplicantResponse> applicants = List.of(
+            ProjectApplicantResponse.of(2L, 20L, ProjectRole.BACKEND, ApplyStatus.UNREAD, 4.5),
+            ProjectApplicantResponse.of(3L, 30L, ProjectRole.FRONTEND, ApplyStatus.READ, 3.0)
+        );
+
+        when(projectQueryUseCase.queryProjectApplicants(projectId)).thenReturn(applicants);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}/applicants", projectId)
+                .with(user(authenticatedUserDetails)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true))
+            .andExpect(jsonPath("$.result.length()").value(2))
+            .andExpect(jsonPath("$.result[0].userId").value(2))
+            .andExpect(jsonPath("$.result[0].profileId").value(20))
+            .andExpect(jsonPath("$.result[0].role").value("BACKEND"))
+            .andExpect(jsonPath("$.result[0].status").value("UNREAD"))
+            .andExpect(jsonPath("$.result[0].score").value(4.5));
+    }
+
+    @Test
+    void 프로젝트_지원자_조회_요청시_프로젝트가_없으면_404를_반환한다() throws Exception {
+        Long projectId = 999L;
+
+        when(projectQueryUseCase.queryProjectApplicants(projectId))
+            .thenThrow(new ProjectNotFoundException(projectId));
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}/applicants", projectId)
+                .with(user(authenticatedUserDetails)))
+            .andDo(print())
+            .andExpect(status().isNotFound());
     }
 
     @Test

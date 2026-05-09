@@ -46,6 +46,8 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
 
     List<ProjectUserEntity> findAllByProjectId(Long projectId);
 
+    List<ProjectUserEntity> findAllByProjectIdAndStatus(Long projectId, ApplyStatus status);
+
     List<ProjectUserEntity> findByUserIdAndProjectIdIn(Long userId, List<Long> projectIds);
 
     List<ProjectUserEntity> findByProjectIdInAndRole(List<Long> projectIds, ProjectRole role);
@@ -79,5 +81,7 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
     WHERE pu.userId = :userId
     """)
     Long findProjectCountByUserId(@Param("userId") Long userId);
+
+	List<ProjectUserEntity> findAllByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses);
 
 }
