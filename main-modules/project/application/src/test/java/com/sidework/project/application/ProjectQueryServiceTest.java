@@ -115,7 +115,7 @@ class ProjectQueryServiceTest {
         List<String> preferredStacks = List.of("Redis");
 
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectId(projectId)).thenReturn(members);
+        when(projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED)).thenReturn(members);
         when(projectRecruitPositionRepository.getProjectRecruitPositions(projectId)).thenReturn(positions);
         when(projectRequiredQueryUseCase.queryNamesByProjectId(projectId)).thenReturn(requiredStacks);
         when(projectPreferredSkillQueryUseCase.queryNamesByProjectId(projectId)).thenReturn(preferredStacks);
@@ -173,7 +173,7 @@ class ProjectQueryServiceTest {
         Long projectId = 1L;
         Project project = createProject(projectId);
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectId(projectId)).thenReturn(List.of());
+        when(projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED)).thenReturn(List.of());
 
         assertThrows(ProjectHasNoMembersException.class, () -> queryService.queryProjectDetail(userId, projectId));
     }

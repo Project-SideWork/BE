@@ -75,6 +75,12 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
         return entities.stream().map(mapper::toDomain).toList();
     }
 
+	@Override
+	public List<ProjectUser> findAllByProjectIdAndStatus(Long projectId, ApplyStatus status) {
+		List<ProjectUserEntity> entities = repo.findAllByProjectIdAndStatus(projectId, status);
+		return entities.stream().map(mapper::toDomain).toList();
+	}
+
     @Override
     public Map<Long, Long> findOwnerUserIdByProjectIds(List<Long> projectIds) {
         if (projectIds == null || projectIds.isEmpty()) {

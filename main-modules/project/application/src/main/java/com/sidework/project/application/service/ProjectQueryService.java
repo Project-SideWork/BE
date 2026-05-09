@@ -32,6 +32,7 @@ import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
 import com.sidework.project.domain.ProjectUserReview;
 import com.sidework.project.domain.ProjectUserReviewStat;
+import com.sidework.project.domain.ApplyStatus;
 import com.sidework.skill.application.port.in.ProjectPreferredSkillQueryUseCase;
 import com.sidework.skill.application.port.in.ProjectRequiredQueryUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;
@@ -336,7 +337,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
     private List<ProjectUser> deduplicateMembersByUserId(Long projectId)
     {
-        List<ProjectUser> rawMembers = projectUserRepository.findAllByProjectId(projectId);
+        List<ProjectUser> rawMembers = projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED);
         if (rawMembers == null || rawMembers.isEmpty()) {
             throw new ProjectHasNoMembersException(projectId);
         }
