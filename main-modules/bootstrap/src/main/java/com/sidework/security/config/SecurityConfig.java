@@ -114,7 +114,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource AllcorsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:63342", "https://mail.naver.com", "http://180.210.81.232:8080",
                 "https://docktalk.co.kr", "http://localhost:5173" ,"http://localhost:5174",
