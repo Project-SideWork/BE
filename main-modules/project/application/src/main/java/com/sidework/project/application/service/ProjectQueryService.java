@@ -214,13 +214,16 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
         List<Long> userIds = applicants.stream().map(ProjectUser::getUserId).distinct().toList();
         Map<Long, Double> avgScoreByUserId = buildScoreByUserId(userIds);
+        Map<Long, String> nameByUserId = userQueryUseCase.findNamesByUserIds(userIds);
         return applicants.stream()
             .map(a -> ProjectApplicantResponse.of(
                 a.getUserId(),
+                nameByUserId.getOrDefault(a.getUserId(), ""),
                 a.getProfileId(),
                 a.getRole(),
                 a.getStatus(),
-                avgScoreByUserId.get(a.getUserId())
+                avgScoreByUserId.get(a.getUserId()),
+                a.getCreatedAt()
             ))
             .toList();
 

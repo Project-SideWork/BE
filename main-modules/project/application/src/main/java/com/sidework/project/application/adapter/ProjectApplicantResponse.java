@@ -1,16 +1,19 @@
 package com.sidework.project.application.adapter;
 
+import java.time.Instant;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 
 public record ProjectApplicantResponse(
 	Long userId,
+	String userName,
 	Long profileId,
 	ProjectRole role,
 	ApplyStatus status,
-	Double score
+	Double score,
+	Instant createdAt
 ) {
-	public static ProjectApplicantResponse of(Long userId, Long profileId, ProjectRole role, ApplyStatus status, Double score) {
-		return new ProjectApplicantResponse(userId, profileId, role, status, score);
+	public static ProjectApplicantResponse of(Long userId, String userName, Long profileId, ProjectRole role, ApplyStatus status, Double score, Instant createdAt) {
+		return new ProjectApplicantResponse(userId, userName, profileId, role, status, score, createdAt);
 	}
 }
