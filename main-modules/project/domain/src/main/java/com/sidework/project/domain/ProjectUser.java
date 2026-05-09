@@ -1,6 +1,8 @@
 package com.sidework.project.domain;
 
 
+import java.time.Instant;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +24,8 @@ public class ProjectUser {
     private ApplyStatus status;
 
     private ProjectRole role;
+
+    private Instant createdAt;
 
     public static ProjectUser create(Long userId, Long projectId, Long profileId, ApplyStatus status, ProjectRole role) {
         return ProjectUser.builder()

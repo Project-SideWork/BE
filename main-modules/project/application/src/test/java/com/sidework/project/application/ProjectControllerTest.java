@@ -574,8 +574,8 @@ public class ProjectControllerTest {
     void 프로젝트_지원자_조회_요청시_성공하면_200을_반환한다() throws Exception {
         Long projectId = 1L;
         List<ProjectApplicantResponse> applicants = List.of(
-            ProjectApplicantResponse.of(2L, 20L, ProjectRole.BACKEND, ApplyStatus.UNREAD, 4.5),
-            ProjectApplicantResponse.of(3L, 30L, ProjectRole.FRONTEND, ApplyStatus.READ, 3.0)
+            ProjectApplicantResponse.of(2L, "user2", 20L, ProjectRole.BACKEND, ApplyStatus.UNREAD, 4.5, java.time.Instant.EPOCH),
+            ProjectApplicantResponse.of(3L, "user3", 30L, ProjectRole.FRONTEND, ApplyStatus.READ, 3.0, java.time.Instant.EPOCH)
         );
 
         when(projectQueryUseCase.queryProjectApplicants(projectId)).thenReturn(applicants);
