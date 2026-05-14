@@ -4,6 +4,7 @@ import com.sidework.common.response.ApiResponse;
 import com.sidework.user.application.adapter.EmailExistResponse;
 import com.sidework.user.application.port.in.EmailCommand;
 import com.sidework.user.application.port.in.SignUpCommand;
+import com.sidework.user.application.port.in.VerificationCodeCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -81,6 +82,49 @@ public interface UserControllerDocs {
             @RequestBody @Valid EmailCommand command
     );
 
+
+    @Operation(description = "이메일 인증번호 검증")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "인증번호 검증 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "200 예시",
+                                    value = """
+                                        {
+                                          "code": "COMMON_200",
+                                          "message": "성공입니다.",
+                                          "isSuccess": true,
+                                          "result": true
+                                        }
+                                        """
+                            )
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청 또는 인증번호 형식 오류",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "400 예시",
+                                    value = """
+                                        {
+                                          "code": "COMMON_400",
+                                          "message": "인증번호는 6자리 숫자여야 합니다.",
+                                          "isSuccess": false,
+                                          "path": "/api/v1/users/email/verification"
+                                        }
+                                        """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<Boolean>> verifyEmailCode(
+            @RequestBody @Valid VerificationCodeCommand command
+    );
 
     @Operation(description = "회원가입")
     @ApiResponses({

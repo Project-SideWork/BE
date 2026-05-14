@@ -3,7 +3,7 @@ package com.sidework.user.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sidework.common.auth.AuthenticatedUserDetails;
-import com.sidework.common.mail.component.EmailSender;
+import com.sidework.common.mail.component.EmailHelper;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.user.application.port.in.GithubInfoResponse;
 import com.sidework.user.application.port.in.SignUpCommand;
@@ -12,7 +12,6 @@ import com.sidework.user.application.port.in.UserCommandUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -45,7 +44,7 @@ public class UserControllerTest {
     private UserQueryUseCase userQueryUseCase;
 
     @MockitoBean
-    private EmailSender emailSender;
+    private EmailHelper emailHelper;
 
     private final AuthenticatedUserDetails authenticatedUserDetails = new AuthenticatedUserDetails(
             1L, "test@test.com", "테스터", "password");
@@ -152,7 +151,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(true));
 
         verify(userQueryUseCase).checkEmailExists(email);
-        verify(emailSender).processEmailCodeSend(email);
+        verify(emailHelper).processEmailCodeSend(email);
     }
 
     @Test
@@ -176,7 +175,74 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.isSuccess").value(false));
 
         verify(userQueryUseCase).checkEmailExists(email);
-        verify(emailSender, never()).processEmailCodeSend(anyString());
+        verify(emailHelper, never()).processEmailCodeSend(anyString());
+    }
+
+    @Test
+    void 이메일_인증번호_검증시_일치하면_true를_반환한다() throws Exception {
+        // given
+        String email = "test@test.com";
+        String code = "123456";
+
+        when(emailHelper.processVerify(email, code)).thenReturn(true);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/email/verification")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "email": "test@test.com",
+                          "code": "123456"
+                        }
+                        """))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result").value(true));
+
+        verify(emailHelper).processVerify(email, code);
+    }
+
+    @Test
+    void 이메일_인증번호_검증시_일치하지_않으면_false를_반환한다() throws Exception {
+        // given
+        String email = "test@test.com";
+        String code = "000000";
+
+        when(emailHelper.processVerify(email, code)).thenReturn(false);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/email/verification")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "email": "test@test.com",
+                          "code": "000000"
+                        }
+                        """))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result").value(false));
+
+        verify(emailHelper).processVerify(email, code);
+    }
+
+    @Test
+    void 이메일_인증번호_검증시_이메일_형식이_잘못되면_400을_반환한다() throws Exception {
+        // when & then
+        mockMvc.perform(post("/api/v1/users/email/verification")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "email": "invalid-email",
+                          "code": "123456"
+                        }
+                        """))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        verify(emailHelper, never()).processVerify(anyString(), anyString());
     }
 
 
