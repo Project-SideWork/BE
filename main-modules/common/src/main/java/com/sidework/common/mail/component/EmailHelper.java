@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.MailException;
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class EmailSender {
+@Slf4j
+public class EmailHelper {
     private final JavaMailSender javaMailSender;
     private final StringRedisTemplate redisTemplate;
 
@@ -38,6 +41,21 @@ public class EmailSender {
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String EMAIL_PREFIX = "email:verify:";
+
+    public boolean processVerify(String email, String inputCode) {
+        boolean res = verify(email, inputCode);
+        if(res) {
+            redisTemplate.delete(EMAIL_PREFIX + email);
+        }
+        return res;
+    }
+
+    public boolean verify(String email, String inputCode) {
+        String code = redisTemplate.opsForValue().get(EMAIL_PREFIX + email);
+        return Objects.equals(code, inputCode);
     }
 
     public MimeMessage createValidationMessage(String to, String code) throws MessagingException, UnsupportedEncodingException {
