@@ -55,7 +55,6 @@ spring:
             enable: true
           ssl:
             enable: false
-      debug: true
 
   h2:
     console:

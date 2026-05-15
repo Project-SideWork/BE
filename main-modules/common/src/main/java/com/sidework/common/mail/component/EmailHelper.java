@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @RequiredArgsConstructor
@@ -27,35 +30,54 @@ public class EmailHelper {
     @Value("${spring.mail.username}")
     private String id;
 
+    public static final String EMAIL_PREFIX = "email:verify:";
+
+    private static final DefaultRedisScript<Long> VERIFY_AND_DELETE_SCRIPT =
+            new DefaultRedisScript<>(
+                    """
+                    local savedCode = redis.call('GET', KEYS[1])
+                    
+                    if not savedCode then
+                        return 0
+                    end
+                    
+                    if savedCode == ARGV[1] then
+                        redis.call('DEL', KEYS[1])
+                        return 1
+                    end
+
+                    return 0
+                    """,
+                    Long.class
+            );
+
     @Async("emailTaskExecutor")
-    public void processEmailCodeSend(String email) {
+    public CompletableFuture<Void> processEmailCodeSend(String email) {
         String validationCode = createKey();
-        redisTemplate.opsForValue().set(
-                "email:verify:" + email,
-                validationCode,
-                Duration.ofMinutes(5)
-        );
+        String redisKey = "email:verify:" + email;
+
+        redisTemplate.opsForValue().set(redisKey, validationCode, Duration.ofMinutes(5));
+
         try {
             MimeMessage message = createValidationMessage(email, validationCode);
             sendMessage(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            return CompletableFuture.completedFuture(null);
+        } catch (MessagingException | UnsupportedEncodingException | RuntimeException e) {
+            redisTemplate.delete(redisKey);
+            return CompletableFuture.failedFuture(e);
         }
     }
-
-    public static String EMAIL_PREFIX = "email:verify:";
 
     public boolean processVerify(String email, String inputCode) {
-        boolean res = verify(email, inputCode);
-        if(res) {
-            redisTemplate.delete(EMAIL_PREFIX + email);
-        }
-        return res;
-    }
+        String key = EMAIL_PREFIX + email;
+        Long result = redisTemplate.execute(
+                VERIFY_AND_DELETE_SCRIPT,
+                List.of(key),
+                inputCode
+        );
 
-    public boolean verify(String email, String inputCode) {
-        String code = redisTemplate.opsForValue().get(EMAIL_PREFIX + email);
-        return Objects.equals(code, inputCode);
+        return result == 1L;
+
     }
 
     public MimeMessage createValidationMessage(String to, String code) throws MessagingException, UnsupportedEncodingException {
