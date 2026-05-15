@@ -14,6 +14,8 @@ public class TestSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/users/email").permitAll()
                         .requestMatchers("/api/v1/users").permitAll()
+                        .requestMatchers("/api/v1/users/email/validation").permitAll()
+                        .requestMatchers("/api/v1/users/email/verification").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())

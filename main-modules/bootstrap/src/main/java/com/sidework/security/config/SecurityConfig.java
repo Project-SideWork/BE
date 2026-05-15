@@ -81,7 +81,8 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/v1/login","/swagger-ui/**",    // Swagger UI 관련 경로
                                 "/v3/api-docs/**", "/api/v1/users/email" ,"/api/v1/users", "/api/v1/reissue",
-                                "/firebase-messaging-sw.js", "/fcm-test.html", "/health", "/oauth2/authorization/github", "/api/v1/payments/webhook").permitAll()
+                                "/firebase-messaging-sw.js", "/fcm-test.html", "/health", "/oauth2/authorization/github",
+                                "/api/v1/payments/webhook", "/api/v1/users/email/validation", "/api/v1/users/email/verification").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/regions/**", "/login/oauth2/code/github").permitAll()
                         .requestMatchers("/internal/**")
 

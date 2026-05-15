@@ -3,6 +3,7 @@ package com.sidework.user.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sidework.common.auth.AuthenticatedUserDetails;
+import com.sidework.common.mail.component.EmailHelper;
 import com.sidework.common.response.exception.ExceptionAdvice;
 import com.sidework.user.application.port.in.GithubInfoResponse;
 import com.sidework.user.application.port.in.SignUpCommand;
@@ -11,7 +12,6 @@ import com.sidework.user.application.port.in.UserCommandUseCase;
 import com.sidework.user.application.port.in.UserQueryUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 @ContextConfiguration(classes = UserTestApplication.class)
-@Import(TestSecurityConfig.class)
+@Import({TestSecurityConfig.class, ExceptionAdvice.class})
 public class UserControllerTest {
 
     @Autowired
@@ -42,6 +42,9 @@ public class UserControllerTest {
 
     @MockitoBean
     private UserQueryUseCase userQueryUseCase;
+
+    @MockitoBean
+    private EmailHelper emailHelper;
 
     private final AuthenticatedUserDetails authenticatedUserDetails = new AuthenticatedUserDetails(
             1L, "test@test.com", "테스터", "password");
@@ -130,36 +133,118 @@ public class UserControllerTest {
     }
 
     @Test
-    void 이메일_중복_확인시_중복이면_true를_반환한다() throws Exception {
-        // given
-        String email = "test@test.com";
-        when(userQueryUseCase.checkEmailExists(email)).thenReturn(true);
-
-        // when & then
-        mockMvc.perform(get("/api/v1/users/email")
-                        .param("email", email))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.isExist").value(true));
-
-        verify(userQueryUseCase).checkEmailExists(email);
-    }
-
-    @Test
-    void 이메일_중복_확인시_중복이_아니면_false를_반환한다() throws Exception {
+    void 이메일_인증번호_요청시_사용가능한_이메일이면_인증번호를_전송한다() throws Exception {
         // given
         String email = "new@test.com";
         when(userQueryUseCase.checkEmailExists(email)).thenReturn(false);
 
         // when & then
-        mockMvc.perform(get("/api/v1/users/email")
-                        .param("email", email))
+        mockMvc.perform(post("/api/v1/users/email/validation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "email": "new@test.com"
+                        }
+                        """))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.isExist").value(false));
+                .andExpect(jsonPath("$.isSuccess").value(true));
 
         verify(userQueryUseCase).checkEmailExists(email);
+        verify(emailHelper).processEmailCodeSend(email);
     }
+
+    @Test
+    void 이메일_인증번호_요청시_이미_존재하는_이메일이면_409를_반환한다() throws Exception {
+        // given
+        String email = "test@test.com";
+        when(userQueryUseCase.checkEmailExists(email)).thenReturn(true);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/email/validation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "email": "test@test.com"
+                        }
+                        """))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("USER_003"))
+                .andExpect(jsonPath("$.message").value("이미 사용 중인 이메일입니다."))
+                .andExpect(jsonPath("$.isSuccess").value(false));
+
+        verify(userQueryUseCase).checkEmailExists(email);
+        verify(emailHelper, never()).processEmailCodeSend(anyString());
+    }
+
+    @Test
+    void 이메일_인증번호_검증시_일치하면_true를_반환한다() throws Exception {
+        // given
+        String email = "test@test.com";
+        String code = "123456";
+
+        when(emailHelper.processVerify(email, code)).thenReturn(true);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/email/verification")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "email": "test@test.com",
+                          "code": "123456"
+                        }
+                        """))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result").value(true));
+
+        verify(emailHelper).processVerify(email, code);
+    }
+
+    @Test
+    void 이메일_인증번호_검증시_일치하지_않으면_false를_반환한다() throws Exception {
+        // given
+        String email = "test@test.com";
+        String code = "000000";
+
+        when(emailHelper.processVerify(email, code)).thenReturn(false);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/email/verification")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "email": "test@test.com",
+                          "code": "000000"
+                        }
+                        """))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result").value(false));
+
+        verify(emailHelper).processVerify(email, code);
+    }
+
+    @Test
+    void 이메일_인증번호_검증시_이메일_형식이_잘못되면_400을_반환한다() throws Exception {
+        // when & then
+        mockMvc.perform(post("/api/v1/users/email/verification")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                          "email": "invalid-email",
+                          "code": "123456"
+                        }
+                        """))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        verify(emailHelper, never()).processVerify(anyString(), anyString());
+    }
+
 
     @Test
     void 깃허브_정보_확인_성공시_200과_깃허브정보를_반환한다() throws Exception {
