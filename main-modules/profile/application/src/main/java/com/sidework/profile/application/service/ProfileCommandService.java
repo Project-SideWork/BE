@@ -225,6 +225,6 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		if (!hasUserChange) {
 			return;
 		}
-		userCommandUseCase.updateMe(userId, email, name, nickname, age, tel, residenceRegionId);
+		userCommandUseCase.updateMe(userId, email, name, nickname, age, residenceRegionId);
 	}
 }
