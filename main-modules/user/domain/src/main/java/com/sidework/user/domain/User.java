@@ -28,8 +28,6 @@ public class User {
 
     private Integer age;
 
-    private String tel;
-
     private Long residenceRegionId;
 
     private UserType type;
@@ -42,7 +40,6 @@ public class User {
             String nickname,
             String password,
             Integer age,
-            String tel,
             Long residenceRegionId,
             UserType type
     ) {
@@ -52,7 +49,6 @@ public class User {
                 .nickname(nickname)
                 .password(password)
                 .age(age)
-                .tel(tel)
                 .residenceRegionId(residenceRegionId)
                 .type(type)
                 .isActive(true)
@@ -68,7 +64,6 @@ public class User {
         String name,
         String nickname,
         Integer age,
-        String tel,
         Long residenceRegionId
     ) {
         if (email != null) {
@@ -82,9 +77,6 @@ public class User {
         }
         if (age != null) {
             this.age = age;
-        }
-        if (tel != null) {
-            this.tel = tel;
         }
         if (residenceRegionId != null) {
             this.residenceRegionId = residenceRegionId;

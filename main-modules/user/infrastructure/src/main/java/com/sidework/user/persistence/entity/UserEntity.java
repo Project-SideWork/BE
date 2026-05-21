@@ -47,10 +47,6 @@ public class UserEntity extends BaseEntity {
     @Column(name = "age", nullable = false)
     private Integer age;
 
-    // 전화번호
-    @Column(name = "tel", nullable = false, length = 20)
-    private String tel;
-
     // 거주지
     @Column(name = "residence_region_id", nullable = false)
     private Long residenceRegionId;
