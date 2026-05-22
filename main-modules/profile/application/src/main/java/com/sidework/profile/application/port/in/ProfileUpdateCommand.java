@@ -12,7 +12,6 @@ public record ProfileUpdateCommand(
 	String name,
 	String nickname,
 	Integer age,
-	String tel,
 	Long residenceRegionId,
 	List<SchoolUpdateRequest> schools,
 	List<PortfolioUpdateRequest> portfolios,

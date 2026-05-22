@@ -44,7 +44,6 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 			command.name(),
 			command.nickname(),
 			command.age(),
-			command.tel(),
 			command.residenceRegionId()
 		);
 		Profile profile = getProfileOrThrow(userId);
@@ -212,7 +211,6 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 		String name,
 		String nickname,
 		Integer age,
-		String tel,
 		Long residenceRegionId
 	) {
 		boolean hasUserChange =
@@ -220,7 +218,6 @@ public class ProfileCommandService implements ProfileCommandUseCase {
 				name != null ||
 				nickname != null ||
 				age != null ||
-				tel != null ||
 				residenceRegionId != null;
 		if (!hasUserChange) {
 			return;

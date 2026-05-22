@@ -12,6 +12,7 @@ import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = false)
+@Slf4j
 public class UserCommandService implements UserCommandUseCase {
     private final RegionOutPort regionRepository;
     private final UserOutPort userRepository;
@@ -28,12 +30,11 @@ public class UserCommandService implements UserCommandUseCase {
 
     @Override
     public void signUp(SignUpCommand command) {
-        Long residenceRegionId = command.residenceRegionId();;
+        Long residenceRegionId = command.residenceRegionId();
         checkRegionValidation(residenceRegionId);
         checkCommandInfoValidation(command.email(), command.nickname());
         User user = User.create(command.email(), command.name(), command.nickname(), encodePassword(command.password())
                 , command.age(), residenceRegionId, UserType.LOCAL);
-
         Long userId = userRepository.save(user);
         eventPublisher.publishEvent(new SignUpCompleteEvent(userId));
     }

@@ -48,6 +48,7 @@ public class UserController implements UserControllerDocs {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> postNewUser(@RequestBody @Validated SignUpCommand command) {
+        log.info("controller");
         commandService.signUp(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
     }

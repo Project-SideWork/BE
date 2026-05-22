@@ -640,7 +640,6 @@ class ProfileQueryServiceTest {
 			.nickname("길동이")
 			.password("password123!")
 			.age(25)
-			.tel("010-1234-5678")
 			.type(UserType.LOCAL)
 			.isActive(true)
 			.build();
