@@ -37,8 +37,6 @@ public class UserPersistenceAdapter implements UserOutPort {
     @Override
     public boolean existsByNickname(String nickname) { return repo.existsByNickname(nickname); }
 
-    @Override
-    public boolean existsByTel(String tel) { return repo.existsByTel(tel); }
 
     @Override
     public boolean existsByEmailExcludingUserId(String email, Long excludeUserId) {
@@ -50,10 +48,6 @@ public class UserPersistenceAdapter implements UserOutPort {
         return repo.existsByNicknameAndIdNot(nickname, excludeUserId);
     }
 
-    @Override
-    public boolean existsByTelExcludingUserId(String tel, Long excludeUserId) {
-        return repo.existsByTelAndIdNot(tel, excludeUserId);
-    }
 
     @Override
     public User findById(Long id) {

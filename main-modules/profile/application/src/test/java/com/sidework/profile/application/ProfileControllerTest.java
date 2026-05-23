@@ -352,7 +352,7 @@ class ProfileControllerTest {
                 .andExpect(jsonPath("$.result.size").value(5))
                 .andExpect(jsonPath("$.result.totalElements").value(12))
                 .andExpect(jsonPath("$.result.totalPages").value(3))
-                .andExpect(jsonPath("$.result.content[0].title").value("테스트 프로젝트"))
+                .andExpect(jsonPath("$.result.content[0].projectTitle").value("테스트 프로젝트"))
                 .andExpect(jsonPath("$.result.content[0].comment").value("좋은 팀원이었습니다."))
                 .andExpect(jsonPath("$.result.content[0].score").value(4.5))
                 .andExpect(jsonPath("$.result.content[0].reviewDt").value("2026-05-01"));
@@ -434,7 +434,6 @@ class ProfileControllerTest {
 			"홍길동",         // name
 			"길동이",         // nickname
 			25,              // age
-			"010-1234-5678", // tel
 			1L,              // residenceRegionId
 			List.of(
 				new ProfileUpdateCommand.SchoolUpdateRequest(
@@ -467,9 +466,7 @@ class ProfileControllerTest {
 			"홍길동",
 			"길동이",
 			25,
-			"010-1234-5678",
 			1L,
-
 			1L,
 			10L,
 			null,
@@ -490,7 +487,6 @@ class ProfileControllerTest {
 			"홍길동",
 			"길동이",
 			25,
-			"010-1234-5678",
 			1L,
 			10L,
 			null,

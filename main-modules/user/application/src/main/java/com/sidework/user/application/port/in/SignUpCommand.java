@@ -11,7 +11,6 @@ public record SignUpCommand(
         @Min(value = 19, message = "나이는 19살 이상이어야 합니다.")
         @Max(value = 100, message = "나이는 100살을 초과할 수 없습니다.")
         Integer age,
-        @NotNull String tel,
         @NotNull @Positive Long residenceRegionId
 ) {
 }

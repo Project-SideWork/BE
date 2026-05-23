@@ -17,7 +17,6 @@ public record UserProfileResponse(
 	String name,
 	String nickname,
 	Integer age,
-	String tel,
 	Long regionId,
 	Long parentRegionId,
 	Long profileId,

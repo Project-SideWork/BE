@@ -12,6 +12,7 @@ import com.sidework.user.application.port.out.UserOutPort;
 import com.sidework.user.domain.User;
 import com.sidework.user.domain.UserType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = false)
+@Slf4j
 public class UserCommandService implements UserCommandUseCase {
     private final RegionOutPort regionRepository;
     private final UserOutPort userRepository;
@@ -28,25 +30,24 @@ public class UserCommandService implements UserCommandUseCase {
 
     @Override
     public void signUp(SignUpCommand command) {
-        Long residenceRegionId = command.residenceRegionId();;
+        Long residenceRegionId = command.residenceRegionId();
         checkRegionValidation(residenceRegionId);
-        checkCommandInfoValidation(command.email(), command.nickname(), command.tel());
+        checkCommandInfoValidation(command.email(), command.nickname());
         User user = User.create(command.email(), command.name(), command.nickname(), encodePassword(command.password())
-                , command.age(), command.tel(), residenceRegionId, UserType.LOCAL);
-
+                , command.age(), residenceRegionId, UserType.LOCAL);
         Long userId = userRepository.save(user);
         eventPublisher.publishEvent(new SignUpCompleteEvent(userId));
     }
 
     @Override
-    public void updateMe(Long userId, String email, String name, String nickname, Integer age, String tel, Long residenceRegionId) {
+    public void updateMe(Long userId, String email, String name, String nickname, Integer age, Long residenceRegionId) {
         User current = userRepository.findById(userId);
-        checkUpdateInfoValidation(userId, current, email, nickname, tel, residenceRegionId);
-        current.update(email, name, nickname, age, tel, residenceRegionId);
+        checkUpdateInfoValidation(userId, current, email, nickname, residenceRegionId);
+        current.update(email, name, nickname, age, residenceRegionId);
         userRepository.save(current);
     }
 
-    private void checkUpdateInfoValidation(Long userId, User current, String email, String nickname, String tel, Long residenceRegionId) {
+    private void checkUpdateInfoValidation(Long userId, User current, String email, String nickname, Long residenceRegionId) {
         if (residenceRegionId != null) {
             checkRegionValidation(residenceRegionId);
         }
@@ -58,11 +59,6 @@ public class UserCommandService implements UserCommandUseCase {
         if (nickname != null && !nickname.equals(current.getNickname())) {
             if (userRepository.existsByNicknameExcludingUserId(nickname, userId)) {
                 throw new DuplicatedInformationException(ErrorStatus.NICKNAME_ALREADY_EXISTS);
-            }
-        }
-        if (tel != null && !tel.equals(current.getTel())) {
-            if (userRepository.existsByTelExcludingUserId(tel, userId)) {
-                throw new DuplicatedInformationException(ErrorStatus.TEL_ALREADY_EXISTS);
             }
         }
     }
@@ -81,9 +77,8 @@ public class UserCommandService implements UserCommandUseCase {
         }
     }
 
-    private void checkCommandInfoValidation(String email, String nickname, String tel) {
+    private void checkCommandInfoValidation(String email, String nickname) {
         if(userRepository.existsByEmail(email)) throw new DuplicatedInformationException(ErrorStatus.EMAIL_ALREADY_EXISTS);
         if(userRepository.existsByNickname(nickname)) throw new DuplicatedInformationException(ErrorStatus.NICKNAME_ALREADY_EXISTS);
-        if(userRepository.existsByTel(tel)) throw new DuplicatedInformationException(ErrorStatus.TEL_ALREADY_EXISTS);
     }
 }

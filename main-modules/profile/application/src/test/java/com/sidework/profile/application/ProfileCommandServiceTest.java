@@ -391,7 +391,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			null, // schools
 			null, // portfolios
@@ -428,7 +427,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			new ArrayList<>(), // schools
 			new ArrayList<>(), // portfolios
@@ -443,7 +441,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			List.of(
 				new ProfileUpdateCommand.SchoolUpdateRequest(
@@ -466,7 +463,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			null, // schools
 			null, // portfolios
@@ -484,7 +480,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			null, // schools
 			new ArrayList<>(), // portfolios
@@ -499,7 +494,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			null, // schools
 			List.of(
@@ -523,7 +517,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			null, // schools
 			List.of(
@@ -547,7 +540,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			null, // schools
 			List.of(
@@ -579,7 +571,6 @@ class ProfileCommandServiceTest {
 			null, // name
 			null, // nickname
 			null, // age
-			null, // tel
 			null, // residenceRegionId
 			List.of(
 				new ProfileUpdateCommand.SchoolUpdateRequest(

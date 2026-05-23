@@ -280,7 +280,6 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678",
                 1L
         );
     }
@@ -292,7 +291,6 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678",
                 1L
         );
     }
@@ -304,7 +302,6 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678",
                 1L
         );
     }
@@ -316,7 +313,6 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 18,
-                "010-1234-5678",
                 1L
         );
     }
@@ -328,7 +324,6 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 101,
-                "010-1234-5678",
                 1L
         );
     }
@@ -340,7 +335,6 @@ public class UserControllerTest {
                 "홍길동",
                 "길동",
                 20,
-                "010-1234-5678",
                 1L
         );
     }
