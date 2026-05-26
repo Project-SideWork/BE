@@ -18,6 +18,8 @@ public class User {
 
     private String githubAccessToken;
 
+    private String githubProfileUrl;
+
     private String email;
 
     private String name;
@@ -83,9 +85,10 @@ public class User {
         }
     }
 
-    public void addGithubInfo(Long githubId, String githubLoginName, String encodedToken) {
+    public void addGithubInfo(Long githubId, String githubLoginName, String encodedToken, String githubProfileUrl) {
         this.githubId = githubId;
         this.githubLoginName = githubLoginName;
         this.githubAccessToken = encodedToken;
+        this.githubProfileUrl = githubProfileUrl;
     }
 }
