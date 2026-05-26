@@ -81,8 +81,10 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 		}
 
 		boolean isLiked = profileLikeQueryUseCase.isLiked(viewerUserId, profile.getId());
+        boolean isGithubAccountLinked = user.getGithubId() != null && user.getGithubAccessToken() != null
+                && user.getGithubLoginName() != null && user.getGithubProfileUrl() != null;
 
-		return buildProfileResponse(user, profile, isLiked);
+		return buildProfileResponse(user, profile, isLiked, isGithubAccountLinked);
 	}
 
 	@Override
@@ -157,7 +159,8 @@ public class ProfileQueryService implements ProfileQueryUseCase {
     private UserProfileResponse buildProfileResponse(
 		User user,
 		Profile profile,
-		boolean isLiked
+		boolean isLiked,
+        boolean githubAccountLinked
 	) {
 		RegionResidenceInfo r = loadResidence(user.getResidenceRegionId());
 
@@ -177,7 +180,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			buildSchoolInfos(profile.getId()),
 			buildSkillInfos(profile.getId()),
 			buildPortfolioInfos(profile.getId()),
-			isLiked
+			isLiked, githubAccountLinked
 		);
 	}
 
@@ -202,7 +205,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			List.of(),
 			List.of(),
 			List.of(),
-			null
+			false, false
 		);
 	}
 
