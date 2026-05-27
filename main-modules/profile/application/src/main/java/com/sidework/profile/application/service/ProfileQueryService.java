@@ -76,13 +76,15 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 	public UserProfileResponse getProfileByUserId(Long viewerUserId, Long targetUserId) {
 		User user = userQueryUseCase.findById(targetUserId);
         Profile profile = profileRepository.getProfileByUserId(targetUserId);
-		if (profile == null) {
-			return buildResponseWhenNoProfile(user);
-		}
-
-		boolean isLiked = profileLikeQueryUseCase.isLiked(viewerUserId, profile.getId());
         boolean isGithubAccountLinked = user.getGithubId() != null && user.getGithubAccessToken() != null
                 && user.getGithubLoginName() != null && user.getGithubProfileUrl() != null;
+
+        if (profile == null) {
+            return buildResponseWhenNoProfile(user, isGithubAccountLinked);
+        }
+
+        boolean isLiked = profileLikeQueryUseCase.isLiked(viewerUserId, profile.getId());
+
 
 		return buildProfileResponse(user, profile, isLiked, isGithubAccountLinked);
 	}
@@ -186,7 +188,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 
 
 	private UserProfileResponse buildResponseWhenNoProfile(
-		User user
+		User user, boolean isGithubAccountLinked
 	) {
 		RegionResidenceInfo r = loadResidence(user.getResidenceRegionId());
 		return new UserProfileResponse(
@@ -205,7 +207,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			List.of(),
 			List.of(),
 			List.of(),
-			false, false
+			false, isGithubAccountLinked
 		);
 	}
 
