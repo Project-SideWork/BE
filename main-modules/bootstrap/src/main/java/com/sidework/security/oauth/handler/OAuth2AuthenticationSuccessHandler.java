@@ -65,9 +65,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             String githubAccessToken = client.getAccessToken().getTokenValue();
             String login = (String) oauthToken.getPrincipal().getAttributes().get("login");
             String email = jwtUtil.getEmail(accessToken);
+            String githubProfileUrl = (String) oauthToken.getPrincipal()
+                    .getAttributes()
+                    .get("html_url");
 
             User user = userRepository.findByEmail(email);
-            user.addGithubInfo(githubId, login, encryptor.encrypt(githubAccessToken));
+            user.addGithubInfo(githubId, login, encryptor.encrypt(githubAccessToken), githubProfileUrl);
             userRepository.save(user);
         }
 
@@ -85,6 +88,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                         Authentication authentication) {
 
         String targetUrl = "http://growp.publicvm.com/api/health";
+        //String targetUrl = "http://localhost:8080";
 
         log.info("targetUrl: {}", targetUrl);
 

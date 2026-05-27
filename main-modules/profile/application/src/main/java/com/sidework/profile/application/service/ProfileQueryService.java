@@ -76,13 +76,17 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 	public UserProfileResponse getProfileByUserId(Long viewerUserId, Long targetUserId) {
 		User user = userQueryUseCase.findById(targetUserId);
         Profile profile = profileRepository.getProfileByUserId(targetUserId);
-		if (profile == null) {
-			return buildResponseWhenNoProfile(user);
-		}
+        boolean isGithubAccountLinked = user.getGithubId() != null && user.getGithubAccessToken() != null
+                && user.getGithubLoginName() != null && user.getGithubProfileUrl() != null;
 
-		boolean isLiked = profileLikeQueryUseCase.isLiked(viewerUserId, profile.getId());
+        if (profile == null) {
+            return buildResponseWhenNoProfile(user, isGithubAccountLinked);
+        }
 
-		return buildProfileResponse(user, profile, isLiked);
+        boolean isLiked = profileLikeQueryUseCase.isLiked(viewerUserId, profile.getId());
+
+
+		return buildProfileResponse(user, profile, isLiked, isGithubAccountLinked);
 	}
 
 	@Override
@@ -157,7 +161,8 @@ public class ProfileQueryService implements ProfileQueryUseCase {
     private UserProfileResponse buildProfileResponse(
 		User user,
 		Profile profile,
-		boolean isLiked
+		boolean isLiked,
+        boolean githubAccountLinked
 	) {
 		RegionResidenceInfo r = loadResidence(user.getResidenceRegionId());
 
@@ -177,13 +182,13 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			buildSchoolInfos(profile.getId()),
 			buildSkillInfos(profile.getId()),
 			buildPortfolioInfos(profile.getId()),
-			isLiked
+			isLiked, githubAccountLinked
 		);
 	}
 
 
 	private UserProfileResponse buildResponseWhenNoProfile(
-		User user
+		User user, boolean isGithubAccountLinked
 	) {
 		RegionResidenceInfo r = loadResidence(user.getResidenceRegionId());
 		return new UserProfileResponse(
@@ -202,7 +207,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 			List.of(),
 			List.of(),
 			List.of(),
-			null
+			false, isGithubAccountLinked
 		);
 	}
 

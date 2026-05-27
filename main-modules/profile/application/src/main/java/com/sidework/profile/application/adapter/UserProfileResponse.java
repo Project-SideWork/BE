@@ -27,7 +27,8 @@ public record UserProfileResponse(
 	List<SchoolInfo> schools, // 학교 장보
 	List<SkillInfo> skills, //기술 스택
 	List<PortfolioInfo> portfolios, // 포폴 정보
-	Boolean isLiked
+	boolean isLiked,
+    boolean githubAccountLinked
 ) {
 	public record RoleInfo(
 		Long roleId,
