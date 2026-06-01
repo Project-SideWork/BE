@@ -107,7 +107,7 @@ class ProjectPromotionQueryServiceTest {
 			.projectId(projectId)
 			.userId(1L)
 			.description("홍보 설명")
-			.demoUrl("https://demo")
+			.demoUrl("https://www.demourl.com")
 			.build();
 
 		Project project = Project.builder()
@@ -139,12 +139,13 @@ class ProjectPromotionQueryServiceTest {
 			.thenReturn(List.of(ProjectUserReviewStat.create(5L, 10.0, 2)));
 		when(userQueryUseCase.findNamesByUserIds(List.of(5L))).thenReturn(Map.of(5L, "이름"));
 
-		ProjectPromotionDetailResponse result = service.queryProjectPromotionDetail(promotionId, projectId);
+		ProjectPromotionDetailResponse result = service.queryProjectPromotionDetail(promotionId);
 
 		assertEquals(projectId, result.projectId());
 		assertEquals(promotionId, result.promotionId());
 		assertEquals("제목", result.title());
 		assertEquals("홍보 설명", result.description());
+		assertEquals("https://www.demourl.com", result.demoUrl());
 		assertEquals(MeetingType.HYBRID, result.meetingType());
 		assertEquals(List.of("Go"), result.usedStacks());
 		assertEquals("부산", result.meetingPlace());

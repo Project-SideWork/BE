@@ -62,7 +62,7 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 	}
 
 	@Override
-	public ProjectPromotionDetailResponse queryProjectPromotionDetail(Long promotionId, Long projectId) {
+	public ProjectPromotionDetailResponse queryProjectPromotionDetail(Long promotionId) {
 		ProjectPromotion promotion = loadPromotionOrThrow(promotionId);
 
 		Project project = loadProjectOrThrow(promotion.getProjectId());
@@ -122,6 +122,7 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 			promotion.getId(),
 			project.getTitle(),
 			promotion.getDescription(),
+            promotion.getDemoUrl(),
 			project.getMeetingType(),
 			usedSkillNames,
 			meetingPlace,

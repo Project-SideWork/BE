@@ -11,6 +11,7 @@ public record ProjectPromotionDetailResponse(
 	Long promotionId,
 	String title,
 	String description,
+    String demoUrl,
 	MeetingType meetingType,
 	List<String> usedStacks,
 	String meetingPlace,
