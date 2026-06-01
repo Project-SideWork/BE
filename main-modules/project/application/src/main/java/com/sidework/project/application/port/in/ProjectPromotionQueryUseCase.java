@@ -11,6 +11,6 @@ import com.sidework.project.application.adapter.ProjectPromotionListResponse;
 public interface ProjectPromotionQueryUseCase {
 
 	PageResponse<List<ProjectPromotionListResponse>> queryProjectPromotionList(String keyword, List<Long> skillIds, Pageable pageable);
-	ProjectPromotionDetailResponse queryProjectPromotionDetail(Long promotionId, Long projectId);
+	ProjectPromotionDetailResponse queryProjectPromotionDetail(Long promotionId);
 
 }
