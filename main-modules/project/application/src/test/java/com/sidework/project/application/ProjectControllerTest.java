@@ -899,6 +899,7 @@ public class ProjectControllerTest {
             promotionId,
             "프로젝트 제목",
             "홍보 본문",
+            "https://www.demourl.com",
             MeetingType.ONLINE,
             List.of("Java", "Spring"),
             "서울",
@@ -906,10 +907,10 @@ public class ProjectControllerTest {
             List.of(member)
         );
 
-        when(projectPromotionQueryUseCase.queryProjectPromotionDetail(eq(promotionId), eq(projectId)))
+        when(projectPromotionQueryUseCase.queryProjectPromotionDetail(eq(promotionId)))
             .thenReturn(detail);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}/promotions/{promotionId}", projectId, promotionId)
+        mockMvc.perform(get("/api/v1/projects/promotions/{promotionId}", promotionId)
                 .with(user(authenticatedUserDetails)))
             .andDo(print())
             .andExpect(status().isOk())
@@ -930,18 +931,17 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.result.teamMembers[0].status").value(ApplyStatus.ACCEPTED.name()))
             .andExpect(jsonPath("$.result.teamMembers[0].score").value(4.5));
 
-        verify(projectPromotionQueryUseCase).queryProjectPromotionDetail(promotionId, projectId);
+        verify(projectPromotionQueryUseCase).queryProjectPromotionDetail(promotionId);
     }
 
     @Test
     void 프로젝트_홍보글_상세_조회시_홍보를_찾을_수_없으면_404를_반환한다() throws Exception {
-        Long projectId = 10L;
         Long promotionId = 99L;
 
-        when(projectPromotionQueryUseCase.queryProjectPromotionDetail(eq(promotionId), eq(projectId)))
+        when(projectPromotionQueryUseCase.queryProjectPromotionDetail(eq(promotionId)))
             .thenThrow(new ProjectPromotionNotFoundException(promotionId));
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}/promotions/{promotionId}", projectId, promotionId)
+        mockMvc.perform(get("/api/v1/projects/promotions/{promotionId}", promotionId)
                 .with(user(authenticatedUserDetails)))
             .andDo(print())
             .andExpect(status().isNotFound());

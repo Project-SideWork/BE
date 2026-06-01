@@ -538,7 +538,6 @@ public interface ProjectControllerDocs {
             )
     })
     ResponseEntity<ApiResponse<ProjectPromotionDetailResponse>> getProjectPromotion(
-            @PathVariable("projectId") Long projectId,
             @PathVariable("promotionId") Long promotionId
     );
 

@@ -199,13 +199,12 @@ public class ProjectController implements ProjectControllerDocs {
         );
     }
 
-    @GetMapping("/{projectId}/promotions/{promotionId}")
+    @GetMapping("/promotions/{promotionId}")
     public ResponseEntity<ApiResponse<ProjectPromotionDetailResponse>> getProjectPromotion(
-        @PathVariable("projectId") Long projectId,
         @PathVariable("promotionId") Long promotionId){
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                promotionQueryService.queryProjectPromotionDetail(promotionId,projectId))
+                promotionQueryService.queryProjectPromotionDetail(promotionId))
         );
     }
 
