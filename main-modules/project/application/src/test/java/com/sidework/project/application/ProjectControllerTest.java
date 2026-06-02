@@ -35,9 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -51,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ProjectController.class)
 @ContextConfiguration(classes = ProjectTestApplication.class)
-@Import(ExceptionAdvice.class)
+@Import({ExceptionAdvice.class, TestSecurityConfig.class})
 public class ProjectControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -778,6 +776,41 @@ public class ProjectControllerTest {
     }
 
     @Test
+    void 비로그인_사용자도_프로젝트_상세_조회시_200과_상세_응답을_반환한다() throws Exception {
+        Long projectId = 1L;
+
+        ProjectDetailResponse detail = new ProjectDetailResponse(
+                1L,
+                "테스트 프로젝트",
+                "설명",
+                java.time.LocalDate.of(2025, 1, 1),
+                java.time.LocalDate.of(2025, 3, 31),
+                MeetingType.HYBRID,
+                ProjectStatus.RECRUITING,
+                List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED, 4.5)),
+                List.of(ProjectDetailResponse.RecruitPositionResponse.of(ProjectRole.BACKEND, 1, 0, SkillLevel.JUNIOR)),
+                List.of("Java", "Spring"),
+                List.of("Redis"),
+                ProjectDetailResponse.ProjectRetrospectiveResponse.of("백엔드", "협업", "일정", "문서화")
+        );
+
+        when(projectQueryUseCase.queryProjectDetail(isNull(), eq(projectId)))
+                .thenReturn(detail);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.id").value(1))
+                .andExpect(jsonPath("$.result.title").value("테스트 프로젝트"))
+                .andExpect(jsonPath("$.result.teamMembers").isArray())
+                .andExpect(jsonPath("$.result.requiredStacks").isArray())
+                .andExpect(jsonPath("$.result.preferredStacks").isArray());
+
+        verify(projectQueryUseCase).queryProjectDetail(isNull(), eq(projectId));
+    }
+
+    @Test
     void 프로젝트_상세_조회_요청시_projectId가_존재하지_않으면_404를_반환한다() throws Exception {
         Long userId = authenticatedUserDetails.getId();
         Long projectId = 999L;
@@ -788,6 +821,21 @@ public class ProjectControllerTest {
                 .with(user(authenticatedUserDetails)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 비로그인_사용자가_존재하지_않는_프로젝트_상세_조회시_404를_반환한다() throws Exception {
+        Long projectId = 999L;
+
+        doThrow(new ProjectNotFoundException(projectId))
+                .when(projectQueryUseCase)
+                .queryProjectDetail(isNull(), eq(projectId));
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}", projectId))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+
+        verify(projectQueryUseCase).queryProjectDetail(isNull(), eq(projectId));
     }
 
     @Test
@@ -839,6 +887,50 @@ public class ProjectControllerTest {
             .andExpect(jsonPath("$.isSuccess").value(true))
             .andExpect(jsonPath("$.result.content[0].projectId").value(1))
             .andExpect(jsonPath("$.result.content[0].title").value("테스트 프로젝트"));
+    }
+
+    @Test
+    void 비로그인_사용자도_프로젝트_리스트_조회시_200과_PageResponse를_반환한다() throws Exception {
+        String keyword = "테스트";
+        List<Long> skillIds = List.of(1L, 2L);
+
+        ProjectListResponse listItem = ProjectListResponse.of(
+                1L,
+                "테스트 프로젝트",
+                "설명",
+                ProjectStatus.RECRUITING,
+                false,
+                List.of(),
+                List.of("Java", "Spring"),
+                "테스트유저"
+        );
+
+        PageResponse<List<ProjectListResponse>> pageResponse =
+                PageResponse.of(List.of(listItem), 0, 20, 1, 1);
+
+        when(projectQueryUseCase.queryProjectList(
+                isNull(),
+                eq(keyword),
+                eq(skillIds),
+                any()
+        )).thenReturn(pageResponse);
+
+        mockMvc.perform(get("/api/v1/projects")
+                        .param("keyword", keyword)
+                        .param("skillIds", "1", "2"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.content[0].projectId").value(1))
+                .andExpect(jsonPath("$.result.content[0].title").value("테스트 프로젝트"))
+                .andExpect(jsonPath("$.result.content[0].liked").value(false));
+
+        verify(projectQueryUseCase).queryProjectList(
+                isNull(),
+                eq(keyword),
+                eq(skillIds),
+                any()
+        );
     }
 
     @Test

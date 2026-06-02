@@ -161,6 +161,82 @@ class ProjectQueryServiceTest {
     }
 
     @Test
+    void queryProjectDetail_userId가_null이면_회고없이_공통_상세정보를_반환한다() {
+        Long userId = null;
+        Long projectId = 1L;
+
+        Project project = createProject(projectId);
+
+        List<ProjectUser> members = List.of(
+                ProjectUser.builder()
+                        .userId(1L)
+                        .profileId(10L)
+                        .role(ProjectRole.OWNER)
+                        .status(ApplyStatus.ACCEPTED)
+                        .build(),
+                ProjectUser.builder()
+                        .userId(2L)
+                        .profileId(20L)
+                        .role(ProjectRole.BACKEND)
+                        .status(ApplyStatus.ACCEPTED)
+                        .build()
+        );
+
+        List<ProjectRecruitPosition> positions = List.of(
+                ProjectRecruitPosition.builder()
+                        .projectId(projectId)
+                        .role(ProjectRole.BACKEND)
+                        .headCount(1)
+                        .currentCount(0)
+                        .level(SkillLevel.JUNIOR)
+                        .build()
+        );
+
+        List<String> requiredStacks = List.of("Java", "Spring");
+        List<String> preferredStacks = List.of("Redis");
+
+        when(projectRepository.findById(projectId)).thenReturn(project);
+        when(projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED))
+                .thenReturn(members);
+        when(projectRecruitPositionRepository.getProjectRecruitPositions(projectId))
+                .thenReturn(positions);
+        when(projectRequiredQueryUseCase.queryNamesByProjectId(projectId))
+                .thenReturn(requiredStacks);
+        when(projectPreferredSkillQueryUseCase.queryNamesByProjectId(projectId))
+                .thenReturn(preferredStacks);
+        when(projectUserReviewStatRepository.getAllReviewStatsByUserIds(anyList()))
+                .thenReturn(List.of(
+                        ProjectUserReviewStat.builder().userId(1L).ratingScore(18.0).ratingCount(4L).build(),
+                        ProjectUserReviewStat.builder().userId(2L).ratingScore(8.0).ratingCount(2L).build()
+                ));
+
+        ProjectDetailResponse result = queryService.queryProjectDetail(userId, projectId);
+
+        assertNotNull(result);
+        assertEquals(projectId, result.id());
+        assertEquals("테스트 프로젝트", result.title());
+        assertEquals("설명", result.description());
+        assertEquals(MeetingType.HYBRID, result.meetingType());
+        assertEquals(ProjectStatus.RECRUITING, result.status());
+
+        assertEquals(2, result.teamMembers().size());
+        assertEquals(1, result.recruitPositions().size());
+        assertEquals(requiredStacks, result.requiredStacks());
+        assertEquals(preferredStacks, result.preferredStacks());
+
+        assertNull(result.retrospective());
+
+        verify(projectRepository).findById(projectId);
+        verify(projectUserRepository).findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED);
+        verify(projectRecruitPositionRepository).getProjectRecruitPositions(projectId);
+        verify(projectRequiredQueryUseCase).queryNamesByProjectId(projectId);
+        verify(projectPreferredSkillQueryUseCase).queryNamesByProjectId(projectId);
+        verify(projectUserReviewStatRepository).getAllReviewStatsByUserIds(anyList());
+
+        verify(projectRetrospectiveOutPort, never()).findByProjectIdAndUserId(anyLong(), anyLong());
+    }
+
+    @Test
     void queryProjectDetail_프로젝트가_없으면_ProjectNotFoundException을_던진다() {
         Long projectId = 999L;
         when(projectRepository.findById(projectId)).thenReturn(null);
@@ -277,6 +353,70 @@ class ProjectQueryServiceTest {
         assertEquals(0, result.totalElements());
         assertEquals(0, result.totalPages());
         verify(projectRepository).findPage(pageable);
+    }
+
+    @Test
+    void queryProjectList_userId가_null이면_좋아요_조회없이_프로젝트_목록을_반환한다() {
+        Long userId = null;
+        String keyword = "테스트";
+        List<Long> skillIds = List.of(1L, 2L);
+        Pageable pageable = PageRequest.of(0, 20);
+
+        Project project1 = createProject(1L);
+        Project project2 = createProject(2L);
+
+        Page<Project> page = new PageImpl<>(List.of(project1, project2), pageable, 2);
+
+        List<ProjectRecruitPosition> positions1 = List.of(
+                ProjectRecruitPosition.builder()
+                        .projectId(1L)
+                        .role(ProjectRole.BACKEND)
+                        .headCount(1)
+                        .currentCount(0)
+                        .level(SkillLevel.JUNIOR)
+                        .build()
+        );
+
+        when(projectRepository.search(keyword, skillIds, pageable))
+                .thenReturn(page);
+
+        when(projectRepository.getProjectRecruitPositionsByProjectIds(List.of(1L, 2L)))
+                .thenReturn(Map.of(1L, positions1, 2L, List.of()));
+
+        when(projectRequiredQueryUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
+                .thenReturn(Map.of(
+                        1L, List.of("Java", "Spring"),
+                        2L, List.of("React")
+                ));
+
+        when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L, 2L)))
+                .thenReturn(Map.of(1L, 10L, 2L, 10L));
+
+        when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
+                .thenReturn(Map.of(10L, "테스트유저"));
+
+        PageResponse<List<ProjectListResponse>> result =
+                queryService.queryProjectList(userId, keyword, skillIds, pageable);
+
+        assertNotNull(result);
+        assertEquals(2, result.content().size());
+        assertEquals(2, result.totalElements());
+
+        ProjectListResponse first = result.content().get(0);
+        assertEquals(1L, first.projectId());
+        assertEquals("테스트 프로젝트", first.title());
+        assertEquals(List.of("Java", "Spring"), first.requiredStacks());
+        assertEquals("테스트유저", first.creatorName());
+        assertFalse(first.liked());
+
+        ProjectListResponse second = result.content().get(1);
+        assertEquals(2L, second.projectId());
+        assertEquals(List.of("React"), second.requiredStacks());
+        assertEquals("테스트유저", second.creatorName());
+        assertFalse(second.liked());
+
+        verify(projectRepository).search(keyword, skillIds, pageable);
+        verify(projectLikeQueryUseCase, never()).isLikedByProjectIds(anyLong(), anyList());
     }
 
     @Test
