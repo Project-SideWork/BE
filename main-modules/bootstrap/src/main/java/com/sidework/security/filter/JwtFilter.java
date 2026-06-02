@@ -29,6 +29,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final TokenBlackListService tokenBlackListService;
 
+
+    //TODO: Http Method로 필터링 필요
     private static final List<String> ALLOW_ORIGINS = List.of(
             "/api/v1/login",
             "/swagger-ui/**",
@@ -46,7 +48,9 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/v1/users/email",
             "/api/v1/payments/webhook",
             "/api/v1/users/email/validation",
-            "/api/v1/users/email/verification"
+            "/api/v1/users/email/verification",
+            "/api/v1/projects", "/api/v1/projects/promotions",
+            "/api/v1/projects/*", "/api/v1/projects/promotions/*"
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";
