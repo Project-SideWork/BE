@@ -232,8 +232,7 @@ class ProjectQueryServiceTest {
         verify(projectRequiredQueryUseCase).queryNamesByProjectId(projectId);
         verify(projectPreferredSkillQueryUseCase).queryNamesByProjectId(projectId);
         verify(projectUserReviewStatRepository).getAllReviewStatsByUserIds(anyList());
-
-        verify(projectRetrospectiveOutPort, never()).findByProjectIdAndUserId(anyLong(), anyLong());
+        verifyNoInteractions(projectRetrospectiveOutPort);
     }
 
     @Test

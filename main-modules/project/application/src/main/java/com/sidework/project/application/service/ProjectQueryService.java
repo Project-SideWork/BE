@@ -83,7 +83,9 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             throw new ProjectNotFoundException(projectId);
         }
 
-        ProjectRetrospective rowRetrospective = projectRetrospectiveOutPort.findByProjectIdAndUserId(projectId, userId);
+        ProjectRetrospective rowRetrospective = userId == null
+                ? null
+                : projectRetrospectiveOutPort.findByProjectIdAndUserId(projectId, userId);
 
         List<ProjectUser> allMembers = deduplicateMembersByUserId(projectId);
 
