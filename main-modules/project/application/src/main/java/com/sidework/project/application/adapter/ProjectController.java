@@ -101,7 +101,8 @@ public class ProjectController implements ProjectControllerDocs {
     public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProject(
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PathVariable("projectId") Long projectId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(user.getId(), projectId)));
+        Long userId = user != null ? user.getId() : null;
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccess(queryService.queryProjectDetail(userId, projectId)));
     }
 
     @GetMapping
@@ -110,9 +111,10 @@ public class ProjectController implements ProjectControllerDocs {
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
             @RequestParam(name = "skillIds", required = false) List<Long> skillIds) {
+        Long userId = user != null ? user.getId() : null;
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                queryService.queryProjectList(user.getId(), keyword, skillIds, pageable)
+                queryService.queryProjectList(userId, keyword, skillIds, pageable)
             )
         );
     }
@@ -161,7 +163,6 @@ public class ProjectController implements ProjectControllerDocs {
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PathVariable("projectId") Long projectId,
         @Validated @RequestBody ProjectPromotionCommand command) {
-
         promotionCommandService.create(user.getId(), projectId, command);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.onSuccessCreated());
     }
@@ -230,8 +231,4 @@ public class ProjectController implements ProjectControllerDocs {
         @PathVariable("projectId") Long projectId){
         return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectApplicants(projectId, pageable)));
     }
-
-
-
-
 }
