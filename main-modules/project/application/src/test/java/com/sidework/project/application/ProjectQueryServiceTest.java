@@ -40,6 +40,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -359,6 +360,8 @@ class ProjectQueryServiceTest {
         Long userId = null;
         String keyword = "테스트";
         List<Long> skillIds = List.of(1L, 2L);
+        List<ProjectRole> projectRoles = List.of(ProjectRole.OWNER, ProjectRole.BACKEND);
+
         Pageable pageable = PageRequest.of(0, 20);
 
         Project project1 = createProject(1L);
@@ -366,7 +369,7 @@ class ProjectQueryServiceTest {
 
         Page<Project> page = new PageImpl<>(List.of(project1, project2), pageable, 2);
 
-        List<ProjectRecruitPosition> positions1 = List.of(
+        List<ProjectRecruitPosition> positions = List.of(
                 ProjectRecruitPosition.builder()
                         .projectId(1L)
                         .role(ProjectRole.BACKEND)
@@ -376,11 +379,11 @@ class ProjectQueryServiceTest {
                         .build()
         );
 
-        when(projectRepository.search(keyword, skillIds, pageable))
+        when(projectRepository.search(keyword, skillIds, projectRoles, pageable))
                 .thenReturn(page);
 
         when(projectRepository.getProjectRecruitPositionsByProjectIds(List.of(1L, 2L)))
-                .thenReturn(Map.of(1L, positions1, 2L, List.of()));
+                .thenReturn(Map.of(1L, positions, 2L, List.of()));
 
         when(projectRequiredQueryUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
                 .thenReturn(Map.of(
@@ -395,7 +398,7 @@ class ProjectQueryServiceTest {
                 .thenReturn(Map.of(10L, "테스트유저"));
 
         PageResponse<List<ProjectListResponse>> result =
-                queryService.queryProjectList(userId, keyword, skillIds, pageable);
+                queryService.queryProjectList(userId, keyword, skillIds, projectRoles, pageable);
 
         assertNotNull(result);
         assertEquals(2, result.content().size());
@@ -414,7 +417,7 @@ class ProjectQueryServiceTest {
         assertEquals("테스트유저", second.creatorName());
         assertFalse(second.liked());
 
-        verify(projectRepository).search(keyword, skillIds, pageable);
+        verify(projectRepository).search(keyword, skillIds, projectRoles, pageable);
         verify(projectLikeQueryUseCase, never()).isLikedByProjectIds(anyLong(), anyList());
     }
 
@@ -467,12 +470,13 @@ class ProjectQueryServiceTest {
         Long userId = 1L;
         String keyword = "테스트";
         List<Long> skillIds = List.of(1L, 2L);
+        List<ProjectRole> projectRoles = List.of(ProjectRole.OWNER, ProjectRole.BACKEND);
         Pageable pageable = PageRequest.of(0, 10);
 
         Project project1 = createProject(1L);
         Page<Project> page = new PageImpl<>(List.of(project1), pageable, 1);
 
-        when(projectRepository.search(keyword, skillIds, pageable)).thenReturn(page);
+        when(projectRepository.search(keyword, skillIds, projectRoles, pageable)).thenReturn(page);
         when(projectRepository.getProjectRecruitPositionsByProjectIds(List.of(1L)))
             .thenReturn(Map.of());
         when(projectRequiredQueryUseCase.queryNamesByProjectIds(List.of(1L)))
@@ -485,12 +489,12 @@ class ProjectQueryServiceTest {
             .thenReturn(Map.of(1L, true));
 
         PageResponse<List<ProjectListResponse>> result =
-            queryService.queryProjectList(userId, keyword, skillIds, pageable);
+            queryService.queryProjectList(userId, keyword, skillIds, projectRoles, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.totalElements());
         assertEquals(1, result.content().size());
-        verify(projectRepository).search(keyword, skillIds, pageable);
+        verify(projectRepository).search(keyword, skillIds, projectRoles, pageable);
     }
 
     @Test
@@ -504,7 +508,7 @@ class ProjectQueryServiceTest {
         Project project2 = createProject(2L);
         Page<Project> page = new PageImpl<>(List.of(project1, project2), pageable, 2);
 
-        List<ProjectRecruitPosition> positions1 = List.of(
+        List<ProjectRecruitPosition> positions = List.of(
             ProjectRecruitPosition.builder()
                 .projectId(1L)
                 .role(ProjectRole.BACKEND)
@@ -516,7 +520,7 @@ class ProjectQueryServiceTest {
 
         when(projectRepository.searchLiked(keyword, skillIds, userId, pageable)).thenReturn(page);
         when(projectRepository.getProjectRecruitPositionsByProjectIds(List.of(1L, 2L)))
-            .thenReturn(Map.of(1L, positions1, 2L, List.of()));
+            .thenReturn(Map.of(1L, positions, 2L, List.of()));
         when(projectRequiredQueryUseCase.queryNamesByProjectIds(List.of(1L, 2L)))
             .thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
         when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L, 2L)))
@@ -645,6 +649,24 @@ class ProjectQueryServiceTest {
 
         verify(projectUserRepository).pageByUserId(userId, pageable);
         verify(projectRepository).findByIdInDesc(ids);
+    }
+
+    @Test
+    void queryProjectRoles_OWNER를_제외한_프로젝트_역할_목록을_반환한다() {
+        // when
+        List<ProjectRole> result = queryService.queryProjectRoles();
+
+        // then
+        assertNotNull(result);
+        assertFalse(result.contains(ProjectRole.OWNER));
+        assertTrue(result.contains(ProjectRole.BACKEND));
+        assertTrue(result.contains(ProjectRole.FRONTEND));
+
+        List<ProjectRole> expected = Arrays.stream(ProjectRole.values())
+                .filter(projectRole -> !projectRole.equals(ProjectRole.OWNER))
+                .toList();
+
+        assertEquals(expected, result);
     }
 
     private Project createProject(Long id) {

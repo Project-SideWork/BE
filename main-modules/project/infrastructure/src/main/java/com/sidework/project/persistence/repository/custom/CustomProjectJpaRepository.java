@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface CustomProjectJpaRepository {
 
-    Page<ProjectEntity> searchByKeywordAndSkillIdsQuerydsl(
+    Page<ProjectEntity> searchByKeywordAndSkillIdsAndRoleIdsQuerydsl(
         ProjectSearchCondition condition,
         Pageable pageable);
 

@@ -13,6 +13,7 @@ import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectCommand;
+import com.sidework.project.domain.ProjectRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -220,7 +221,8 @@ public interface ProjectControllerDocs {
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PageableDefault(size = 20) Pageable pageable,
         @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
-        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds,
+        @RequestParam(name = "positions", required = false) List<ProjectRole> positions
     );
 
     @Operation(description = "프로젝트 좋아요")
@@ -549,4 +551,60 @@ public interface ProjectControllerDocs {
             @AuthenticationPrincipal AuthenticatedUserDetails user
     );
 
+    @Operation(
+            summary = "프로젝트 역할 목록 조회",
+            description = "프로젝트 모집 포지션으로 사용할 수 있는 역할 목록을 조회합니다. 인증 없이 호출할 수 있습니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "역할 목록 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "200 예시",
+                                    value = """
+                    {
+                      "code": "COMMON_200",
+                      "message": "요청이 정상적으로 처리되었습니다.",
+                      "isSuccess": true,
+                      "result": [
+                        "BACKEND",
+                        "FRONTEND",
+                        "FULLSTACK",
+                        "MOBILE",
+                        "ANDROID",
+                        "IOS",
+                        "DEVOPS",
+                        "INFRA",
+                        "CLOUD",
+                        "DATA_ENGINEER",
+                        "AI_ENGINEER",
+                        "ML_ENGINEER",
+                        "DATA_ANALYST",
+                        "DATA_SCIENTIST",
+                        "SECURITY",
+                        "BLOCKCHAIN",
+                        "EMBEDDED",
+                        "PM",
+                        "PO",
+                        "PLANNER",
+                        "SERVICE_PLANNER",
+                        "DESIGNER",
+                        "UI_UX_DESIGNER",
+                        "PRODUCT_DESIGNER",
+                        "QA",
+                        "TEST_ENGINEER",
+                        "MARKETER",
+                        "BUSINESS_DEVELOPER",
+                        "TECH_WRITER",
+                        "ETC"
+                      ]
+                    }
+                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<ApiResponse<List<ProjectRole>>> getProjectRoles();
 }
