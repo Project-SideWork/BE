@@ -852,10 +852,11 @@ public class ProjectControllerTest {
     }
 
     @Test
-    void 프로젝트_리스트_조회시_키워드와_스킬필터를_적용해_200과_PageResponse를_반환한다() throws Exception {
+    void 프로젝트_리스트_조회시_모든_검색값을_적용해_200과_PageResponse를_반환한다() throws Exception {
         Long userId = authenticatedUserDetails.getId();
         String keyword = "테스트";
         List<Long> skillIds = List.of(1L, 2L);
+        List<ProjectRole> projectRoles = List.of(ProjectRole.OWNER, ProjectRole.BACKEND);
 
         ProjectListResponse listItem = ProjectListResponse.of(
             1L,
@@ -875,13 +876,15 @@ public class ProjectControllerTest {
             eq(userId),
             eq(keyword),
             eq(skillIds),
+            eq(projectRoles),
             any()
         )).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/v1/projects")
                 .with(user(authenticatedUserDetails))
                 .param("keyword", keyword)
-                .param("skillIds", "1", "2"))
+                .param("skillIds", "1", "2")
+                .param("positions", "OWNER", "BACKEND"))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.isSuccess").value(true))
@@ -893,6 +896,7 @@ public class ProjectControllerTest {
     void 비로그인_사용자도_프로젝트_리스트_조회시_200과_PageResponse를_반환한다() throws Exception {
         String keyword = "테스트";
         List<Long> skillIds = List.of(1L, 2L);
+        List<ProjectRole> projectRoles = List.of(ProjectRole.OWNER, ProjectRole.BACKEND);
 
         ProjectListResponse listItem = ProjectListResponse.of(
                 1L,
@@ -912,12 +916,14 @@ public class ProjectControllerTest {
                 isNull(),
                 eq(keyword),
                 eq(skillIds),
+                eq(projectRoles),
                 any()
         )).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/v1/projects")
                         .param("keyword", keyword)
-                        .param("skillIds", "1", "2"))
+                        .param("skillIds", "1", "2")
+                        .param("positions", "OWNER", "BACKEND"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isSuccess").value(true))
@@ -929,6 +935,7 @@ public class ProjectControllerTest {
                 isNull(),
                 eq(keyword),
                 eq(skillIds),
+                eq(projectRoles),
                 any()
         );
     }

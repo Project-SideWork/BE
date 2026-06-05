@@ -19,6 +19,7 @@ import com.sidework.project.application.port.in.ProjectRetrospectiveCommand;
 import com.sidework.project.application.port.in.ProjectRetrospectiveCommandUseCase;
 import com.sidework.project.application.port.in.ProjectUserReviewCommandUseCase;
 
+import com.sidework.project.domain.ProjectRole;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;
@@ -110,11 +111,13 @@ public class ProjectController implements ProjectControllerDocs {
             @AuthenticationPrincipal AuthenticatedUserDetails user,
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
-            @RequestParam(name = "skillIds", required = false) List<Long> skillIds) {
+            @RequestParam(name = "skillIds", required = false) List<Long> skillIds,
+            @RequestParam(name = "positions", required = false) List<ProjectRole> positions
+            ) {
         Long userId = user != null ? user.getId() : null;
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                queryService.queryProjectList(userId, keyword, skillIds, pageable)
+                queryService.queryProjectList(userId, keyword, skillIds, positions, pageable)
             )
         );
     }
@@ -231,4 +234,10 @@ public class ProjectController implements ProjectControllerDocs {
         @PathVariable("projectId") Long projectId){
         return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectApplicants(projectId, pageable)));
     }
+
+    @GetMapping("/roles")
+    public ResponseEntity<ApiResponse<List<ProjectRole>>> getProjectRoles(){
+        return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectRoles()));
+    }
+
 }

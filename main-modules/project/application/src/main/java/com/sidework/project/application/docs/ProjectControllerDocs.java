@@ -13,6 +13,7 @@ import com.sidework.project.application.dto.ProjectUserReviewCommand;
 import com.sidework.project.application.port.in.ProjectApplyCommand;
 import com.sidework.project.application.port.in.ProjectApplyDecisionCommand;
 import com.sidework.project.application.port.in.ProjectCommand;
+import com.sidework.project.domain.ProjectRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -220,7 +221,8 @@ public interface ProjectControllerDocs {
         @AuthenticationPrincipal AuthenticatedUserDetails user,
         @PageableDefault(size = 20) Pageable pageable,
         @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
-        @RequestParam(name = "skillIds", required = false) List<Long> skillIds
+        @RequestParam(name = "skillIds", required = false) List<Long> skillIds,
+        @RequestParam(name = "positions", required = false) List<ProjectRole> positions
     );
 
     @Operation(description = "프로젝트 좋아요")
