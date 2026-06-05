@@ -4,9 +4,12 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sidework.profile.persistence.entity.QRoleEntity;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.persistence.entity.ProjectEntity;
 import com.sidework.project.persistence.entity.QProjectEntity;
 import com.sidework.project.persistence.entity.QProjectLikeEntity;
+import com.sidework.project.persistence.entity.QProjectRecruitPositionEntity;
 import com.sidework.project.persistence.repository.condition.ProjectSearchCondition;
 import com.sidework.skill.persistence.entity.QProjectRequiredSkillEntity;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +25,7 @@ public class CustomProjectJpaRepositoryImpl implements CustomProjectJpaRepositor
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<ProjectEntity> searchByKeywordAndSkillIdsQuerydsl(
+    public Page<ProjectEntity> searchByKeywordAndSkillIdsAndRoleIdsQuerydsl(
         ProjectSearchCondition condition,
         Pageable pageable) {
 
@@ -32,7 +35,8 @@ public class CustomProjectJpaRepositoryImpl implements CustomProjectJpaRepositor
             .selectFrom(project)
             .where(
                 keywordContains(condition.getKeyword()),
-                skillExists(condition.getSkillIds(), condition.getSkillCount())
+                skillExists(condition.getSkillIds(), condition.getSkillCount()),
+                    roleExists(condition.getProjectRoles())
             )
             .orderBy(project.id.desc())
             .offset(pageable.getOffset())
@@ -79,7 +83,8 @@ public class CustomProjectJpaRepositoryImpl implements CustomProjectJpaRepositor
 			.where(
 				projectIdIn(condition.getProjectIds()),
 				keywordContains(condition.getKeyword()),
-				skillExists(condition.getSkillIds(), condition.getSkillCount())
+				skillExists(condition.getSkillIds(), condition.getSkillCount()),
+                    roleExists(condition.getProjectRoles())
 			);
 
 		return PageableExecutionUtils.getPage(
@@ -165,6 +170,24 @@ public class CustomProjectJpaRepositoryImpl implements CustomProjectJpaRepositor
             )
             .groupBy(prs.projectId)
             .having(prs.skillId.countDistinct().eq(skillCount))
+            .exists();
+    }
+
+    private BooleanExpression roleExists(List<ProjectRole> projectRoles) {
+        if (projectRoles == null || projectRoles.isEmpty()) {
+            return null;
+        }
+        QProjectRecruitPositionEntity role = QProjectRecruitPositionEntity.projectRecruitPositionEntity;
+        QProjectEntity project = QProjectEntity.projectEntity;
+
+        return JPAExpressions
+            .select(role.id)
+            .from(role)
+            .where(
+                role.projectId.eq(project.id)
+                    .and(role.role.in(projectRoles))
+            )
+            .groupBy(role.projectId)
             .exists();
     }
 
