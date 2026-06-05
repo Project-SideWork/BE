@@ -239,5 +239,4 @@ public class ProjectController implements ProjectControllerDocs {
     public ResponseEntity<ApiResponse<List<ProjectRole>>> getProjectRoles(){
         return ResponseEntity.ok(ApiResponse.onSuccess(queryService.queryProjectRoles()));
     }
-
 }
