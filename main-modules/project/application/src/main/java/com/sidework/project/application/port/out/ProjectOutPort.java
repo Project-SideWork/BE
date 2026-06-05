@@ -4,6 +4,7 @@ import com.sidework.project.application.dto.ProjectIdTitleProjection;
 import com.sidework.project.application.dto.ProjectTitleDto;
 import com.sidework.project.domain.Project;
 import com.sidework.project.domain.ProjectRecruitPosition;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface ProjectOutPort {
     List<ProjectTitleDto> findAllTitles(List<Long> projectIds);
     Page<Project> findPage(Pageable pageable);
     Page<Project> search(String keyword, Pageable pageable);
-    Page<Project> search(String keyword, List<Long> skillIds, Pageable pageable);
+    Page<Project> search(String keyword, List<Long> skillIds, List<ProjectRole> roles, Pageable pageable);
     Page<Project> searchInProjectIds(String keyword, List<Long> skillIds, List<Long> projectIds, Pageable pageable);
     Page<Project> searchLiked(String keyword, List<Long> skillIds, Long userId, Pageable pageable);
     Map<Long, List<ProjectRecruitPosition>> getProjectRecruitPositionsByProjectIds(List<Long> projectIds);

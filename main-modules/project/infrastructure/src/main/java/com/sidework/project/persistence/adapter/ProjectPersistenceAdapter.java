@@ -6,6 +6,7 @@ import com.sidework.project.application.port.out.ProjectOutPort;
 import com.sidework.project.domain.Project;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.domain.ProjectRecruitPosition;
+import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectStatus;
 import com.sidework.project.persistence.entity.ProjectEntity;
 import com.sidework.project.persistence.entity.ProjectRecruitPositionEntity;
@@ -90,15 +91,15 @@ public class ProjectPersistenceAdapter implements ProjectOutPort {
     }
 
     @Override
-    public Page<Project> search(String keyword, List<Long> skillIds, Pageable pageable) {
-
+    public Page<Project> search(String keyword, List<Long> skillIds, List<ProjectRole> roles, Pageable pageable) {
         ProjectSearchCondition condition = new ProjectSearchCondition();
         condition.setKeyword(keyword);
         condition.setSkillIds(skillIds);
+        condition.setProjectRoles(roles);
         condition.setSkillCount(skillIds == null ? 0L : skillIds.size());
 
         Page<ProjectEntity> entities =
-            repo.searchByKeywordAndSkillIdsQuerydsl(condition, pageable);
+            repo.searchByKeywordAndSkillIdsAndRoleIdsQuerydsl(condition, pageable);
 
         return entities.map(mapper::toDomain);
     }
