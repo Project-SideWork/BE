@@ -25,7 +25,11 @@ public interface ProjectQueryUseCase {
     List<ProjectRecruitPosition> queryProjectRecruitPosition(Long projectId);
     Map<Long, List<ProjectRole>> queryUserRolesByProjects(Long userId, List<Long> projectIds);
     PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, Pageable pageable);
-    PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable);
+    PageResponse<List<ProjectListResponse>> queryProjectList(Long userId,
+                                                             String keyword,
+                                                             List<Long> skillIds,
+                                                             List<ProjectRole> positions,
+                                                             Pageable pageable);
 	PageResponse<List<ProjectListResponse>> queryLikedProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable);
     ProjectUserReviewStatSummary queryStatSummaryByUserId(Long userId);
     List<ProjectUserReviewSummary> queryReviewSummaryByUserId(Long userId, Pageable pageable);
@@ -35,5 +39,5 @@ public interface ProjectQueryUseCase {
     Long queryReviewCount(Long userId);
     List<ProjectIdTitleProjection> queryUserProjectIdTitlePairs(List<Long> projectIds);
     PageResponse<List<ProjectApplicantResponse>> queryProjectApplicants(Long projectId, Pageable pageable);
-
+    List<ProjectRole> queryProjectRoles();
 }

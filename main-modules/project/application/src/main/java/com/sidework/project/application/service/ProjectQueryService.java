@@ -1,9 +1,6 @@
 package com.sidework.project.application.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -138,8 +135,9 @@ public class ProjectQueryService implements ProjectQueryUseCase {
     }
 
     @Override
-    public PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, String keyword, List<Long> skillIds, Pageable pageable) {
-        Page<Project> page = projectRepository.search(keyword, skillIds, pageable);
+    public PageResponse<List<ProjectListResponse>> queryProjectList(Long userId, String keyword,
+                                                                    List<Long> skillIds, List<ProjectRole> projectRoles, Pageable pageable) {
+        Page<Project> page = projectRepository.search(keyword, skillIds, projectRoles, pageable);
         return buildProjectListPageResponse(userId, page);
     }
 
@@ -242,6 +240,11 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             );
 
         return PageResponse.from(page, contents);
+    }
+
+    @Override
+    public List<ProjectRole> queryProjectRoles() {
+        return Arrays.stream(ProjectRole.values()).filter(projectRole -> !projectRole.equals(ProjectRole.OWNER)).toList();
     }
 
     private List<ProjectApplicantResponse> buildApplicantResponses(
