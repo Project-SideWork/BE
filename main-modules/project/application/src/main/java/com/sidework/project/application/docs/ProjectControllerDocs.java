@@ -569,7 +569,6 @@ public interface ProjectControllerDocs {
                       "message": "요청이 정상적으로 처리되었습니다.",
                       "isSuccess": true,
                       "result": [
-                        "OWNER",
                         "BACKEND",
                         "FRONTEND",
                         "FULLSTACK",
