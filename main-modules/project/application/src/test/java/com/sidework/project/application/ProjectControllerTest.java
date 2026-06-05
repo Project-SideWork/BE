@@ -1370,6 +1370,28 @@ public class ProjectControllerTest {
         verify(projectPromotionCommandUseCase).delete(eq(1L), eq(promotionId), eq(projectId));
     }
 
+    @Test
+    void 비로그인_사용자도_프로젝트_역할_목록_조회시_200과_OWNER를_제외한_역할목록을_반환한다() throws Exception {
+        List<ProjectRole> roles = List.of(
+                ProjectRole.BACKEND,
+                ProjectRole.FRONTEND,
+                ProjectRole.FULLSTACK
+        );
+
+        when(projectQueryUseCase.queryProjectRoles()).thenReturn(roles);
+
+        mockMvc.perform(get("/api/v1/projects/roles"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result").isArray())
+                .andExpect(jsonPath("$.result[0]").value("BACKEND"))
+                .andExpect(jsonPath("$.result[1]").value("FRONTEND"))
+                .andExpect(jsonPath("$.result[2]").value("FULLSTACK"));
+
+        verify(projectQueryUseCase).queryProjectRoles();
+    }
+
     private ProjectCommand createCommand(ProjectStatus status) {
         return new ProjectCommand(
                 "버스 실시간 위치 서비스",                 // title

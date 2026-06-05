@@ -40,6 +40,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -648,6 +649,24 @@ class ProjectQueryServiceTest {
 
         verify(projectUserRepository).pageByUserId(userId, pageable);
         verify(projectRepository).findByIdInDesc(ids);
+    }
+
+    @Test
+    void queryProjectRoles_OWNER를_제외한_프로젝트_역할_목록을_반환한다() {
+        // when
+        List<ProjectRole> result = queryService.queryProjectRoles();
+
+        // then
+        assertNotNull(result);
+        assertFalse(result.contains(ProjectRole.OWNER));
+        assertTrue(result.contains(ProjectRole.BACKEND));
+        assertTrue(result.contains(ProjectRole.FRONTEND));
+
+        List<ProjectRole> expected = Arrays.stream(ProjectRole.values())
+                .filter(projectRole -> !projectRole.equals(ProjectRole.OWNER))
+                .toList();
+
+        assertEquals(expected, result);
     }
 
     private Project createProject(Long id) {
