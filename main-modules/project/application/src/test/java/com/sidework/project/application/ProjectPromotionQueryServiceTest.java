@@ -137,7 +137,7 @@ class ProjectPromotionQueryServiceTest {
 		when(projectUserOutPort.findAllByProjectId(projectId)).thenReturn(List.of(member));
 		when(projectUserReviewStatOutPort.getAllReviewStatsByUserIds(List.of(5L)))
 			.thenReturn(List.of(ProjectUserReviewStat.create(5L, 10.0, 2)));
-		when(userQueryUseCase.findNamesByUserIds(List.of(5L))).thenReturn(Map.of(5L, "이름"));
+		when(userQueryUseCase.findNicknamesByUserIds(List.of(5L))).thenReturn(Map.of(5L, "닉네임"));
 
 		ProjectPromotionDetailResponse result = service.queryProjectPromotionDetail(promotionId);
 
@@ -151,11 +151,9 @@ class ProjectPromotionQueryServiceTest {
 		assertEquals("부산", result.meetingPlace());
 		assertEquals(3, result.duration());
 		assertEquals(1, result.teamMembers().size());
-		assertEquals(5L, result.teamMembers().get(0).userId());
 		assertEquals(20L, result.teamMembers().get(0).profileId());
-		assertEquals("이름", result.teamMembers().get(0).name());
+		assertEquals("닉네임", result.teamMembers().get(0).nickname());
 		assertEquals(ProjectRole.OWNER, result.teamMembers().get(0).role());
-		assertEquals(ApplyStatus.ACCEPTED, result.teamMembers().get(0).status());
 		assertEquals(5.0, result.teamMembers().get(0).score());
 
 		verify(projectPromotionOutPort).findById(promotionId);

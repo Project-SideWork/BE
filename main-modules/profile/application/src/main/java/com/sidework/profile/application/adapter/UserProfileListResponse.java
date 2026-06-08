@@ -7,8 +7,7 @@ import com.sidework.profile.domain.SkillProficiencyType;
 public record UserProfileListResponse(
 	Long profileId,
 	Long userId,
-	String name,
-	String description,
+	String nickname,
 	List<SkillInfo> skills,
 	boolean liked,
 	Double score

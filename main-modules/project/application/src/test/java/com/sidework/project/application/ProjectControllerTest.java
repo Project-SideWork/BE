@@ -751,7 +751,7 @@ public class ProjectControllerTest {
             java.time.LocalDate.of(2025, 3, 31),
             MeetingType.HYBRID,
             ProjectStatus.RECRUITING,
-            List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED, 4.5)),
+            List.of(ProjectDetailResponse.ProjectMemberResponse.of("Test1", 10L, ProjectRole.OWNER, 4.5)),
             List.of(ProjectDetailResponse.RecruitPositionResponse.of(ProjectRole.BACKEND, 1, 0, SkillLevel.JUNIOR)),
             List.of("Java", "Spring"),
             List.of("Redis"),
@@ -787,7 +787,7 @@ public class ProjectControllerTest {
                 java.time.LocalDate.of(2025, 3, 31),
                 MeetingType.HYBRID,
                 ProjectStatus.RECRUITING,
-                List.of(ProjectDetailResponse.ProjectMemberResponse.of(1L, 10L, ProjectRole.OWNER, ApplyStatus.ACCEPTED, 4.5)),
+                List.of(ProjectDetailResponse.ProjectMemberResponse.of("Test1", 10L, ProjectRole.OWNER, 4.5)),
                 List.of(ProjectDetailResponse.RecruitPositionResponse.of(ProjectRole.BACKEND, 1, 0, SkillLevel.JUNIOR)),
                 List.of("Java", "Spring"),
                 List.of("Redis"),
@@ -985,11 +985,9 @@ public class ProjectControllerTest {
 
         ProjectPromotionDetailResponse.ProjectMemberResponse member =
             new ProjectPromotionDetailResponse.ProjectMemberResponse(
-                5L,
                 20L,
                 "멤버1",
                 ProjectRole.OWNER,
-                ApplyStatus.ACCEPTED,
                 4.5
             );
 

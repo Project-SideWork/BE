@@ -43,10 +43,7 @@ import com.sidework.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -253,7 +250,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 		List<Long> profileIds = collectProfileIds(profiles);
 		List<Long> userIds = collectDistinctUserIds(profiles);
 
-		Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(userIds);
+		Map<Long, String> userIdToNickname = userQueryUseCase.findNicknamesByUserIds(userIds);
 		Map<Long, List<ProfileSkill>> skillsByProfileId = loadProfileSkillsByProfileId(profileIds);
 		Map<Long, Skill> skillMap = loadSkillMap(skillsByProfileId);
 		Map<Long, Double> averageScoreByUserId = projectQueryUseCase.queryAverageReviewScoresByUserIds(userIds);
@@ -264,8 +261,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 
 		List<UserProfileListResponse> contents = profiles.stream()
 			.map(profile -> toUserProfileListResponse(
-				profile,
-				userIdToName,
+				profile, userIdToNickname,
 				skillsByProfileId,
 				skillMap,
 				likedByProfileId,
@@ -313,7 +309,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 
 	private UserProfileListResponse toUserProfileListResponse(
 		Profile profile,
-		Map<Long, String> userIdToName,
+		Map<Long, String> userIdToNickname,
 		Map<Long, List<ProfileSkill>> skillsByProfileId,
 		Map<Long, Skill> skillMap,
 		Map<Long, Boolean> likedByProfileId,
@@ -331,9 +327,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 
 		return new UserProfileListResponse(
 			profileId,
-			userId,
-			userIdToName.get(userId),
-			profile.getSelfIntroduction(),
+			userId, userIdToNickname.get(userId),
 			skillInfos,
 			likedByProfileId.getOrDefault(profileId, false),
 			averageScoreByUserId.get(userId)

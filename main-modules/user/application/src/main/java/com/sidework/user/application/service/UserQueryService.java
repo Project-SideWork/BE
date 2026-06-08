@@ -65,12 +65,12 @@ public class UserQueryService implements UserQueryUseCase {
     }
 
     @Override
-    public Map<Long, String> findNamesByUserIds(List<Long> userIds) {
+    public Map<Long, String> findNicknamesByUserIds(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return Map.of();
         }
         return userRepository.findAllByUserIdIn(userIds).stream()
-            .collect(Collectors.toMap(User::getId, User::getName, (a, b) -> a));
+            .collect(Collectors.toMap(User::getId, User::getNickname, (a, b) -> a));
     }
 
     @Override

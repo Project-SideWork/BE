@@ -1,6 +1,7 @@
 package com.sidework.project.persistence.repository;
 
 import com.sidework.project.application.dto.ProjectTitleDto;
+import com.sidework.project.application.dto.ProjectUserProjection;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.persistence.entity.ProjectUserEntity;
@@ -88,4 +89,10 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
 
 	Page<ProjectUserEntity> findByProjectIdAndStatusIn(Long projectId, List<ApplyStatus> statuses, Pageable pageable);
 
+    @Query("""
+            SELECT new com.sidework.project.application.dto.ProjectUserProjection(pu.userId, u.nickname, pu.profileId, pu.role)
+            FROM ProjectUserEntity pu JOIN UserEntity u ON pu.userId = u.id
+            WHERE pu.projectId = :projectId AND pu.status = com.sidework.project.domain.ApplyStatus.ACCEPTED AND pu.role != com.sidework.project.domain.ProjectRole.OWNER
+            """)
+    List<ProjectUserProjection> findProjectMemberProjections(@Param("projectId") Long projectId);
 }

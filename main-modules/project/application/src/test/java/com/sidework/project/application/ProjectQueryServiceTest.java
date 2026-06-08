@@ -6,6 +6,7 @@ import com.sidework.project.application.adapter.ProjectApplicantResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.dto.ProjectTitleDto;
+import com.sidework.project.application.dto.ProjectUserProjection;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
 import com.sidework.project.application.exception.ProjectNotFoundException;
 import com.sidework.project.application.port.in.ProjectLikeQueryUseCase;
@@ -106,9 +107,9 @@ class ProjectQueryServiceTest {
         Long userId = 1L;
         Long projectId = 1L;
         Project project = createProject(projectId);
-        List<ProjectUser> members = List.of(
-            ProjectUser.builder().userId(1L).profileId(10L).role(ProjectRole.OWNER).status(ApplyStatus.ACCEPTED).build(),
-            ProjectUser.builder().userId(2L).profileId(20L).role(ProjectRole.BACKEND).status(ApplyStatus.ACCEPTED).build()
+        List<ProjectUserProjection> members = List.of(
+                new ProjectUserProjection(1L, "test1", 1L, ProjectRole.BACKEND),
+                new ProjectUserProjection(2L, "test2", 2L, ProjectRole.BACKEND)
         );
         List<ProjectRecruitPosition> positions = List.of(
             ProjectRecruitPosition.builder().role(ProjectRole.BACKEND).headCount(1).currentCount(0).level(SkillLevel.JUNIOR).build()
@@ -117,7 +118,7 @@ class ProjectQueryServiceTest {
         List<String> preferredStacks = List.of("Redis");
 
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED)).thenReturn(members);
+        when(projectUserRepository.findAllProjectMembers(projectId)).thenReturn(members);
         when(projectRecruitPositionRepository.getProjectRecruitPositions(projectId)).thenReturn(positions);
         when(projectRequiredQueryUseCase.queryNamesByProjectId(projectId)).thenReturn(requiredStacks);
         when(projectPreferredSkillQueryUseCase.queryNamesByProjectId(projectId)).thenReturn(preferredStacks);
@@ -143,7 +144,7 @@ class ProjectQueryServiceTest {
         assertEquals(project.getTitle(), result.title());
         assertEquals(2, result.teamMembers().size());
         List<ProjectDetailResponse.ProjectMemberResponse> membersSorted = result.teamMembers().stream()
-            .sorted(Comparator.comparing(ProjectDetailResponse.ProjectMemberResponse::userId))
+            .sorted(Comparator.comparing(ProjectDetailResponse.ProjectMemberResponse::nickname))
             .toList();
         assertEquals(4.5, membersSorted.get(0).score());
         assertEquals(4.0, membersSorted.get(1).score());
@@ -168,19 +169,9 @@ class ProjectQueryServiceTest {
 
         Project project = createProject(projectId);
 
-        List<ProjectUser> members = List.of(
-                ProjectUser.builder()
-                        .userId(1L)
-                        .profileId(10L)
-                        .role(ProjectRole.OWNER)
-                        .status(ApplyStatus.ACCEPTED)
-                        .build(),
-                ProjectUser.builder()
-                        .userId(2L)
-                        .profileId(20L)
-                        .role(ProjectRole.BACKEND)
-                        .status(ApplyStatus.ACCEPTED)
-                        .build()
+        List<ProjectUserProjection> members = List.of(
+                new ProjectUserProjection(1L, "test1", 1L, ProjectRole.BACKEND),
+                new ProjectUserProjection(2L, "test2", 2L, ProjectRole.BACKEND)
         );
 
         List<ProjectRecruitPosition> positions = List.of(
@@ -197,7 +188,7 @@ class ProjectQueryServiceTest {
         List<String> preferredStacks = List.of("Redis");
 
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED))
+        when(projectUserRepository.findAllProjectMembers(projectId))
                 .thenReturn(members);
         when(projectRecruitPositionRepository.getProjectRecruitPositions(projectId))
                 .thenReturn(positions);
@@ -228,7 +219,7 @@ class ProjectQueryServiceTest {
         assertNull(result.retrospective());
 
         verify(projectRepository).findById(projectId);
-        verify(projectUserRepository).findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED);
+        verify(projectUserRepository).findAllProjectMembers(projectId);
         verify(projectRecruitPositionRepository).getProjectRecruitPositions(projectId);
         verify(projectRequiredQueryUseCase).queryNamesByProjectId(projectId);
         verify(projectPreferredSkillQueryUseCase).queryNamesByProjectId(projectId);
@@ -250,7 +241,7 @@ class ProjectQueryServiceTest {
         Long projectId = 1L;
         Project project = createProject(projectId);
         when(projectRepository.findById(projectId)).thenReturn(project);
-        when(projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED)).thenReturn(List.of());
+        when(projectUserRepository.findAllProjectMembers(projectId)).thenReturn(List.of());
 
         assertThrows(ProjectHasNoMembersException.class, () -> queryService.queryProjectDetail(userId, projectId));
     }
@@ -394,7 +385,7 @@ class ProjectQueryServiceTest {
         when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L, 2L)))
                 .thenReturn(Map.of(1L, 10L, 2L, 10L));
 
-        when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
+        when(userQueryUseCase.findNicknamesByUserIds(List.of(10L)))
                 .thenReturn(Map.of(10L, "테스트유저"));
 
         PageResponse<List<ProjectListResponse>> result =
@@ -439,7 +430,7 @@ class ProjectQueryServiceTest {
             .thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
         when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L, 2L)))
             .thenReturn(Map.of(1L, 10L, 2L, 10L));
-        when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
+        when(userQueryUseCase.findNicknamesByUserIds(List.of(10L)))
             .thenReturn(Map.of(10L, "테스트유저"));
         when(projectLikeQueryUseCase.isLikedByProjectIds(userId, List.of(1L, 2L)))
             .thenReturn(Map.of(1L, true, 2L, false));
@@ -483,7 +474,7 @@ class ProjectQueryServiceTest {
             .thenReturn(Map.of(1L, List.of("Java")));
         when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L)))
             .thenReturn(Map.of(1L, 10L));
-        when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
+        when(userQueryUseCase.findNicknamesByUserIds(List.of(10L)))
             .thenReturn(Map.of(10L, "테스트유저"));
         when(projectLikeQueryUseCase.isLikedByProjectIds(userId, List.of(1L)))
             .thenReturn(Map.of(1L, true));
@@ -525,7 +516,7 @@ class ProjectQueryServiceTest {
             .thenReturn(Map.of(1L, List.of("Java", "Spring"), 2L, List.of("React")));
         when(projectUserRepository.findOwnerUserIdByProjectIds(List.of(1L, 2L)))
             .thenReturn(Map.of(1L, 10L, 2L, 10L));
-        when(userQueryUseCase.findNamesByUserIds(List.of(10L)))
+        when(userQueryUseCase.findNicknamesByUserIds(List.of(10L)))
             .thenReturn(Map.of(10L, "테스트유저"));
         when(projectLikeQueryUseCase.isLikedByProjectIds(userId, List.of(1L, 2L)))
             .thenReturn(Map.of(1L, true, 2L, false));

@@ -10,6 +10,7 @@ import com.sidework.project.application.adapter.ProjectApplicantResponse;
 import com.sidework.project.application.adapter.ProjectDetailResponse;
 import com.sidework.project.application.adapter.ProjectListResponse;
 import com.sidework.project.application.dto.ProjectIdTitleProjection;
+import com.sidework.project.application.dto.ProjectUserProjection;
 import com.sidework.project.application.dto.ProjectUserReviewStatSummary;
 import com.sidework.project.application.dto.ProjectUserReviewSummary;
 import com.sidework.project.application.exception.ProjectHasNoMembersException;
@@ -84,16 +85,16 @@ public class ProjectQueryService implements ProjectQueryUseCase {
                 ? null
                 : projectRetrospectiveOutPort.findByProjectIdAndUserId(projectId, userId);
 
-        List<ProjectUser> allMembers = deduplicateMembersByUserId(projectId);
+        List<ProjectUserProjection> allMembers = deduplicateMembersByUserId(projectId);
 
         List<Long> userIds = allMembers.stream()
-            .map(ProjectUser::getUserId)
+            .map(ProjectUserProjection::userId)
             .toList();
 
         List<ProjectRecruitPosition> positions = queryProjectRecruitPosition(projectId);
         Map<Long, Double> avgScoreByUserId = buildScoreByUserId(userIds);
 
-        List<ProjectDetailResponse.ProjectMemberResponse> teamMembers = buildTeamMembers(allMembers,avgScoreByUserId);
+        List<ProjectDetailResponse.ProjectMemberResponse> teamMembers = buildTeamMembers(allMembers, avgScoreByUserId);
         List<RecruitPositionResponse> recruitPositions = buildRecruitPositions(positions);
         List<String> requiredStacks = queryRequiredStacks(projectId);
         List<String> preferredStacks = queryPreferredSkills(projectId);
@@ -230,7 +231,7 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         Map<Long, Double> avgScoreByUserId = buildScoreByUserId(userIds);
 
         Map<Long, String> nameByUserId =
-            userQueryUseCase.findNamesByUserIds(userIds);
+            userQueryUseCase.findNicknamesByUserIds(userIds);
 
         List<ProjectApplicantResponse> contents =
             buildApplicantResponses(
@@ -294,12 +295,11 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 			.distinct()
 			.toList();
 
-        Map<Long, String> userIdToName = userQueryUseCase.findNamesByUserIds(ownerUserIds);
+        Map<Long, String> userIdToNickname = userQueryUseCase.findNicknamesByUserIds(ownerUserIds);
         return new ListBatchData(
 			positionsMap,
 			requiredStacksMap,
-			ownerUserIdByProject,
-			userIdToName,
+			ownerUserIdByProject, userIdToNickname,
 			isLikedProject);
     }
 
@@ -316,14 +316,14 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
     private String resolveCreatorName(Long projectId, ListBatchData batch) {
         Long ownerUserId = batch.ownerUserIdByProject.get(projectId);
-        return ownerUserId != null ? batch.userIdToName.get(ownerUserId) : null;
+        return ownerUserId != null ? batch.userIdToNickname.get(ownerUserId) : null;
     }
 
     private record ListBatchData(
         Map<Long, List<ProjectRecruitPosition>> positionsMap,
         Map<Long, List<String>> requiredStacksMap,
 		Map<Long, Long> ownerUserIdByProject,
-        Map<Long, String> userIdToName,
+        Map<Long, String> userIdToNickname,
         Map<Long, Boolean> likedByProjectId
     ) {}
 
@@ -351,14 +351,13 @@ public class ProjectQueryService implements ProjectQueryUseCase {
             .orElse(List.of());
     }
 
-    private List<ProjectDetailResponse.ProjectMemberResponse> buildTeamMembers(List<ProjectUser> allMembers, Map<Long, Double> avgScoreByUserId) {
+    private List<ProjectDetailResponse.ProjectMemberResponse> buildTeamMembers(List<ProjectUserProjection> allMembers, Map<Long, Double> avgScoreByUserId) {
         return allMembers.stream()
             .map(member -> ProjectDetailResponse.ProjectMemberResponse.of(
-                member.getUserId(),
-                member.getProfileId(),
-                member.getRole(),
-                member.getStatus(),
-                avgScoreByUserId.get(member.getUserId())
+                member.nickname(),
+                member.profileId(),
+                member.role(),
+                avgScoreByUserId.get(member.userId())
             ))
             .toList();
     }
@@ -401,31 +400,15 @@ public class ProjectQueryService implements ProjectQueryUseCase {
         return stat.getRatingScore() / stat.getRatingCount();
     }
 
-    private List<ProjectUser> deduplicateMembersByUserId(Long projectId)
-    {
-        List<ProjectUser> rawMembers = projectUserRepository.findAllByProjectIdAndStatus(projectId, ApplyStatus.ACCEPTED);
-        if (rawMembers == null || rawMembers.isEmpty()) {
+    private List<ProjectUserProjection> deduplicateMembersByUserId(Long projectId) {
+        List<ProjectUserProjection> members = projectUserRepository.findAllProjectMembers(projectId);
+        if (members == null || members.isEmpty()) {
             throw new ProjectHasNoMembersException(projectId);
         }
 
-        List<ProjectUser> allMembers = rawMembers.stream()
-            .collect(Collectors.toMap(
-                ProjectUser::getUserId,
-                Function.identity(),
-                (a, b) -> pickOwnerFirst(a, b)
-            ))
-            .values()
-            .stream()
-            .toList();
-
-        return allMembers;
+        return members;
     }
 
-    private ProjectUser pickOwnerFirst(ProjectUser a, ProjectUser b) {
-        if (a.getRole() == ProjectRole.OWNER) return a;
-        if (b.getRole() == ProjectRole.OWNER) return b;
-        return a;
-    }
 
     private double calculateScore(ProjectUserReview review) {
         return (

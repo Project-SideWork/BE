@@ -11,7 +11,7 @@ public interface UserQueryUseCase {
     boolean checkEmailExists(String email);
     User findById(Long id);
     List<User> findByIdIn(List<Long> ids);
-    Map<Long, String> findNamesByUserIds(List<Long> userIds);
+    Map<Long, String> findNicknamesByUserIds(List<Long> userIds);
     void validateExists(Long id);
     GithubInfoResponse queryGithubInformation(Long id);
     UserSummaryResponse queryUserSummary(Long id);
