@@ -989,7 +989,6 @@ public class ProjectControllerTest {
                 20L,
                 "멤버1",
                 ProjectRole.OWNER,
-                ApplyStatus.ACCEPTED,
                 4.5
             );
 

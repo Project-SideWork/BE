@@ -95,15 +95,14 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 			.toList();
 
 		Map<Long, Double> scoreByUserId = buildAverageReviewScoresByUserIds(userIds);
-		Map<Long, String> userNameByUserId = buildUserNameByUserIds(userIds);
+		Map<Long, String> userNicknameByUserId = buildUserNicknameByUserIds(userIds);
 
 		return members.stream()
 			.map(m -> new ProjectPromotionDetailResponse.ProjectMemberResponse(
 				m.getUserId(),
 				m.getProfileId(),
-				userNameByUserId.get(m.getUserId()),
+                    userNicknameByUserId.get(m.getUserId()),
 				m.getRole(),
-				m.getStatus(),
 				scoreByUserId.get(m.getUserId())
 			))
 			.toList();
@@ -159,7 +158,7 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 			));
 	}
 
-	private Map<Long, String> buildUserNameByUserIds(List<Long> userIds) {
+	private Map<Long, String> buildUserNicknameByUserIds(List<Long> userIds) {
 		if (userIds == null || userIds.isEmpty()) {
 			return Map.of();
 		}
