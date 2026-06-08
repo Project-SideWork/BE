@@ -101,7 +101,7 @@ class ProfileQueryServiceTest {
 		when(profileRepository.searchProfilesBySkillName(skillIds, pageable))
 			.thenReturn(new PageImpl<>(List.of(p1, p2), pageable, 5));
 
-		when(userQueryUseCase.findNamesByUserIds(anyList()))
+		when(userQueryUseCase.findNicknamesByUserIds(anyList()))
 			.thenReturn(Map.of(1L, "김철수", 2L, "이영희"));
 
 		List<ProfileSkill> profileSkills = List.of(
@@ -176,7 +176,7 @@ class ProfileQueryServiceTest {
 		when(profileRepository.searchLikedProfilesBySkillName(viewerUserId, skillIds, pageable))
 			.thenReturn(new PageImpl<>(List.of(p1, p2), pageable, 5));
 
-		when(userQueryUseCase.findNamesByUserIds(anyList()))
+		when(userQueryUseCase.findNicknamesByUserIds(anyList()))
 			.thenReturn(Map.of(1L, "김철수", 2L, "이영희"));
 
 		List<ProfileSkill> profileSkills = List.of(
