@@ -284,12 +284,11 @@ class ProfileControllerTest {
 
 		UserProfileListResponse item = new UserProfileListResponse(
 			1L,
-			10L,           // userId
-			"테스트유저",
-			null,          // description
-			List.of(),     // skills
-			true,          // liked
-			4.5            // score
+			10L,
+			null,
+			List.of(),
+			true,
+			4.5
 		);
 		PageResponse<List<UserProfileListResponse>> pageResponse = PageResponse.of(
 			List.of(item),
@@ -476,7 +475,7 @@ class ProfileControllerTest {
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>(),
-			true
+			true, false
 		);
 	}
 
@@ -497,7 +496,7 @@ class ProfileControllerTest {
 			new ArrayList<>(),
 			new ArrayList<>(),
 			new ArrayList<>()
-			,true
+			,true, false
 		);
 	}
 }

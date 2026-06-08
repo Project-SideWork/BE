@@ -73,7 +73,7 @@ public class ProfileController implements ProfileControllerDocs {
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.onSuccessVoid());
 	}
 
-	@GetMapping()
+	@GetMapping
 	public ResponseEntity<ApiResponse<PageResponse<List<UserProfileListResponse>>>> getUserProfiles(
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PageableDefault(size = 20) Pageable pageable,
