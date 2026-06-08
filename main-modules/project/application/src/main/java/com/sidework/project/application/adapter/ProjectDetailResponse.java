@@ -24,14 +24,13 @@ public record ProjectDetailResponse(
 	ProjectRetrospectiveResponse retrospective
 ) {
 	public record ProjectMemberResponse(
-		Long userId,
+		String nickname,
 		Long profileId,
 		ProjectRole role,
-		ApplyStatus status,
 		Double score
 	) {
-		public static ProjectMemberResponse of(Long userId, Long profileId, ProjectRole role, ApplyStatus status,Double score) {
-			return new ProjectMemberResponse(userId, profileId, role, status, score);
+		public static ProjectMemberResponse of(String nickname, Long profileId, ProjectRole role, Double score) {
+			return new ProjectMemberResponse(nickname, profileId, role, score);
 		}
 	}
 
