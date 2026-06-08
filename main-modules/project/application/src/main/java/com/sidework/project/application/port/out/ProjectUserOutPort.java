@@ -2,6 +2,7 @@ package com.sidework.project.application.port.out;
 
 
 import com.sidework.project.application.dto.ProjectTitleDto;
+import com.sidework.project.application.dto.ProjectUserProjection;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
 import com.sidework.project.domain.ProjectUser;
@@ -22,7 +23,7 @@ public interface ProjectUserOutPort {
 	Optional<ProjectUser> findByProjectIdAndUserId(Long projectId, Long userId);
 	Optional<ProjectUser> findByProjectIdAndUserIdAndRole(Long projectId, Long userId, ProjectRole role);
 	List<ProjectUser> findAllByProjectId(Long projectId);
-	List<ProjectUser> findAllByProjectIdAndStatus(Long projectId, ApplyStatus status);
+	List<ProjectUserProjection> findAllProjectMembers(Long projectId);
 	Map<Long, Long> findOwnerUserIdByProjectIds(List<Long> projectIds);
 	Optional<ProjectUser> findAcceptedByProjectIdAndUserId(Long projectId, Long userId);
 	List<ProjectTitleDto> getMyProjectSummary(Long userId);

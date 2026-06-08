@@ -1,6 +1,7 @@
 package com.sidework.project.persistence.adapter;
 
 import com.sidework.project.application.dto.ProjectTitleDto;
+import com.sidework.project.application.dto.ProjectUserProjection;
 import com.sidework.project.application.port.out.ProjectUserOutPort;
 import com.sidework.project.domain.ApplyStatus;
 import com.sidework.project.domain.ProjectRole;
@@ -105,9 +106,8 @@ public class ProjectUserPersistenceAdapter implements ProjectUserOutPort {
     }
 
     @Override
-    public List<ProjectUser> findAllByProjectIdAndStatus(Long projectId, ApplyStatus status) {
-        List<ProjectUserEntity> entities = repo.findAllByProjectIdAndStatus(projectId, status);
-        return entities.stream().map(mapper::toDomain).toList();
+    public List<ProjectUserProjection> findAllProjectMembers(Long projectId) {
+        return repo.findProjectMemberProjections(projectId);
     }
 
     @Override
