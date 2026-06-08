@@ -92,7 +92,7 @@ public interface ProjectUserJpaRepository extends JpaRepository<ProjectUserEntit
     @Query("""
             SELECT new com.sidework.project.application.dto.ProjectUserProjection(pu.userId, u.nickname, pu.profileId, pu.role)
             FROM ProjectUserEntity pu JOIN UserEntity u ON pu.userId = u.id
-            WHERE pu.projectId = :projectId AND pu.status = "ACCEPTED" AND pu.role != "OWNER"
+            WHERE pu.projectId = :projectId AND pu.status = com.sidework.project.domain.ApplyStatus.ACCEPTED AND pu.role != com.sidework.project.domain.ProjectRole.OWNER
             """)
     List<ProjectUserProjection> findProjectMemberProjections(@Param("projectId") Long projectId);
 }

@@ -316,14 +316,14 @@ public class ProjectQueryService implements ProjectQueryUseCase {
 
     private String resolveCreatorName(Long projectId, ListBatchData batch) {
         Long ownerUserId = batch.ownerUserIdByProject.get(projectId);
-        return ownerUserId != null ? batch.userIdToName.get(ownerUserId) : null;
+        return ownerUserId != null ? batch.userIdToNickname.get(ownerUserId) : null;
     }
 
     private record ListBatchData(
         Map<Long, List<ProjectRecruitPosition>> positionsMap,
         Map<Long, List<String>> requiredStacksMap,
 		Map<Long, Long> ownerUserIdByProject,
-        Map<Long, String> userIdToName,
+        Map<Long, String> userIdToNickname,
         Map<Long, Boolean> likedByProjectId
     ) {}
 
