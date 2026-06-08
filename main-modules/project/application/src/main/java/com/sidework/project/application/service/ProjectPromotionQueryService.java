@@ -99,7 +99,6 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 
 		return members.stream()
 			.map(m -> new ProjectPromotionDetailResponse.ProjectMemberResponse(
-				m.getUserId(),
 				m.getProfileId(),
                     userNicknameByUserId.get(m.getUserId()),
 				m.getRole(),

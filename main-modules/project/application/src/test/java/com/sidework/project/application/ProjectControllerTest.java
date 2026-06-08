@@ -985,7 +985,6 @@ public class ProjectControllerTest {
 
         ProjectPromotionDetailResponse.ProjectMemberResponse member =
             new ProjectPromotionDetailResponse.ProjectMemberResponse(
-                5L,
                 20L,
                 "멤버1",
                 ProjectRole.OWNER,

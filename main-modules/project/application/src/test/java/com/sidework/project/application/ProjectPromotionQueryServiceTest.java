@@ -151,7 +151,6 @@ class ProjectPromotionQueryServiceTest {
 		assertEquals("부산", result.meetingPlace());
 		assertEquals(3, result.duration());
 		assertEquals(1, result.teamMembers().size());
-		assertEquals(5L, result.teamMembers().get(0).userId());
 		assertEquals(20L, result.teamMembers().get(0).profileId());
 		assertEquals("닉네임", result.teamMembers().get(0).nickname());
 		assertEquals(ProjectRole.OWNER, result.teamMembers().get(0).role());
