@@ -137,7 +137,7 @@ class ProjectPromotionQueryServiceTest {
 		when(projectUserOutPort.findAllByProjectId(projectId)).thenReturn(List.of(member));
 		when(projectUserReviewStatOutPort.getAllReviewStatsByUserIds(List.of(5L)))
 			.thenReturn(List.of(ProjectUserReviewStat.create(5L, 10.0, 2)));
-		when(userQueryUseCase.findNamesByUserIds(List.of(5L))).thenReturn(Map.of(5L, "이름"));
+		when(userQueryUseCase.findNicknamesByUserIds(List.of(5L))).thenReturn(Map.of(5L, "이름"));
 
 		ProjectPromotionDetailResponse result = service.queryProjectPromotionDetail(promotionId);
 

@@ -163,7 +163,7 @@ public class ProjectPromotionQueryService implements ProjectPromotionQueryUseCas
 		if (userIds == null || userIds.isEmpty()) {
 			return Map.of();
 		}
-		return userQueryUseCase.findNamesByUserIds(userIds);
+		return userQueryUseCase.findNicknamesByUserIds(userIds);
 	}
 
 	private List<ProjectPromotionListResponse> toListResponse(
