@@ -84,7 +84,7 @@ public class SecurityConfig {
                                 "/firebase-messaging-sw.js", "/fcm-test.html", "/health", "/oauth2/authorization/github",
                                 "/api/v1/payments/webhook", "/api/v1/users/email/validation", "/api/v1/users/email/verification", "/api/v1/skills/**", "/api/v1/projects/roles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/regions/**", "/login/oauth2/code/github", "/api/v1/projects", "/api/v1/projects/promotions"
-                                , "/api/v1/projects/*", "/api/v1/projects/promotions/*").permitAll()
+                                , "/api/v1/projects/*", "/api/v1/projects/promotions/*", "/api/v1/profiles").permitAll()
                         .requestMatchers("/internal/**")
 
                         .access(new WebExpressionAuthorizationManager(

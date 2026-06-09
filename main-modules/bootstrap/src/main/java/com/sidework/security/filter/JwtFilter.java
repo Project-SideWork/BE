@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,32 +31,48 @@ public class JwtFilter extends OncePerRequestFilter {
     private final TokenBlackListService tokenBlackListService;
 
 
-    //TODO: Http Method로 필터링 필요
-    private static final List<String> ALLOW_ORIGINS = List.of(
-            "/api/v1/login",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/api/v1/signup",
-            "/favicon.ico",
-            "/fcm-test.html",
-            "/firebase-messaging-sw.js",
-            "/error",
-            "/health",
-            "/api/v1/regions/**",
-            "/api/v1/users",
-            "/login/oauth2/code/github",
-            "/oauth2/authorization/github",
-            "/api/v1/users/email",
-            "/api/v1/payments/webhook",
-            "/api/v1/users/email/validation",
-            "/api/v1/users/email/verification",
-            "/api/v1/projects", "/api/v1/projects/promotions",
-            "/api/v1/projects/*", "/api/v1/projects/promotions/*",
-            "/api/v1/skills/**", "/api/v1/projects/roles"
+    private record PermitRequest(HttpMethod method, String pattern) {
+        boolean matches(HttpServletRequest request, AntPathMatcher pathMatcher) {
+            return method.matches(request.getMethod())
+                    && pathMatcher.match(pattern, request.getRequestURI());
+        }
+    }
+
+    private record AnyMethodPermitRequest(String pattern) {
+        boolean matches(HttpServletRequest request, AntPathMatcher pathMatcher) {
+            return pathMatcher.match(pattern, request.getRequestURI());
+        }
+    }
+
+    private static final List<AnyMethodPermitRequest> ANY_METHOD_PERMIT_REQUESTS = List.of(
+            new AnyMethodPermitRequest("/api/v1/login"),
+            new AnyMethodPermitRequest("/swagger-ui/**"),
+            new AnyMethodPermitRequest("/v3/api-docs/**"),
+            new AnyMethodPermitRequest("/api/v1/users/email"),
+            new AnyMethodPermitRequest("/api/v1/users"),
+            new AnyMethodPermitRequest("/firebase-messaging-sw.js"),
+            new AnyMethodPermitRequest("/fcm-test.html"),
+            new AnyMethodPermitRequest("/health"),
+            new AnyMethodPermitRequest("/oauth2/authorization/github"),
+            new AnyMethodPermitRequest("/api/v1/payments/webhook"),
+            new AnyMethodPermitRequest("/api/v1/users/email/validation"),
+            new AnyMethodPermitRequest("/api/v1/users/email/verification"),
+            new AnyMethodPermitRequest("/api/v1/skills/**"),
+            new AnyMethodPermitRequest("/api/v1/projects/roles")
+    );
+
+    private static final List<PermitRequest> METHOD_PERMIT_REQUESTS = List.of(
+            new PermitRequest(HttpMethod.GET, "/api/v1/regions/**"),
+            new PermitRequest(HttpMethod.GET, "/login/oauth2/code/github"),
+            new PermitRequest(HttpMethod.GET, "/api/v1/projects/promotions"),
+            new PermitRequest(HttpMethod.GET, "/api/v1/projects/promotions/*")
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";
+
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+
 
     @Override
     protected void doFilterInternal(
@@ -68,7 +85,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String refreshToken = CookieUtil.getRefreshTokenFromRequest(request);
 
 
-        if (isAllowedPath(requestUri)) {
+        if (isAllowedRequest(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -129,11 +146,12 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isAllowedPath(String uri) {
-        return ALLOW_ORIGINS.stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, uri));
+    private boolean isAllowedRequest(HttpServletRequest request) {
+        return ANY_METHOD_PERMIT_REQUESTS.stream()
+                .anyMatch(permitRequest -> permitRequest.matches(request, pathMatcher))
+                || METHOD_PERMIT_REQUESTS.stream()
+                .anyMatch(permitRequest -> permitRequest.matches(request, pathMatcher));
     }
-
     private void handleTokenReissue(
             HttpServletResponse response,
             String refreshToken

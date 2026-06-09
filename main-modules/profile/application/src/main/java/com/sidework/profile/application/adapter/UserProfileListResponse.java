@@ -9,7 +9,7 @@ public record UserProfileListResponse(
 	Long userId,
 	String nickname,
 	List<SkillInfo> skills,
-	boolean liked,
+	Boolean liked,
 	Double score
 
 ) {

@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ProfileController.class)
 @ContextConfiguration(classes = ProfileTestApplication.class)
-@Import(ExceptionAdvice.class)
+@Import({TestSecurityConfig.class, ExceptionAdvice.class})
 class ProfileControllerTest {
 
 	@Autowired
@@ -80,6 +80,53 @@ class ProfileControllerTest {
 
 		verify(profileQueryUseCase).getMyProfile(userId);
 	}
+
+    @Test
+    void 비로그인_사용자도_프로필_목록_조회시_200을_반환한다() throws Exception {
+        // given
+        List<Long> skillIds = List.of(1L, 2L);
+
+        UserProfileListResponse item = new UserProfileListResponse(
+                1L,
+                10L,
+                "닉네임입ㄹ니다.",
+                List.of(),
+                false,
+                4.5
+        );
+
+        PageResponse<List<UserProfileListResponse>> pageResponse = PageResponse.of(
+                List.of(item),
+                0,
+                20,
+                1,
+                1
+        );
+
+        when(profileQueryUseCase.getUserProfileList(
+                isNull(),
+                eq(skillIds),
+                any(Pageable.class)
+        )).thenReturn(pageResponse);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/profiles")
+                        .param("skillIds", "1", "2")
+                        .param("page", "1")
+                        .param("size", "20")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isSuccess").value(true))
+                .andExpect(jsonPath("$.result.content[0].liked").value(false))
+                .andExpect(jsonPath("$.result.content[0].score").value(4.5));
+
+        verify(profileQueryUseCase).getUserProfileList(
+                isNull(),
+                eq(skillIds),
+                any(Pageable.class)
+        );
+    }
 
 	@Test
 	void 프로필_조회_요청시_프로필이_없어도_200을_반환한다() throws Exception {
