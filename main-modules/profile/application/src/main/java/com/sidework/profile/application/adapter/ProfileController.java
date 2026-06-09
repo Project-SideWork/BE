@@ -78,8 +78,8 @@ public class ProfileController implements ProfileControllerDocs {
 		@AuthenticationPrincipal AuthenticatedUserDetails user,
 		@PageableDefault(size = 20) Pageable pageable,
 		@RequestParam(name = "skillIds", required = false) List<Long> skillIds){
-
-		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProfileList(user.getId(), skillIds, pageable)));
+        Long userId = user != null ? user.getId() : null;
+		return ResponseEntity.ok(ApiResponse.onSuccess(profileQueryUseCase.getUserProfileList(userId, skillIds, pageable)));
 	}
 
 	@GetMapping("/{userId}")
