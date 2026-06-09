@@ -95,6 +95,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 	@Override
 	public PageResponse<List<UserProfileListResponse>> getUserProfileList(Long viewerUserId, List<Long> skillIds, Pageable pageable) {
 		Page<Profile> page = profileRepository.searchProfilesBySkillName(skillIds, pageable);
+        if(viewerUserId == null) return buildProfileListResponse(null, page, false);
 		return buildProfileListResponse(viewerUserId, page, true);
 	}
 
@@ -242,7 +243,7 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 	}
 
 
-	private PageResponse<List<UserProfileListResponse>> buildProfileListResponse(Long viewerUserId, Page<Profile> page, boolean loadLike) {
+    private PageResponse<List<UserProfileListResponse>> buildProfileListResponse(Long viewerUserId, Page<Profile> page, boolean loadLike) {
 		List<Profile> profiles = page.getContent();
 		if (profiles.isEmpty()) {
 			return PageResponse.from(page, List.of());
@@ -256,8 +257,10 @@ public class ProfileQueryService implements ProfileQueryUseCase {
 		Map<Long, Double> averageScoreByUserId = projectQueryUseCase.queryAverageReviewScoresByUserIds(userIds);
 		Map<Long, Boolean> likedByProfileId =
 			loadLike ? profileLikeQueryUseCase.isLikedByProfileIds(viewerUserId, profileIds)
-				: profileIds.stream()
-				.collect(Collectors.toMap(id -> id, id -> true));
+				: (viewerUserId == null) ? profileIds.stream()
+                    .collect(Collectors.toMap(id -> id, id -> false))
+                    : profileIds.stream()
+                    .collect(Collectors.toMap(id -> id, id -> true));
 
 		List<UserProfileListResponse> contents = profiles.stream()
 			.map(profile -> toUserProfileListResponse(

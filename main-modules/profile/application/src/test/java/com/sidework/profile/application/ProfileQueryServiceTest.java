@@ -140,6 +140,78 @@ class ProfileQueryServiceTest {
 		assertEquals(3.0, res.content().get(1).score());
 	}
 
+    @Test
+    void 비로그인_사용자가_프로필_목록을_조회하면_좋아요는_false로_반환한다() {
+        // given
+        Long viewerUserId = null;
+        List<Long> skillIds = List.of(11L);
+        var pageable = PageRequest.of(0, 2);
+
+        Profile p1 = Profile.builder()
+                .id(10L)
+                .userId(1L)
+                .selfIntroduction("소개1")
+                .build();
+
+        Profile p2 = Profile.builder()
+                .id(20L)
+                .userId(2L)
+                .selfIntroduction("소개2")
+                .build();
+
+        when(profileRepository.searchProfilesBySkillName(skillIds, pageable))
+                .thenReturn(new PageImpl<>(List.of(p1, p2), pageable, 2));
+
+        when(userQueryUseCase.findNicknamesByUserIds(anyList()))
+                .thenReturn(Map.of(
+                        1L, "김철수",
+                        2L, "이영희"
+                ));
+
+        List<ProfileSkill> profileSkills = List.of(
+                ProfileSkill.builder()
+                        .id(1L)
+                        .profileId(10L)
+                        .skillId(11L)
+                        .build(),
+
+                ProfileSkill.builder()
+                        .id(2L)
+                        .profileId(20L)
+                        .skillId(12L)
+                        .build()
+        );
+
+        when(profileRepository.getProfileSkillsByProfileIds(anyList()))
+                .thenReturn(profileSkills);
+
+        when(skillRepository.findByIdIn(anyList()))
+                .thenReturn(List.of(
+                        Skill.builder().id(11L).name("Java").build(),
+                        Skill.builder().id(12L).name("Spring").build()
+                ));
+
+        when(projectQueryUseCase.queryAverageReviewScoresByUserIds(anyList()))
+                .thenReturn(Map.of(
+                        1L, 4.5,
+                        2L, 3.0
+                ));
+
+        // when
+        PageResponse<List<UserProfileListResponse>> response =
+                service.getUserProfileList(viewerUserId, skillIds, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(2, response.content().size());
+
+        assertFalse(response.content().get(0).liked());
+        assertFalse(response.content().get(1).liked());
+
+        verify(profileLikeQueryUseCase, never())
+                .isLikedByProfileIds(anyLong(), anyList());
+    }
+
 	@Test
 	void 프로필_목록_조회시_빈_페이지면_빈_컨텐츠로_응답한다() {
 		// given
