@@ -89,7 +89,7 @@ class ProfileControllerTest {
         UserProfileListResponse item = new UserProfileListResponse(
                 1L,
                 10L,
-                "소개입니다.",
+                "닉네임입ㄹ니다.",
                 List.of(),
                 false,
                 4.5
