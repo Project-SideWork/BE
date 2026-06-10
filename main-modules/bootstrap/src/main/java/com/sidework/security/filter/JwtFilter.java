@@ -65,7 +65,10 @@ public class JwtFilter extends OncePerRequestFilter {
             new PermitRequest(HttpMethod.GET, "/api/v1/regions/**"),
             new PermitRequest(HttpMethod.GET, "/login/oauth2/code/github"),
             new PermitRequest(HttpMethod.GET, "/api/v1/projects/promotions"),
-            new PermitRequest(HttpMethod.GET, "/api/v1/projects/promotions/*")
+            new PermitRequest(HttpMethod.GET, "/api/v1/projects/promotions/*"),
+            new PermitRequest(HttpMethod.GET, "/api/v1/projects"),
+            new PermitRequest(HttpMethod.GET, "/api/v1/projects/*"),
+            new PermitRequest(HttpMethod.GET, "/api/v1/profiles")
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";
@@ -85,10 +88,8 @@ public class JwtFilter extends OncePerRequestFilter {
         String refreshToken = CookieUtil.getRefreshTokenFromRequest(request);
 
 
-        if (isAllowedRequest(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        boolean isAllowedRequest = isAllowedRequest(request);
+
 
         boolean isReissueRequest = pathMatcher.match(TOKEN_REISSUE_API, requestUri)
                 && "POST".equals(request.getMethod());
@@ -106,6 +107,10 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (accessToken == null || accessToken.isEmpty()) {
+            if(isAllowedRequest) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             log.debug("access 토큰 없음, URI={}", requestUri);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");
             return;
