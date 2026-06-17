@@ -58,7 +58,8 @@ public class JwtFilter extends OncePerRequestFilter {
             new AnyMethodPermitRequest("/api/v1/users/email/validation"),
             new AnyMethodPermitRequest("/api/v1/users/email/verification"),
             new AnyMethodPermitRequest("/api/v1/skills/**"),
-            new AnyMethodPermitRequest("/api/v1/projects/roles")
+            new AnyMethodPermitRequest("/api/v1/projects/roles"),
+            new AnyMethodPermitRequest("/actuator/*")
     );
 
     private static final List<PermitRequest> METHOD_PERMIT_REQUESTS = List.of(
