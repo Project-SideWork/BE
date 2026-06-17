@@ -60,6 +60,9 @@ dependencies {
 
     runtimeOnly 'com.h2database:h2' // TODO: mysql 연결 후 수정
 
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
 
     testImplementation 'com.ninja-squad:springmockk:4.0.2'
     implementation libs.querydsl.jpa

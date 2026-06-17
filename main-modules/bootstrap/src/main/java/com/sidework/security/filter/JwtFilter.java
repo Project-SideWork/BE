@@ -68,7 +68,8 @@ public class JwtFilter extends OncePerRequestFilter {
             new PermitRequest(HttpMethod.GET, "/api/v1/projects/promotions/*"),
             new PermitRequest(HttpMethod.GET, "/api/v1/projects"),
             new PermitRequest(HttpMethod.GET, "/api/v1/projects/*"),
-            new PermitRequest(HttpMethod.GET, "/api/v1/profiles")
+            new PermitRequest(HttpMethod.GET, "/api/v1/profiles"),
+            new PermitRequest(HttpMethod.GET, "/actuator/*")
     );
 
     private static final String TOKEN_REISSUE_API = "/api/v1/reissue";
