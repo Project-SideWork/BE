@@ -86,3 +86,10 @@ firebase:
 
 encryption:
   key: ${AES_ENCRYPT_KEY}
+
+logging:
+  config: classpath:logback-spring.xml  # 또는 logback.xml
+  level:
+    root: INFO
+    com.sidework: DEBUG  # 본인 패키지명으로 변경
+    org.springframework.security: DEBUG
