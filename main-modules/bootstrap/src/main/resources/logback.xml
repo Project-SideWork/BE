@@ -26,9 +26,8 @@
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </root>
-
-    <!-- 프로젝트 패키지는 DEBUG -->
-    <logger name="com.sidework" level="DEBUG" additivity="false">
+    
+    <logger name="com.sidework" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </logger>
