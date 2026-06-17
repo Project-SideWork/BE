@@ -87,18 +87,6 @@ encryption:
   key: ${AES_ENCRYPT_KEY}
 
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: always
-  metrics:
-    tags:
-      application: "sidework"
-
 logging:
   config: classpath:logback.xml
   level:

@@ -87,6 +87,18 @@ firebase:
 encryption:
   key: ${AES_ENCRYPT_KEY}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: "sidework"
+
 logging:
   config: classpath:logback.xml  # 또는 logback.xml
   level:
