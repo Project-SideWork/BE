@@ -118,6 +118,7 @@ jobs:
                       --name growp \
                       -p 8080:8080 \
                       --env-file .env.production \
+                      -v /var/log/spring-boot:/app/logs \
                       --restart unless-stopped \
                       growp:${{ github.sha }}
                   
