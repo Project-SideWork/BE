@@ -2,7 +2,7 @@ name: CI / CD
 
 on:
   push:
-    branches: [ feat/#125-log-mounting ]
+    branches: [ main ]
 
 jobs:
   CI:
