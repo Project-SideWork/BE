@@ -113,6 +113,9 @@ jobs:
                     docker stop growp 2>/dev/null || true
                     docker rm growp 2>/dev/null || true
                     docker load -i myapp.tar
+              
+                    sudo mkdir -p /var/log/spring-boot
+                    sudo chown -R ubuntu:ubuntu /var/log/spring-boot
                   
                     docker run -d \
                       --name growp \
